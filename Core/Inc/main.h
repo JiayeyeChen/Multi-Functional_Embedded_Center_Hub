@@ -50,6 +50,8 @@ extern "C" {
 
 /* USER CODE END EM */
 
+void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
+
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
 
@@ -62,6 +64,8 @@ void Error_Handler(void);
 #define ONBOARD_BUTTON_KEY_GPIO_Port GPIOI
 #define ONBOARD_LED_BLUE_Pin GPIO_PIN_12
 #define ONBOARD_LED_BLUE_GPIO_Port GPIOD
+#define LCD_BL_Pin GPIO_PIN_13
+#define LCD_BL_GPIO_Port GPIOD
 #define ONBOARD_LED_YELLOWGREEN_Pin GPIO_PIN_7
 #define ONBOARD_LED_YELLOWGREEN_GPIO_Port GPIOG
 #define ONBOARD_UART_TX_Pin GPIO_PIN_9
