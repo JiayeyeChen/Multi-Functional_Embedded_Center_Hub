@@ -21,9 +21,9 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "usbd_cdc_if.h"
-
+#include "main.h"
 /* USER CODE BEGIN INCLUDE */
-
+extern uint8_t usbtxtest[3];
 /* USER CODE END INCLUDE */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -267,6 +267,7 @@ static int8_t CDC_Receive_HS(uint8_t* Buf, uint32_t *Len)
   /* USER CODE BEGIN 11 */
   USBD_CDC_SetRxBuffer(&hUsbDeviceHS, &Buf[0]);
   USBD_CDC_ReceivePacket(&hUsbDeviceHS);
+  usbtxtest[0] = Buf[0];
   return (USBD_OK);
   /* USER CODE END 11 */
 }
