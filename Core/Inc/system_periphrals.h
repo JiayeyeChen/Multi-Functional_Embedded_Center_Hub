@@ -1,6 +1,12 @@
 #ifndef SYSTEM_PERIPHRALS_H
 #define SYSTEM_PERIPHRALS_H
 
+#include "main.h"
+#include "usbd_core.h"
+#include "usbd_desc.h"
+#include "usbd_cdc.h"
+#include "usbd_cdc_if.h"
+
 #define SPI_SCK_Pin GPIO_PIN_2
 #define SPI_SCK_GPIO_Port GPIOE
 #define AD7606_RST_Pin GPIO_PIN_3
@@ -70,16 +76,34 @@
 #define I2C_SDA_GPIO_Port GPIOB
 
 
-
-
 void SystemPeriphral_Init(void);
+void MX_USB_DEVICE_Init(void);
 
 
 
 
 
 
-
-
-
+extern SPI_HandleTypeDef hspi1;
+extern SPI_HandleTypeDef hspi4;
+extern SPI_HandleTypeDef hspi5;
+extern SPI_HandleTypeDef hspi6;
+extern TIM_HandleTypeDef htim3;
+extern TIM_HandleTypeDef htim4;
+extern TIM_HandleTypeDef htim5;
+extern TIM_HandleTypeDef htim13;
+extern TIM_HandleTypeDef htim14;
+extern UART_HandleTypeDef huart4;
+extern UART_HandleTypeDef huart1;
+extern UART_HandleTypeDef huart2;
+extern UART_HandleTypeDef huart3;
+extern UART_HandleTypeDef huart6;
+extern CAN_HandleTypeDef hcan1;
+extern CAN_HandleTypeDef hcan2;
+extern CRC_HandleTypeDef hcrc;
+extern DAC_HandleTypeDef hdac;
+extern I2C_HandleTypeDef hi2c1;
+extern LTDC_HandleTypeDef hltdc;
+extern SD_HandleTypeDef hsd;
+extern USBD_HandleTypeDef hUsbDeviceHS;
 #endif

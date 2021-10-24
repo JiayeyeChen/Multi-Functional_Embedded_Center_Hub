@@ -1,6 +1,6 @@
 #include "system_periphrals.h"
-#include "main.h"
 
+USBD_HandleTypeDef hUsbDeviceHS;
 DMA_HandleTypeDef hdma_sdio_rx;
 DMA_HandleTypeDef hdma_sdio_tx;
 
@@ -69,6 +69,14 @@ static void SDIO_SD_Init(void);
 static void CRC_Init(void);
 static void USART1_UART_Init(void);
 static void LTDC_Init(void);
+
+void USB_DEVICE_Init(void)
+{
+  USBD_Init(&hUsbDeviceHS, &HS_Desc, DEVICE_HS);
+  USBD_RegisterClass(&hUsbDeviceHS, &USBD_CDC);
+  USBD_CDC_RegisterInterface(&hUsbDeviceHS, &USBD_Interface_fops_HS);
+  USBD_Start(&hUsbDeviceHS);
+}
 
 static void CAN1_Init(void)
 {
@@ -541,10 +549,10 @@ static void GPIO_Init(void)
   HAL_GPIO_WritePin(AD7606_CV_GPIO_Port, AD7606_CV_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(ONBOARD_LED_BLUE_GPIO_Port, ONBOARD_LED_BLUE_Pin, GPIO_PIN_RESET);
-
+  HAL_GPIO_WritePin(ONBOARD_LED_BLUE_GPIO_Port, ONBOARD_LED_BLUE_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(ONBOARD_LED_YELLOWGREEN_GPIO_Port, ONBOARD_LED_YELLOWGREEN_Pin, GPIO_PIN_SET);
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOG, GPIO_PIN_2|SPI_FLASH_CS_Pin|ONBOARD_LED_YELLOWGREEN_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOG, GPIO_PIN_2|SPI_FLASH_CS_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : AD7606_RST_Pin */
   GPIO_InitStruct.Pin = AD7606_RST_Pin;
@@ -956,10 +964,7 @@ void HAL_LTDC_MspInit(LTDC_HandleTypeDef* hltdc)
     PeriphClkInitStruct.PLLSAI.PLLSAIN = 60;
     PeriphClkInitStruct.PLLSAI.PLLSAIR = 2;
     PeriphClkInitStruct.PLLSAIDivR = RCC_PLLSAIDIVR_2;
-    if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
-    {
-      Error_Handler();
-    }
+    HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct);
 
     /* Peripheral clock enable */
     __HAL_RCC_LTDC_CLK_ENABLE();
@@ -1904,4 +1909,5 @@ void SystemPeriphral_Init(void)
   TIM14_Init();
   CAN2_Init();
   SPI1_Init();
+  USB_DEVICE_Init();
 }
