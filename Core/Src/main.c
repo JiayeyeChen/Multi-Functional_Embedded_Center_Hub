@@ -73,8 +73,9 @@ void AK10Calibration(void *argument)
   char usbtxtest[]= "Jiaye\n";
   for(;;)
   {
+    GPIO_Digital_Filtered_Input(&hButtonOnboardKey, 30);
 //    CDC_Transmit_HS((uint8_t*)usbtxtest, 6);
-    osDelay(100);
+    osDelay(10);
   }
 }
 

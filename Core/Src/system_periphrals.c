@@ -46,6 +46,8 @@ DMA_HandleTypeDef hdma_i2c1_tx;
 LTDC_HandleTypeDef hltdc;
 SD_HandleTypeDef hsd;
 
+GPIOStruct hButtonOnboardKey;
+
 static uint32_t HAL_RCC_CAN1_CLK_ENABLED=0;
 
 static void TIM4_Init(void);
@@ -571,7 +573,7 @@ static void GPIO_Init(void)
   /*Configure GPIO pin : ONBOARD_BUTTON_KEY_Pin */
   GPIO_InitStruct.Pin = ONBOARD_BUTTON_KEY_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(ONBOARD_BUTTON_KEY_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PI9 PI10 PI0 PI1
@@ -1910,4 +1912,15 @@ void SystemPeriphral_Init(void)
   CAN2_Init();
   SPI1_Init();
   USB_DEVICE_Init();
+  Button_Init();
+}
+
+void Button_Init(void)
+{
+  hButtonOnboardKey.gpioPort = ONBOARD_BUTTON_KEY_GPIO_Port;
+  hButtonOnboardKey.gpioPin = ONBOARD_BUTTON_KEY_Pin;
+  hButtonOnboardKey.curRead = GPIO_PIN_RESET;
+  hButtonOnboardKey.preRead = GPIO_PIN_RESET;
+  hButtonOnboardKey.state = GPIO_PIN_RESET;
+  hButtonOnboardKey.lastDebounceTime = 0;
 }

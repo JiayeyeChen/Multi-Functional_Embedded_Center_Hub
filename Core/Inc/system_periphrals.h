@@ -6,6 +6,7 @@
 #include "usbd_desc.h"
 #include "usbd_cdc.h"
 #include "usbd_cdc_if.h"
+#include "gpio_digital_filtered_input.h"
 
 #define SPI_SCK_Pin GPIO_PIN_2
 #define SPI_SCK_GPIO_Port GPIOE
@@ -78,7 +79,7 @@
 
 void SystemPeriphral_Init(void);
 void MX_USB_DEVICE_Init(void);
-
+void Button_Init(void);
 
 
 
@@ -106,4 +107,6 @@ extern I2C_HandleTypeDef hi2c1;
 extern LTDC_HandleTypeDef hltdc;
 extern SD_HandleTypeDef hsd;
 extern USBD_HandleTypeDef hUsbDeviceHS;
+
+extern GPIOStruct hButtonOnboardKey;
 #endif
