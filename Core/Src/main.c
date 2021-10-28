@@ -5,16 +5,28 @@
 #include "system_periphrals.h"
 #include "usbd_cdc_if.h"
 #include "usb.h"
+#include "lcd_rgb.h"
+#include "lcd_pwm.h"
+#include "sdram.h"
+#include "touch_800x480.h"
 
-osThreadId_t AK10_CalibratioHandle;
-const osThreadAttr_t AK10_Calibratio_attributes = {
-  .name = "AK10_Calibratio",
+osThreadId_t AK10_CalibrationnTaskHandle;
+const osThreadAttr_t AK10_Calibration_attributes = {
+  .name = "AK10_Calibration",
+  .stack_size = 1024 * 4,
+  .priority = (osPriority_t) osPriorityRealtime,
+};
+
+osThreadId_t LCDTaskHandle;
+const osThreadAttr_t LCDTask_attributes = {
+  .name = "LCD",
   .stack_size = 1024 * 4,
   .priority = (osPriority_t) osPriorityRealtime,
 };
 
 void SystemClock_Config(void);
-void AK10Calibration(void *argument);
+void AK10Calibration_Task(void *argument);
+void LCD_Task(void *argument);
 
 int main(void)
 {
@@ -25,12 +37,12 @@ int main(void)
   MX_FATFS_Init();
   SystemPeriphral_Init();
   USB_Init();
-  
-  
+  LTDC_Init();
+  Touch_Init();
   
   osKernelInitialize();
-  AK10_CalibratioHandle = osThreadNew(AK10Calibration, NULL, &AK10_Calibratio_attributes);
-
+  AK10_CalibrationnTaskHandle = osThreadNew(AK10Calibration_Task, NULL, &AK10_Calibration_attributes);
+  LCDTaskHandle = osThreadNew(LCD_Task, NULL, &LCDTask_attributes);
   osKernelStart();
   while (1){}
 }
@@ -68,13 +80,22 @@ void SystemClock_Config(void)
   HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_3);
 }
 
-void AK10Calibration(void *argument)
+void AK10Calibration_Task(void *argument)
 {
-  char usbtxtest[]= "Jiaye\n";
   for(;;)
   {
     GPIO_Digital_Filtered_Input(&hButtonOnboardKey, 30);
+    LED_Blink(&hLEDBlue, 2);
 //    CDC_Transmit_HS((uint8_t*)usbtxtest, 6);
+    osDelay(10);
+  }
+}
+
+void LCD_Task(void *argument)
+{
+  for(;;)
+  {
+    LED_Blink(&hLEDYellowGreen, 15);
     osDelay(10);
   }
 }

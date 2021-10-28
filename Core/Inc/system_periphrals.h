@@ -7,6 +7,7 @@
 #include "usbd_cdc.h"
 #include "usbd_cdc_if.h"
 #include "gpio_digital_filtered_input.h"
+#include "led_control.h"
 
 #define SPI_SCK_Pin GPIO_PIN_2
 #define SPI_SCK_GPIO_Port GPIOE
@@ -47,8 +48,6 @@
 #define RS485_RX_GPIO_Port GPIOD
 #define ONBOARD_LED_BLUE_Pin GPIO_PIN_12
 #define ONBOARD_LED_BLUE_GPIO_Port GPIOD
-#define LCD_BL_Pin GPIO_PIN_13
-#define LCD_BL_GPIO_Port GPIOD
 #define SPI_FLASH_CS_Pin GPIO_PIN_3
 #define SPI_FLASH_CS_GPIO_Port GPIOG
 #define ONBOARD_LED_YELLOWGREEN_Pin GPIO_PIN_7
@@ -76,26 +75,20 @@
 #define I2C_SDA_Pin GPIO_PIN_7
 #define I2C_SDA_GPIO_Port GPIOB
 
-
 void SystemPeriphral_Init(void);
 void MX_USB_DEVICE_Init(void);
 void Button_Init(void);
-
-
-
-
+void LED_Init(void);
 
 extern SPI_HandleTypeDef hspi1;
 extern SPI_HandleTypeDef hspi4;
 extern SPI_HandleTypeDef hspi5;
 extern SPI_HandleTypeDef hspi6;
 extern TIM_HandleTypeDef htim3;
-extern TIM_HandleTypeDef htim4;
 extern TIM_HandleTypeDef htim5;
 extern TIM_HandleTypeDef htim13;
 extern TIM_HandleTypeDef htim14;
 extern UART_HandleTypeDef huart4;
-extern UART_HandleTypeDef huart1;
 extern UART_HandleTypeDef huart2;
 extern UART_HandleTypeDef huart3;
 extern UART_HandleTypeDef huart6;
@@ -104,9 +97,9 @@ extern CAN_HandleTypeDef hcan2;
 extern CRC_HandleTypeDef hcrc;
 extern DAC_HandleTypeDef hdac;
 extern I2C_HandleTypeDef hi2c1;
-extern LTDC_HandleTypeDef hltdc;
 extern SD_HandleTypeDef hsd;
 extern USBD_HandleTypeDef hUsbDeviceHS;
 
 extern GPIOStruct hButtonOnboardKey;
+extern LEDHandle  hLEDBlue, hLEDYellowGreen;
 #endif

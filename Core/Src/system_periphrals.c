@@ -14,20 +14,16 @@ DMA_HandleTypeDef hdma_spi5_rx;
 DMA_HandleTypeDef hdma_spi5_tx;
 
 TIM_HandleTypeDef htim3;
-TIM_HandleTypeDef htim4;
 TIM_HandleTypeDef htim5;
 TIM_HandleTypeDef htim13;
 TIM_HandleTypeDef htim14;
 
 UART_HandleTypeDef huart4;
-UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
 UART_HandleTypeDef huart3;
 UART_HandleTypeDef huart6;
 DMA_HandleTypeDef hdma_uart4_rx;
 DMA_HandleTypeDef hdma_uart4_tx;
-DMA_HandleTypeDef hdma_usart1_rx;
-DMA_HandleTypeDef hdma_usart1_tx;
 DMA_HandleTypeDef hdma_usart2_rx;
 DMA_HandleTypeDef hdma_usart2_tx;
 DMA_HandleTypeDef hdma_usart3_rx;
@@ -43,14 +39,13 @@ DAC_HandleTypeDef hdac;
 I2C_HandleTypeDef hi2c1;
 DMA_HandleTypeDef hdma_i2c1_rx;
 DMA_HandleTypeDef hdma_i2c1_tx;
-LTDC_HandleTypeDef hltdc;
 SD_HandleTypeDef hsd;
 
 GPIOStruct hButtonOnboardKey;
+LEDHandle  hLEDBlue, hLEDYellowGreen;
 
 static uint32_t HAL_RCC_CAN1_CLK_ENABLED=0;
 
-static void TIM4_Init(void);
 static void CAN1_Init(void);
 static void DAC_Init(void);
 static void SPI4_Init(void);
@@ -67,10 +62,7 @@ static void TIM13_Init(void);
 static void TIM14_Init(void);
 static void CAN2_Init(void);
 static void SPI1_Init(void);
-static void SDIO_SD_Init(void);
 static void CRC_Init(void);
-static void USART1_UART_Init(void);
-static void LTDC_Init(void);
 
 void USB_DEVICE_Init(void)
 {
@@ -151,71 +143,6 @@ static void I2C1_Init(void)
   HAL_I2CEx_ConfigDigitalFilter(&hi2c1, 0);
 }
 
-static void LTDC_Init(void)
-{
-  LTDC_LayerCfgTypeDef pLayerCfg = {0};
-  LTDC_LayerCfgTypeDef pLayerCfg1 = {0};
-  hltdc.Instance = LTDC;
-  hltdc.Init.HSPolarity = LTDC_HSPOLARITY_AL;
-  hltdc.Init.VSPolarity = LTDC_VSPOLARITY_AL;
-  hltdc.Init.DEPolarity = LTDC_DEPOLARITY_AL;
-  hltdc.Init.PCPolarity = LTDC_PCPOLARITY_IPC;
-  hltdc.Init.HorizontalSync = 7;
-  hltdc.Init.VerticalSync = 3;
-  hltdc.Init.AccumulatedHBP = 14;
-  hltdc.Init.AccumulatedVBP = 5;
-  hltdc.Init.AccumulatedActiveW = 654;
-  hltdc.Init.AccumulatedActiveH = 485;
-  hltdc.Init.TotalWidth = 660;
-  hltdc.Init.TotalHeigh = 487;
-  hltdc.Init.Backcolor.Blue = 0;
-  hltdc.Init.Backcolor.Green = 0;
-  hltdc.Init.Backcolor.Red = 0;
-  HAL_LTDC_Init(&hltdc);
-  pLayerCfg.WindowX0 = 0;
-  pLayerCfg.WindowX1 = 0;
-  pLayerCfg.WindowY0 = 0;
-  pLayerCfg.WindowY1 = 0;
-  pLayerCfg.PixelFormat = LTDC_PIXEL_FORMAT_ARGB8888;
-  pLayerCfg.Alpha = 0;
-  pLayerCfg.Alpha0 = 0;
-  pLayerCfg.BlendingFactor1 = LTDC_BLENDING_FACTOR1_CA;
-  pLayerCfg.BlendingFactor2 = LTDC_BLENDING_FACTOR2_CA;
-  pLayerCfg.FBStartAdress = 0;
-  pLayerCfg.ImageWidth = 0;
-  pLayerCfg.ImageHeight = 0;
-  pLayerCfg.Backcolor.Blue = 0;
-  pLayerCfg.Backcolor.Green = 0;
-  pLayerCfg.Backcolor.Red = 0;
-  HAL_LTDC_ConfigLayer(&hltdc, &pLayerCfg, 0);
-  pLayerCfg1.WindowX0 = 0;
-  pLayerCfg1.WindowX1 = 0;
-  pLayerCfg1.WindowY0 = 0;
-  pLayerCfg1.WindowY1 = 0;
-  pLayerCfg1.PixelFormat = LTDC_PIXEL_FORMAT_ARGB8888;
-  pLayerCfg1.Alpha = 0;
-  pLayerCfg1.Alpha0 = 0;
-  pLayerCfg1.BlendingFactor1 = LTDC_BLENDING_FACTOR1_CA;
-  pLayerCfg1.BlendingFactor2 = LTDC_BLENDING_FACTOR2_CA;
-  pLayerCfg1.FBStartAdress = 0;
-  pLayerCfg1.ImageWidth = 0;
-  pLayerCfg1.ImageHeight = 0;
-  pLayerCfg1.Backcolor.Blue = 0;
-  pLayerCfg1.Backcolor.Green = 0;
-  pLayerCfg1.Backcolor.Red = 0;
-  HAL_LTDC_ConfigLayer(&hltdc, &pLayerCfg1, 1);
-}
-
-static void SDIO_SD_Init(void)
-{
-  hsd.Instance = SDIO;
-  hsd.Init.ClockEdge = SDIO_CLOCK_EDGE_RISING;
-  hsd.Init.ClockBypass = SDIO_CLOCK_BYPASS_DISABLE;
-  hsd.Init.ClockPowerSave = SDIO_CLOCK_POWER_SAVE_DISABLE;
-  hsd.Init.BusWide = SDIO_BUS_WIDE_1B;
-  hsd.Init.HardwareFlowControl = SDIO_HARDWARE_FLOW_CONTROL_DISABLE;
-  hsd.Init.ClockDiv = 0;
-}
 
 static void SPI1_Init(void)
 {
@@ -309,29 +236,6 @@ static void TIM3_Init(void)
 
 }
 
-static void TIM4_Init(void)
-{
-  TIM_MasterConfigTypeDef sMasterConfig = {0};
-  TIM_OC_InitTypeDef sConfigOC = {0};
-
-  htim4.Instance = TIM4;
-  htim4.Init.Prescaler = 0;
-  htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim4.Init.Period = 65535;
-  htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  HAL_TIM_PWM_Init(&htim4);
-  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
-  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  HAL_TIMEx_MasterConfigSynchronization(&htim4, &sMasterConfig);
-  sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 0;
-  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
-  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
-  HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_2);
-  HAL_TIM_MspPostInit(&htim4);
-
-}
 
 static void TIM5_Init(void)
 {
@@ -411,19 +315,6 @@ static void UART4_Init(void)
   HAL_UART_Init(&huart4);
 }
 
-static void USART1_UART_Init(void)
-{
-  huart1.Instance = USART1;
-  huart1.Init.BaudRate = 115200;
-  huart1.Init.WordLength = UART_WORDLENGTH_8B;
-  huart1.Init.StopBits = UART_STOPBITS_1;
-  huart1.Init.Parity = UART_PARITY_NONE;
-  huart1.Init.Mode = UART_MODE_TX_RX;
-  huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-  huart1.Init.OverSampling = UART_OVERSAMPLING_16;
-  HAL_UART_Init(&huart1);
-
-}
 
 static void USART2_UART_Init(void)
 {
@@ -956,138 +847,6 @@ void HAL_I2C_MspDeInit(I2C_HandleTypeDef* hi2c)
 
 }
 
-void HAL_LTDC_MspInit(LTDC_HandleTypeDef* hltdc)
-{
-  GPIO_InitTypeDef GPIO_InitStruct = {0};
-  RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
-  if(hltdc->Instance==LTDC)
-  {
-    PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_LTDC;
-    PeriphClkInitStruct.PLLSAI.PLLSAIN = 60;
-    PeriphClkInitStruct.PLLSAI.PLLSAIR = 2;
-    PeriphClkInitStruct.PLLSAIDivR = RCC_PLLSAIDIVR_2;
-    HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct);
-
-    /* Peripheral clock enable */
-    __HAL_RCC_LTDC_CLK_ENABLE();
-
-    __HAL_RCC_GPIOI_CLK_ENABLE();
-    __HAL_RCC_GPIOJ_CLK_ENABLE();
-    __HAL_RCC_GPIOK_CLK_ENABLE();
-    /**LTDC GPIO Configuration
-    PI12     ------> LTDC_HSYNC
-    PI13     ------> LTDC_VSYNC
-    PI14     ------> LTDC_CLK
-    PJ0     ------> LTDC_R1
-    PJ1     ------> LTDC_R2
-    PJ2     ------> LTDC_R3
-    PJ3     ------> LTDC_R4
-    PJ4     ------> LTDC_R5
-    PJ5     ------> LTDC_R6
-    PJ6     ------> LTDC_R7
-    PJ7     ------> LTDC_G0
-    PJ8     ------> LTDC_G1
-    PJ9     ------> LTDC_G2
-    PJ10     ------> LTDC_G3
-    PJ11     ------> LTDC_G4
-    PK0     ------> LTDC_G5
-    PK1     ------> LTDC_G6
-    PK2     ------> LTDC_G7
-    PJ12     ------> LTDC_B0
-    PJ13     ------> LTDC_B1
-    PJ14     ------> LTDC_B2
-    PJ15     ------> LTDC_B3
-    PK3     ------> LTDC_B4
-    PK4     ------> LTDC_B5
-    PK5     ------> LTDC_B6
-    PK6     ------> LTDC_B7
-    PK7     ------> LTDC_DE
-    */
-    GPIO_InitStruct.Pin = GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14;
-    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-    GPIO_InitStruct.Alternate = GPIO_AF14_LTDC;
-    HAL_GPIO_Init(GPIOI, &GPIO_InitStruct);
-
-    GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3
-                          |GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7
-                          |GPIO_PIN_8|GPIO_PIN_9|GPIO_PIN_10|GPIO_PIN_11
-                          |GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15;
-    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-    GPIO_InitStruct.Alternate = GPIO_AF14_LTDC;
-    HAL_GPIO_Init(GPIOJ, &GPIO_InitStruct);
-
-    GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3
-                          |GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7;
-    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-    GPIO_InitStruct.Alternate = GPIO_AF14_LTDC;
-    HAL_GPIO_Init(GPIOK, &GPIO_InitStruct);
-
-    /* LTDC interrupt Init */
-    HAL_NVIC_SetPriority(LTDC_IRQn, 5, 0);
-    HAL_NVIC_EnableIRQ(LTDC_IRQn);
-    HAL_NVIC_SetPriority(LTDC_ER_IRQn, 5, 0);
-    HAL_NVIC_EnableIRQ(LTDC_ER_IRQn);
-  }
-
-}
-
-void HAL_LTDC_MspDeInit(LTDC_HandleTypeDef* hltdc)
-{
-  if(hltdc->Instance==LTDC)
-  {
-    __HAL_RCC_LTDC_CLK_DISABLE();
-
-    /**LTDC GPIO Configuration
-    PI12     ------> LTDC_HSYNC
-    PI13     ------> LTDC_VSYNC
-    PI14     ------> LTDC_CLK
-    PJ0     ------> LTDC_R1
-    PJ1     ------> LTDC_R2
-    PJ2     ------> LTDC_R3
-    PJ3     ------> LTDC_R4
-    PJ4     ------> LTDC_R5
-    PJ5     ------> LTDC_R6
-    PJ6     ------> LTDC_R7
-    PJ7     ------> LTDC_G0
-    PJ8     ------> LTDC_G1
-    PJ9     ------> LTDC_G2
-    PJ10     ------> LTDC_G3
-    PJ11     ------> LTDC_G4
-    PK0     ------> LTDC_G5
-    PK1     ------> LTDC_G6
-    PK2     ------> LTDC_G7
-    PJ12     ------> LTDC_B0
-    PJ13     ------> LTDC_B1
-    PJ14     ------> LTDC_B2
-    PJ15     ------> LTDC_B3
-    PK3     ------> LTDC_B4
-    PK4     ------> LTDC_B5
-    PK5     ------> LTDC_B6
-    PK6     ------> LTDC_B7
-    PK7     ------> LTDC_DE
-    */
-    HAL_GPIO_DeInit(GPIOI, GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14);
-
-    HAL_GPIO_DeInit(GPIOJ, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3
-                          |GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7
-                          |GPIO_PIN_8|GPIO_PIN_9|GPIO_PIN_10|GPIO_PIN_11
-                          |GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15);
-
-    HAL_GPIO_DeInit(GPIOK, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3
-                          |GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7);
-
-    /* LTDC interrupt DeInit */
-    HAL_NVIC_DisableIRQ(LTDC_IRQn);
-    HAL_NVIC_DisableIRQ(LTDC_ER_IRQn);
-  }
-
-}
 
 void HAL_SD_MspInit(SD_HandleTypeDef* hsd)
 {
@@ -1423,13 +1182,6 @@ void HAL_TIM_PWM_MspInit(TIM_HandleTypeDef* htim_pwm)
     HAL_NVIC_SetPriority(TIM3_IRQn, 5, 0);
     HAL_NVIC_EnableIRQ(TIM3_IRQn);
   }
-  else if(htim_pwm->Instance==TIM4)
-  {
-    __HAL_RCC_TIM4_CLK_ENABLE();
-    /* TIM4 interrupt Init */
-    HAL_NVIC_SetPriority(TIM4_IRQn, 5, 0);
-    HAL_NVIC_EnableIRQ(TIM4_IRQn);
-  }
   else if(htim_pwm->Instance==TIM5)
   {
     __HAL_RCC_TIM5_CLK_ENABLE();
@@ -1472,19 +1224,6 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim)
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
     GPIO_InitStruct.Alternate = GPIO_AF2_TIM3;
     HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
-  }
-  else if(htim->Instance==TIM4)
-  {
-    __HAL_RCC_GPIOD_CLK_ENABLE();
-    /**TIM4 GPIO Configuration
-    PD13     ------> TIM4_CH2
-    */
-    GPIO_InitStruct.Pin = LCD_BL_Pin;
-    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-    GPIO_InitStruct.Alternate = GPIO_AF2_TIM4;
-    HAL_GPIO_Init(LCD_BL_GPIO_Port, &GPIO_InitStruct);
   }
   else if(htim->Instance==TIM5)
   {
@@ -1535,12 +1274,6 @@ void HAL_TIM_PWM_MspDeInit(TIM_HandleTypeDef* htim_pwm)
     __HAL_RCC_TIM3_CLK_DISABLE();
 
     HAL_NVIC_DisableIRQ(TIM3_IRQn);
-  }
-  else if(htim_pwm->Instance==TIM4)
-  {
-    __HAL_RCC_TIM4_CLK_DISABLE();
-
-    HAL_NVIC_DisableIRQ(TIM4_IRQn);
   }
   else if(htim_pwm->Instance==TIM5)
   {
@@ -1622,54 +1355,6 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
   }
   else if(huart->Instance==USART1)
   {
-    __HAL_RCC_USART1_CLK_ENABLE();
-
-    __HAL_RCC_GPIOA_CLK_ENABLE();
-    /**USART1 GPIO Configuration
-    PA9     ------> USART1_TX
-    PA10     ------> USART1_RX
-    */
-    GPIO_InitStruct.Pin = ONBOARD_UART_TX_Pin|ONBOARD_UART_RX_Pin;
-    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-    GPIO_InitStruct.Alternate = GPIO_AF7_USART1;
-    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-    /* USART1 DMA Init */
-    /* USART1_RX Init */
-    hdma_usart1_rx.Instance = DMA2_Stream2;
-    hdma_usart1_rx.Init.Channel = DMA_CHANNEL_4;
-    hdma_usart1_rx.Init.Direction = DMA_PERIPH_TO_MEMORY;
-    hdma_usart1_rx.Init.PeriphInc = DMA_PINC_DISABLE;
-    hdma_usart1_rx.Init.MemInc = DMA_MINC_ENABLE;
-    hdma_usart1_rx.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
-    hdma_usart1_rx.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
-    hdma_usart1_rx.Init.Mode = DMA_NORMAL;
-    hdma_usart1_rx.Init.Priority = DMA_PRIORITY_LOW;
-    hdma_usart1_rx.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
-    HAL_DMA_Init(&hdma_usart1_rx);
-
-    __HAL_LINKDMA(huart,hdmarx,hdma_usart1_rx);
-
-    /* USART1_TX Init */
-    hdma_usart1_tx.Instance = DMA2_Stream7;
-    hdma_usart1_tx.Init.Channel = DMA_CHANNEL_4;
-    hdma_usart1_tx.Init.Direction = DMA_MEMORY_TO_PERIPH;
-    hdma_usart1_tx.Init.PeriphInc = DMA_PINC_DISABLE;
-    hdma_usart1_tx.Init.MemInc = DMA_MINC_ENABLE;
-    hdma_usart1_tx.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
-    hdma_usart1_tx.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
-    hdma_usart1_tx.Init.Mode = DMA_NORMAL;
-    hdma_usart1_tx.Init.Priority = DMA_PRIORITY_LOW;
-    hdma_usart1_tx.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
-    HAL_DMA_Init(&hdma_usart1_tx);
-
-    __HAL_LINKDMA(huart,hdmatx,hdma_usart1_tx);
-
-    /* USART1 interrupt Init */
-    HAL_NVIC_SetPriority(USART1_IRQn, 5, 0);
-    HAL_NVIC_EnableIRQ(USART1_IRQn);
   }
   else if(huart->Instance==USART2)
   {
@@ -1825,19 +1510,6 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* huart)
   }
   else if(huart->Instance==USART1)
   {
-    __HAL_RCC_USART1_CLK_DISABLE();
-
-    /**USART1 GPIO Configuration
-    PA9     ------> USART1_TX
-    PA10     ------> USART1_RX
-    */
-    HAL_GPIO_DeInit(GPIOA, ONBOARD_UART_TX_Pin|ONBOARD_UART_RX_Pin);
-
-    /* USART1 DMA DeInit */
-    HAL_DMA_DeInit(huart->hdmarx);
-    HAL_DMA_DeInit(huart->hdmatx);
-
-    HAL_NVIC_DisableIRQ(USART1_IRQn);
   }
   else if(huart->Instance==USART2)
   {
@@ -1890,11 +1562,7 @@ void SystemPeriphral_Init(void)
 {
   GPIO_Init();
   DMA_Init();
-  SDIO_SD_Init();
   CRC_Init();
-  USART1_UART_Init();
-  LTDC_Init();
-  TIM4_Init();
   CAN1_Init();
   DAC_Init();
   SPI4_Init();
@@ -1913,6 +1581,7 @@ void SystemPeriphral_Init(void)
   SPI1_Init();
   USB_DEVICE_Init();
   Button_Init();
+  LED_Init();
 }
 
 void Button_Init(void)
@@ -1923,4 +1592,26 @@ void Button_Init(void)
   hButtonOnboardKey.preRead = GPIO_PIN_RESET;
   hButtonOnboardKey.state = GPIO_PIN_RESET;
   hButtonOnboardKey.lastDebounceTime = 0;
+}
+
+void LED_Init(void)
+{
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  GPIO_InitStruct.Pin = ONBOARD_LED_YELLOWGREEN_Pin;
+  HAL_GPIO_Init(ONBOARD_LED_YELLOWGREEN_GPIO_Port, &GPIO_InitStruct);
+  GPIO_InitStruct.Pin = ONBOARD_LED_BLUE_Pin;
+  HAL_GPIO_Init(ONBOARD_LED_BLUE_GPIO_Port, &GPIO_InitStruct);
+  
+  hLEDYellowGreen.gpioPort = ONBOARD_LED_YELLOWGREEN_GPIO_Port;
+  hLEDYellowGreen.gpioPin = ONBOARD_LED_YELLOWGREEN_Pin;
+  hLEDYellowGreen.blinkFrequency = 500;
+  hLEDYellowGreen.status = LED_STATUS_OFF;
+  
+  hLEDBlue.gpioPort = ONBOARD_LED_BLUE_GPIO_Port;
+  hLEDBlue.gpioPin = ONBOARD_LED_BLUE_Pin;
+  hLEDBlue.blinkFrequency = 500;
+  hLEDBlue.status = LED_STATUS_OFF;
 }
