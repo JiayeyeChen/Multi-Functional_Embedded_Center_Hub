@@ -261,34 +261,7 @@ uint8_t Touch_Init(void)
 	
 	GT9XX_ReadReg (GT9XX_ID_ADDR,11,GT9XX_Info);		// 读触摸屏IC信息
 	GT9XX_ReadReg (GT9XX_CFG_ADDR,1,&cfgVersion);	// 读触摸配置版本
-	
-	if( GT9XX_Info[0] == '9' )		//	判断第一个字符是否为 ‘9’
-	{
-		printf("Touch ID： GT%.4s \r\n",GT9XX_Info);									// 打印触摸芯片的ID
-		printf("固件版本： 0X%.4x\r\n",(GT9XX_Info[5]<<8) + GT9XX_Info[4]);	// 芯片固件版本
-		printf("触摸分辨率：%d * %d\r\n",(GT9XX_Info[7]<<8) + GT9XX_Info[6],(GT9XX_Info[9]<<8) +GT9XX_Info[8]);	// 当前触摸分辨率		
-		printf("触摸参数配置版本： 0X%.2x \r\n",cfgVersion);	// 触摸配置版本	
-		
-		if( ( (GT9XX_Info[7]<<8) + GT9XX_Info[6] ) == 1024 )		// 判断触摸屏的X轴分辨率是否为1024
-		{
-			// 在 7寸屏 V1.1 之前的硬件版本，触摸屏的分辨率为1024*600，为了程序上的兼容，这里进行判断处理
-			//	该变量标志主要用于判断是否需要软件修改采集到的触摸坐标
-			//	在 7寸屏 V1.1开始以及其它尺寸的面板，无需理会此段代码
-			Modify_Flag	= 1;	
-		}
-		else if( ( (GT9XX_Info[7]<<8) + GT9XX_Info[6] ) == 800 )	// 触摸屏的X轴分辨率为800
-		{
-			Modify_Flag	= 0;	// 置0标志位，无需做处理
-		}		
-		
-		return SUCCESS;
-	}
-	else
-	{
-		printf("未检测到触摸IC\r\n");			//错误，未检测到触摸屏
-		return ERROR;
-	}
-
+	return SUCCESS;
 }
 
 /*****************************************************************************************

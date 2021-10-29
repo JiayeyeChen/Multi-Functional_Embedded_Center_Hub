@@ -37,8 +37,30 @@ int main(void)
   MX_FATFS_Init();
   SystemPeriphral_Init();
   USB_Init();
+  
+  USART1_Init();
+	MX_FMC_Init();
   LTDC_Init();
   Touch_Init();
+  
+  LCD_SetColor(0xff0E0E0E);				//	设置画笔色
+	LCD_SetBackColor(0xff8AC6D1); 			//	设置背景色
+	LCD_Clear(); 						//	清屏，刷背景色
+
+	LCD_SetTextFont(&CH_Font32);
+	LCD_DisplayText( 42, 20,"电容触摸测试");
+	LCD_DisplayText( 42, 70,"核心板型号：FK429M1");
+	LCD_DisplayText( 42, 120,"屏幕分辨率：800*480");		
+
+
+	
+	LCD_DisplayString(44, 170,"X1:       Y1:");	
+	LCD_DisplayString(44, 220,"X2:       Y2:");	
+	LCD_DisplayString(44, 270,"X3:       Y3:");	
+	LCD_DisplayString(44, 320,"X4:       Y4:");		
+	LCD_DisplayString(44, 370,"X5:       Y5:");		
+	
+	LCD_SetColor(0xffEA7070);	//设置画笔颜色	
   
   osKernelInitialize();
   AK10_CalibrationnTaskHandle = osThreadNew(AK10Calibration_Task, NULL, &AK10_Calibration_attributes);
@@ -52,6 +74,10 @@ void SystemClock_Config(void)
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
+	uint16_t LCD_PLLSAIN = 0;		//	用于倍频的PLLSAIN参数，可取范围为50~432
+	uint8_t  LCD_PLLSAIR = 3;		//	用于分频的PLLSAIR参数，可取范围为2~7
+	uint8_t  LCD_CLKDIV	= 2;		//	LCD时钟分频参数，默认设置为2分频
+  RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
   /** Configure the main internal regulator output voltage
   */
   __HAL_RCC_PWR_CLK_ENABLE();
@@ -78,6 +104,15 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
 
   HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_3);
+  
+  
+  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_LTDC;
+	// LCD_CLK = LCD_PLLSAIN / LCD_PLLSAIR / RCC_PLLSAIDIVR_2
+	LCD_PLLSAIN = LCD_CLK * LCD_PLLSAIR * LCD_CLKDIV;	//	根据需要使用的LCD时钟计算PLLSAIN参数，可取范围为50~432
+	PeriphClkInitStruct.PLLSAI.PLLSAIN 	= LCD_PLLSAIN;			// 设置 PLLSAIN
+	PeriphClkInitStruct.PLLSAI.PLLSAIR 	= LCD_PLLSAIR;			// 设置 PLLSAIR，这里取值为3
+	PeriphClkInitStruct.PLLSAIDivR 		= RCC_PLLSAIDIVR_4;	// 为了方便计算，这里使用2分频，所以 LCD_CLKDIV 定义为2
+	HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct);
 }
 
 void AK10Calibration_Task(void *argument)
@@ -96,7 +131,28 @@ void LCD_Task(void *argument)
   for(;;)
   {
     LED_Blink(&hLEDYellowGreen, 15);
-    osDelay(10);
+    
+    Touch_Scan();	// 触摸扫描
+		
+		if(touchInfo.flag == 1)
+		{
+		  LCD_DisplayNumber(110,170,touchInfo.x[0],4);	// 显示第1组坐标
+			LCD_DisplayNumber(260,170,touchInfo.y[0],4);
+			                                        
+			LCD_DisplayNumber(110,220,touchInfo.x[1],4);	// 显示第2组坐标
+			LCD_DisplayNumber(260,220,touchInfo.y[1],4);
+		                                           
+			LCD_DisplayNumber(110,270,touchInfo.x[2],4);	// 显示第3组坐标
+			LCD_DisplayNumber(260,270,touchInfo.y[2],4);
+		                                           
+			LCD_DisplayNumber(110,320,touchInfo.x[3],4);	// 显示第4组坐标
+			LCD_DisplayNumber(260,320,touchInfo.y[3],4);
+		                                           
+			LCD_DisplayNumber(110,370,touchInfo.x[4],4);	// 显示第5组坐标
+			LCD_DisplayNumber(260,370,touchInfo.y[4],4);
+		}
+    
+    osDelay(20);
   }
 }
 
