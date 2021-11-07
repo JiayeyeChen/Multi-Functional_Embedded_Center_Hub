@@ -82,13 +82,19 @@ void UI_Init(void)
   LCD_DisplayDirection(Direction_V);
 }
 
-JoystickHandle Joystick_Create(uint16_t x, uint16_t y, uint16_t xLen, uint16_t yLen, char label[])
+JoystickHandle Joystick_Create(uint16_t x, uint16_t y, uint16_t r, char label[])
 {
   JoystickHandle hjoy;
   hjoy.pos.x = x;
   hjoy.pos.y = y;
-  hjoy.pos.xLen = xLen;
-  hjoy.pos.yLen = yLen;
+  hjoy.pos.xLen = r;
+  hjoy.pos.yLen = r;
+  LCD_SetLayer(0);
+  LCD_SetColor(DARK_CYAN);
+  LCD_FillCircle(hjoy.pos.x + hjoy.pos.xLen, hjoy.pos.y + hjoy.pos.yLen, hjoy.pos.xLen);
+  LCD_SetColor(LCD_BLACK);
+  LCD_DrawCircle(hjoy.pos.x + hjoy.pos.xLen, hjoy.pos.y + hjoy.pos.yLen, hjoy.pos.xLen);
+  LCD_DisplayString(hjoy.pos.x, hjoy.pos.y - 30, (char*)label);
   
 //  hjoy.pos.detectZoneX = 
 //  hjoy.pos.detectZoneY = 

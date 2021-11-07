@@ -23,6 +23,7 @@ ButtonHandle hButtonTest;
 ButtonHandle hButtonTest2;
 uint8_t buttoncount1;
 uint8_t buttoncount2;
+JoystickHandle hJoystickTest;
 /////////////////////
 int main(void)
 {
@@ -162,6 +163,7 @@ void LCD_Task(void *argument)
 {
   hButtonTest = Button_Create(50, 50, 200, 100, VIRTUAL_COMPONENT_SHAPE_RECTANGLE, "test", LCD_GREEN, LCD_RED);
   hButtonTest2 = Button_Create(50, 300, 200, 200, VIRTUAL_COMPONENT_SHAPE_CIRCLE, "test2", LCD_GREEN, LCD_RED);
+  hJoystickTest = Joystick_Create(250, 600, 100, "joystick");
   for(;;)
   {
     Touch_Scan();	// ´¥ÃþÉ¨Ãè

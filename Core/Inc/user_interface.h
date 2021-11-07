@@ -41,6 +41,7 @@ typedef struct
 typedef struct
 {
   VirtualComponentPosition pos;
+  
 }JoystickHandle;
 
 
@@ -51,7 +52,7 @@ uint8_t      ButtonScan(ButtonHandle* hbutton);
 uint8_t      ifButtonPressed(ButtonHandle* hbutton);
 void         ButtonRefresh(ButtonHandle* hbutton);
 
-JoystickHandle Joystick_Create(uint16_t x, uint16_t y, uint16_t xLen, uint16_t yLen, char label[]);
+JoystickHandle Joystick_Create(uint16_t x, uint16_t y, uint16_t r, char label[]);
 
 
 
