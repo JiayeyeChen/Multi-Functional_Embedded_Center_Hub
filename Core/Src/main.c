@@ -19,7 +19,10 @@
 void SystemClock_Config(void);
 
 /////for testing/////
-
+ButtonHandle hButtonTest;
+ButtonHandle hButtonTest2;
+uint8_t buttoncount1;
+uint8_t buttoncount2;
 /////////////////////
 int main(void)
 {
@@ -157,17 +160,25 @@ void AK10Calibration_Task(void *argument)
 
 void LCD_Task(void *argument)
 {
+  hButtonTest = Button_Create(50, 50, 100, 50, VIRTUAL_COMPONENT_SHAPE_RECTANGLE, "test", LCD_GREEN, LCD_RED);
+  hButtonTest2 = Button_Create(300, 300, 100, 150, VIRTUAL_COMPONENT_SHAPE_CIRCLE, "test2", LCD_GREEN, LCD_RED);
   for(;;)
   {
     Touch_Scan();	// ´¥ÃþÉ¨Ãè
+    ButtonScan(&hButtonTest);
+    ButtonScan(&hButtonTest2);
     if (touchInfo.flag)
     {
-      LED_Blink(&hLEDYellowGreen, 10);
+      
     }
     else
       LED_Off(&hLEDYellowGreen);
     
     osDelay(100);
+    if (ifButtonPressed(&hButtonTest))
+      buttoncount1++;
+    if (ifButtonPressed(&hButtonTest2))
+      buttoncount2++;
   }
 }
 

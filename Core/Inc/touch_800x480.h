@@ -14,6 +14,8 @@ typedef struct
 	uint8_t  num;				//	触摸点数
 	uint16_t x[TOUCH_MAX];	//	x坐标
 	uint16_t y[TOUCH_MAX];	//	y坐标
+  uint16_t xVertical[TOUCH_MAX];
+	uint16_t yVertical[TOUCH_MAX];
 }TouchStructure;
 
 extern TouchStructure touchInfo;	// 触摸数据结构体声明	

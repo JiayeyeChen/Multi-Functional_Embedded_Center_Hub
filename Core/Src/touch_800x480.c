@@ -304,6 +304,29 @@ void Touch_Scan(void)
 	{
 		touchInfo.flag = 0;		// 触摸标志位置0，无触摸动作
 	}
+  
+  if (touchInfo.flag)
+  {
+    for (uint8_t i = 0; i <= touchInfo.num - 1; i++)
+    {
+      touchInfo.yVertical[i] = touchInfo.x[i];
+      touchInfo.xVertical[i] = 499 - touchInfo.y[i];
+    }
+    for (uint8_t i = 4; i > touchInfo.num - 1; i--)
+    {
+      touchInfo.yVertical[i] = 0xFFFF;
+      touchInfo.xVertical[i] = 0xFFFF;
+    }
+  }
+  else
+  {
+    for (uint8_t i = 0; i <=4; i++)
+    {
+      touchInfo.yVertical[i] = 0xFFFF;
+      touchInfo.xVertical[i] = 0xFFFF;
+    }
+  }
+  
 }
 
 /*****************************************************************************************************************************************************************************************************************FANKE***/
