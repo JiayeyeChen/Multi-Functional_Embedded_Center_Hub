@@ -18,6 +18,7 @@ TIM_HandleTypeDef htim5;
 TIM_HandleTypeDef htim13;
 TIM_HandleTypeDef htim14;
 
+UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart4;
 UART_HandleTypeDef huart2;
 UART_HandleTypeDef huart3;
@@ -75,7 +76,7 @@ void USB_DEVICE_Init(void)
 static void CAN1_Init(void)
 {
   hcan1.Instance = CAN1;
-  hcan1.Init.Prescaler = 9;
+  hcan1.Init.Prescaler = 6;
   hcan1.Init.Mode = CAN_MODE_NORMAL;
   hcan1.Init.SyncJumpWidth = CAN_SJW_1TQ;
   hcan1.Init.TimeSeg1 = CAN_BS1_3TQ;
@@ -87,6 +88,11 @@ static void CAN1_Init(void)
   hcan1.Init.ReceiveFifoLocked = DISABLE;
   hcan1.Init.TransmitFifoPriority = DISABLE;
   HAL_CAN_Init(&hcan1);
+  
+  HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO0_MSG_PENDING);
+  HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO1_MSG_PENDING);
+  HAL_CAN_ActivateNotification(&hcan1, CAN_IT_TX_MAILBOX_EMPTY);
+  
 }
 
 static void CAN2_Init(void)
@@ -104,6 +110,11 @@ static void CAN2_Init(void)
   hcan2.Init.ReceiveFifoLocked = DISABLE;
   hcan2.Init.TransmitFifoPriority = DISABLE;
   HAL_CAN_Init(&hcan2);
+  
+  HAL_CAN_ActivateNotification(&hcan2, CAN_IT_RX_FIFO0_MSG_PENDING);
+  HAL_CAN_ActivateNotification(&hcan2, CAN_IT_RX_FIFO1_MSG_PENDING);
+  HAL_CAN_ActivateNotification(&hcan2, CAN_IT_TX_MAILBOX_EMPTY);
+  
 }
 
 static void CRC_Init(void)
@@ -300,6 +311,38 @@ static void TIM14_Init(void)
   HAL_TIM_PWM_ConfigChannel(&htim14, &sConfigOC, TIM_CHANNEL_1);
   HAL_TIM_MspPostInit(&htim14);
 
+}
+
+static void USART1_Init(void)
+{
+	huart1.Instance 				= USART1;						// USART1
+	huart1.Init.BaudRate 		= 115200;			// 波特率
+	huart1.Init.WordLength 		= UART_WORDLENGTH_8B;		// 8位数据宽度
+	huart1.Init.StopBits			= UART_STOPBITS_1;			// 停止位1
+	huart1.Init.Parity 			= UART_PARITY_NONE;			// 无校验
+	huart1.Init.Mode 				= UART_MODE_TX;				// 发送模式
+	huart1.Init.HwFlowCtl 		= UART_HWCONTROL_NONE;		// 不启用硬件流控制
+	huart1.Init.OverSampling	= UART_OVERSAMPLING_16;		// 采样时钟周期16
+	
+	HAL_UART_Init(&huart1);
+  
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+	
+
+  __HAL_RCC_USART1_CLK_ENABLE();		// 开启 USART1 时钟
+
+  __HAL_RCC_GPIOA_CLK_ENABLE();				// 开启 USART1 TX 引脚的 GPIO 时钟
+  __HAL_RCC_GPIOA_CLK_ENABLE();				// 开启 USART1 RX 引脚的 GPIO 时钟
+
+  GPIO_InitStruct.Pin 			= ONBOARD_UART_TX_Pin;					// TX引脚
+  GPIO_InitStruct.Mode 		= GPIO_MODE_AF_PP;				// 复用推挽输出
+  GPIO_InitStruct.Pull 		= GPIO_PULLUP;						// 上拉
+  GPIO_InitStruct.Speed 		= GPIO_SPEED_FREQ_VERY_HIGH;	// 速度等级 100M
+  GPIO_InitStruct.Alternate 	= GPIO_AF7_USART1;				// 复用为USART1
+  HAL_GPIO_Init(ONBOARD_UART_TX_GPIO_Port, &GPIO_InitStruct);
+
+  GPIO_InitStruct.Pin 			= ONBOARD_UART_RX_Pin;					// RX引脚
+  HAL_GPIO_Init(ONBOARD_UART_RX_GPIO_Port, &GPIO_InitStruct);		
 }
 
 static void UART4_Init(void)
@@ -610,7 +653,7 @@ void HAL_CAN_MspInit(CAN_HandleTypeDef* hcan)
     */
     GPIO_InitStruct.Pin = GPIO_PIN_11|GPIO_PIN_12;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Pull = GPIO_PULLDOWN;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
     GPIO_InitStruct.Alternate = GPIO_AF9_CAN1;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
@@ -641,7 +684,7 @@ void HAL_CAN_MspInit(CAN_HandleTypeDef* hcan)
     */
     GPIO_InitStruct.Pin = GPIO_PIN_12|GPIO_PIN_13;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Pull = GPIO_PULLDOWN;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
     GPIO_InitStruct.Alternate = GPIO_AF9_CAN2;
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
@@ -1573,6 +1616,7 @@ void SystemPeriphral_Init(void)
   I2C1_Init();
   USART3_UART_Init();
   USART6_UART_Init();
+  USART1_Init();
   TIM3_Init();
   TIM5_Init();
   TIM13_Init();

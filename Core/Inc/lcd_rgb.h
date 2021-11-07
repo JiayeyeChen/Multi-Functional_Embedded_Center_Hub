@@ -3,7 +3,6 @@
 
 #include "stm32f4xx_hal.h"
 #include "lcd_fonts.h"
-#include "usart.h"
 
 // 1. 设置LTDC时钟，这里设置为33MHz，即刷新率在60帧左右，过高或者过低都会造成闪烁 
 // 2. 这里为了方便计算数值应在10-70之间，单位为MHz，具体设置时钟的代码在 SystemClock_Config()

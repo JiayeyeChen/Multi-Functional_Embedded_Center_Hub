@@ -2,13 +2,11 @@
 #define CAN_BUS_H
 
 #include "system_periphrals.h"
+#include "tmotor_ak10-9_v2.h"
 
-typedef enum
-{
-  MY_CAN_ID_TMotor_Testing = 10
-}CANIDEnumType;
+#define CAN_ID_TMOTOR_EXOSKELETON_LEFT_HIP          0x2964
 
-
+CAN_FilterTypeDef ConfigCANFilter_EXT_ID_32BitIDListMode(CAN_HandleTypeDef* hcan, uint32_t FilterBank, uint32_t FilterFIFOAssignment, uint8_t IDE, uint32_t ID1, uint32_t ID2);
 
 
 

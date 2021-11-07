@@ -2,7 +2,6 @@
 #define	__SDRAM_H
 
 #include "stm32f4xx_hal.h"
-#include "usart.h"
 
 #define SDRAM_Size 0x01000000  //16M字节
 #define SDRAM_BANK_ADDR     ((uint32_t)0xD0000000) 				// FMC SDRAM 数据基地址

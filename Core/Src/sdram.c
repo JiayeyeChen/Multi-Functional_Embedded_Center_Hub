@@ -283,42 +283,42 @@ uint8_t SDRAM_Test(void)
 	uint32_t ReadData = 0; 	// 读取到的数据
 	uint8_t  ReadData_8b;
 	
-	printf("STM32F429 SDRAM测试\r\n");
-	printf("测试开始，以32位数据宽度写入数据...\r\n");	
+//	printf("STM32F429 SDRAM测试\r\n");
+//	printf("测试开始，以32位数据宽度写入数据...\r\n");	
 	for (i = 0; i < SDRAM_Size/4; i++)
 	{
  		*(__IO uint32_t*) (SDRAM_BANK_ADDR + 4*i) = i;		// 写入数据
 	}
 	
-	printf("写入完毕，读取数据并比较...\r\n");
+//	printf("写入完毕，读取数据并比较...\r\n");
 	for(i = 0; i < SDRAM_Size/4;i++ )
 	{
 		ReadData = *(__IO uint32_t*)(SDRAM_BANK_ADDR + 4 * i );  // 从SDRAM读出数据	
 		if( ReadData != i )      //检测数据，若不相等，跳出函数,返回检测失败结果。
 		{
-			printf("SDRAM测试失败！！\r\n");
+//			printf("SDRAM测试失败！！\r\n");
 			return ERROR;	 // 返回失败标志
 		}
 	}
 	
-	printf("32位数据宽度读写通过，以8位数据宽度写入数据\r\n");
+//	printf("32位数据宽度读写通过，以8位数据宽度写入数据\r\n");
 	for (i = 0; i < 255; i++)
 	{
  		*(__IO uint8_t*) (SDRAM_BANK_ADDR + i) = i;
 	}	
-	printf("写入完毕，读取数据并比较...\r\n");
+//	printf("写入完毕，读取数据并比较...\r\n");
 	for (i = 0; i < 255; i++)
 	{
 		ReadData_8b = *(__IO uint8_t*) (SDRAM_BANK_ADDR + i);
 		if( ReadData_8b != (uint8_t)i )      //检测数据，若不相等，跳出函数,返回检测失败结果。
 		{
-			printf("8位数据宽度读写测试失败！！\r\n");
-			printf("请检查NBL0和NBL1的连接\r\n");	
+//			printf("8位数据宽度读写测试失败！！\r\n");
+//			printf("请检查NBL0和NBL1的连接\r\n");	
 			return ERROR;	 // 返回失败标志
 		}
 	}		
-	printf("8位数据宽度读写通过\r\n");
-	printf("SDRAM读写测试通过，系统正常\r\n");
+//	printf("8位数据宽度读写通过\r\n");
+//	printf("SDRAM读写测试通过，系统正常\r\n");
 	return SUCCESS;	 // 返回成功标志
 }
 

@@ -36,6 +36,9 @@ extern UART_HandleTypeDef huart3;
 extern UART_HandleTypeDef huart6;
 extern TIM_HandleTypeDef htim1;
 
+//for testing//
+
+///////////////
 void NMI_Handler(void)
 {
   while (1)

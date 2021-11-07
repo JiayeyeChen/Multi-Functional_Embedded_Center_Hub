@@ -363,17 +363,19 @@ void LTDC_Init(void)
 	LCD_ShowNumMode(Fill_Space);			//	数字显示默认填充空格
 	
 	LCD_SetLayer(0);  
-	LCD_SetBackColor(LCD_BLACK); 			//	设置背景色
+	LCD_SetBackColor(LCD_CYAN); 			//	设置背景色
 	LCD_SetColor(LCD_WHITE);				//	设置画笔颜色
 	LCD_Clear(); 								//	清屏，刷背景色
 	
 /*---------------------------------- 如果开启了两层显示 --------------------------------*/	
 
 #if LCD_NUM_LAYERS == 2	 //	如果定义了第二层
-	LCD_SetLayer(1); 
-	LCD_SetBackColor(LCD_BLACK); 	//	设置背景色
-	LCD_SetColor(LCD_WHITE);		//	设置画笔颜色
+	LCD_SetLayer(0); 
+	LCD_SetBackColor(LCD_CYAN); 	//	设置背景色
+	LCD_SetColor(LCD_BLACK);		//	设置画笔颜色
 	LCD_Clear(); 						//	清屏，刷背景色
+  LCD_SetLayer(1);
+  LCD_Clear();
 #endif
 // LTDC在初始化之后，上电的瞬间会有一个短暂的白屏，
 //	即使一开始就将背光引脚拉低并且屏幕背光引脚用电阻下拉还是会有这个现象，
