@@ -14,29 +14,12 @@
 #include "ak10-9_v2_testing.h"
 #include <math.h>
 #include "user_interface.h"
-
-osThreadId_t AK10_CalibrationnTaskHandle;
-const osThreadAttr_t AK10_Calibration_attributes = {
-  .name = "AK10_Calibration",
-  .stack_size = 1024 * 4,
-  .priority = (osPriority_t) osPriorityRealtime,
-};
-
-osThreadId_t LCDTaskHandle;
-const osThreadAttr_t LCDTask_attributes = {
-  .name = "LCD",
-  .stack_size = 1024 * 4,
-  .priority = (osPriority_t) osPriorityRealtime,
-};
+#include "os_threads.h"
 
 void SystemClock_Config(void);
-void AK10Calibration_Task(void *argument);
-void LCD_Task(void *argument);
 
 /////for testing/////
-float sinPosTest = 0.0f;
-double sinIncre = 1.0f;
-double step = 0.0005f;
+
 /////////////////////
 int main(void)
 {
@@ -58,8 +41,8 @@ int main(void)
   HAL_CAN_Start(&hcan2);
   
   osKernelInitialize();
-  AK10_CalibrationnTaskHandle = osThreadNew(AK10Calibration_Task, NULL, &AK10_Calibration_attributes);
-  LCDTaskHandle = osThreadNew(LCD_Task, NULL, &LCDTask_attributes);
+  OSThreads_Init();
+  
   osKernelStart();
   while (1){}
 }
@@ -163,16 +146,8 @@ void AK10Calibration_Task(void *argument)
   AK10_9_ServoMode_Zeroing(&hAKMotorLeftHip);
   for(;;)
   {
-    sinPosTest = (float)sin(sinIncre * step) * 3600.0f;
-    AK10_9_ServoMode_PositionSpeedControl(&hAKMotorLeftHip, sinPosTest, 1000.0f, 0x0FFF);
-    sinIncre+=1.0f;
     if (GPIO_Digital_Filtered_Input(&hButtonOnboardKey, 30))
     {
-//      AK10_9_ServoMode_PositionSpeedControl(&hAKMotorLeftHip, 2000.0f, 1000.0f, 0x0FFF);
-      LCD_SetLayer(0);
-      LCD_SetColor(LIGHT_MAGENTA);
-      LCD_FillCircle(100, 100, 80);
-      step+=1.0f;
     }
     LED_Blink(&hLEDBlue, 2);
     
@@ -182,18 +157,12 @@ void AK10Calibration_Task(void *argument)
 
 void LCD_Task(void *argument)
 {
-  LCD_SetLayer(0);
-  LCD_SetColor(LIGHT_MAGENTA);
-  LCD_FillCircle(100, 100, 50);
   for(;;)
   {
     Touch_Scan();	// ´¥ÃþÉ¨Ãè
     if (touchInfo.flag)
     {
       LED_Blink(&hLEDYellowGreen, 10);
-      LCD_SetLayer(1);
-      LCD_SetColor(LCD_BLACK);
-      LCD_FillCircle(100, 100, 20);
     }
     else
       LED_Off(&hLEDYellowGreen);
