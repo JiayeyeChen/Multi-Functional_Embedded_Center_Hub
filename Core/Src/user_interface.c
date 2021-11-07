@@ -15,6 +15,7 @@ ButtonHandle Button_Create(uint16_t x, uint16_t y, uint16_t xLen, uint16_t yLen,
   hbutton.ifNeedRefresh = 0;
   hbutton.ifPressed = 0;
   hbutton.preIfPressed = 0;
+  hbutton.shape = shape;
 
 
   if (shape == VIRTUAL_COMPONENT_SHAPE_RECTANGLE)
@@ -66,6 +67,7 @@ uint8_t ifButtonPressed(ButtonHandle* hbutton)
 {
   if (hbutton->ifPressed != hbutton->preIfPressed)
   {
+    hbutton->ifNeedRefresh = 1;
     hbutton->preIfPressed = hbutton->ifPressed;
     if (hbutton->ifPressed == 0)
       return 1;
@@ -78,4 +80,35 @@ void UI_Init(void)
   LTDC_Init();
   Touch_Init();
   LCD_DisplayDirection(Direction_V);
+}
+
+JoystickHandle Joystick_Create(uint16_t x, uint16_t y, uint16_t xLen, uint16_t yLen, char label[])
+{
+  JoystickHandle hjoy;
+  hjoy.pos.x = x;
+  hjoy.pos.y = y;
+  hjoy.pos.xLen = xLen;
+  hjoy.pos.yLen = yLen;
+  
+//  hjoy.pos.detectZoneX = 
+//  hjoy.pos.detectZoneY = 
+//  hjoy.pos.detectZoneL = 
+  return hjoy;
+}
+
+void ButtonRefresh(ButtonHandle* hbutton)
+{
+  if (hbutton->ifNeedRefresh)
+  {
+    LCD_SetLayer(0);
+    if (hbutton->ifPressed)
+      LCD_SetColor(hbutton->colorPressed);
+    else
+      LCD_SetColor(hbutton->colorUnpressed);
+    if (hbutton->shape == VIRTUAL_COMPONENT_SHAPE_RECTANGLE)
+      LCD_FillRect(hbutton->pos.x, hbutton->pos.y, hbutton->pos.xLen, hbutton->pos.yLen);
+    else if (hbutton->shape == VIRTUAL_COMPONENT_SHAPE_CIRCLE)
+      LCD_FillCircle(hbutton->pos.x + hbutton->pos.xLen / 2, hbutton->pos.y + hbutton->pos.yLen / 2, MIN(hbutton->pos.yLen, hbutton->pos.xLen)/2);
+    hbutton->ifNeedRefresh = 0;
+  }
 }

@@ -160,8 +160,8 @@ void AK10Calibration_Task(void *argument)
 
 void LCD_Task(void *argument)
 {
-  hButtonTest = Button_Create(50, 50, 100, 50, VIRTUAL_COMPONENT_SHAPE_RECTANGLE, "test", LCD_GREEN, LCD_RED);
-  hButtonTest2 = Button_Create(300, 300, 100, 150, VIRTUAL_COMPONENT_SHAPE_CIRCLE, "test2", LCD_GREEN, LCD_RED);
+  hButtonTest = Button_Create(50, 50, 200, 100, VIRTUAL_COMPONENT_SHAPE_RECTANGLE, "test", LCD_GREEN, LCD_RED);
+  hButtonTest2 = Button_Create(50, 300, 200, 200, VIRTUAL_COMPONENT_SHAPE_CIRCLE, "test2", LCD_GREEN, LCD_RED);
   for(;;)
   {
     Touch_Scan();	// ´¥ÃþÉ¨Ãè
@@ -174,11 +174,20 @@ void LCD_Task(void *argument)
     else
       LED_Off(&hLEDYellowGreen);
     
-    osDelay(100);
+    osDelay(10);
     if (ifButtonPressed(&hButtonTest))
+    {
       buttoncount1++;
+      LCD_DisplayNumber(50, 100, buttoncount1, 1);
+    }
     if (ifButtonPressed(&hButtonTest2))
+    {
       buttoncount2++;
+      LCD_DisplayNumber(300, 400, buttoncount2, 1);
+    }
+    
+    ButtonRefresh(&hButtonTest2);
+    ButtonRefresh(&hButtonTest);
   }
 }
 

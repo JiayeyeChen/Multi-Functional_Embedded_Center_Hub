@@ -35,6 +35,7 @@ typedef struct
   uint8_t                  ifNeedRefresh;
   uint8_t                  ifPressed;
   uint8_t                  preIfPressed;
+  uint8_t                  shape;
 }ButtonHandle;
 
 typedef struct
@@ -48,8 +49,9 @@ void UI_Init(void);
 ButtonHandle Button_Create(uint16_t x, uint16_t y, uint16_t xLen, uint16_t yLen, uint8_t shape, char label[], uint32_t colorUnpressed, uint32_t colorPressed);
 uint8_t      ButtonScan(ButtonHandle* hbutton);
 uint8_t      ifButtonPressed(ButtonHandle* hbutton);
+void         ButtonRefresh(ButtonHandle* hbutton);
 
-
+JoystickHandle Joystick_Create(uint16_t x, uint16_t y, uint16_t xLen, uint16_t yLen, char label[]);
 
 
 
