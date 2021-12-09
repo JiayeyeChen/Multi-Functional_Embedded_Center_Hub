@@ -18,13 +18,15 @@
 
 void SystemClock_Config(void);
 
-/////for testing/////
+/////for UI testing/////
 ButtonHandle hButtonTest;
 ButtonHandle hButtonTest2;
 uint8_t buttoncount1;
 uint8_t buttoncount2;
 JoystickHandle hJoystickTest;
 /////////////////////
+/////for CRC32 testing////
+//////////////////////////
 int main(void)
 {
   HAL_Init();
@@ -180,12 +182,26 @@ void LCD_Task(void *argument)
     if (ifButtonPressed(&hButtonTest))
     {
       buttoncount1++;
-      LCD_DisplayNumber(50, 100, buttoncount1, 1);
+      LCD_DisplayNumber(300, 100, buttoncount1, 1);
+      
+      uint8_t usbsend[4];
+      for (uint8_t i = 0; i <=4; i++)
+      {
+        usbsend[i] = i * 2 + 1;
+      }
+      USB_Transmit_Cargo(usbsend, 4);
     }
     if (ifButtonPressed(&hButtonTest2))
     {
       buttoncount2++;
       LCD_DisplayNumber(300, 400, buttoncount2, 1);
+      
+      uint8_t usbsend[7];
+      for (uint8_t i = 0; i <=6; i++)
+      {
+        usbsend[i] = i;
+      }
+      USB_Transmit_Cargo(usbsend, 7);
     }
     
     ButtonRefresh(&hButtonTest2);
