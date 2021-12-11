@@ -5,6 +5,8 @@ USBHandle hUSB;
 void USB_Init(void)
 {
   hUSB.husbd = &hUsbDeviceHS;
+  hUSB.invalidRxMsgCount = 0;
+  hUSB.ifNewCargo = 0;
 }
 
 void USB_Transmit_Cargo(uint8_t* buf, uint8_t size)
@@ -32,8 +34,47 @@ void USB_Transmit_Cargo(uint8_t* buf, uint8_t size)
 
 void USB_ReceiveCpltCallback(void)
 {
-  HAL_GPIO_TogglePin(ONBOARD_LED_BLUE_GPIO_Port, ONBOARD_LED_BLUE_Pin);
   HAL_GPIO_TogglePin(ONBOARD_LED_YELLOWGREEN_GPIO_Port, ONBOARD_LED_YELLOWGREEN_Pin);
   memset(hUSB.rxMsgRaw, 0, sizeof(hUSB.rxMsgRaw));
   memcpy(hUSB.rxMsgRaw, hUSB.buf, *hUSB.len);
+  USB_Receive_Cargo();
+}
+
+void USB_Receive_Cargo(void)
+{
+  if (hUSB.rxMsgRaw[0] == (char)0xBB && hUSB.rxMsgRaw[1] == (char)0xCC && hUSB.rxMsgRaw[*hUSB.len - 1] == (char)0x88)
+  {
+    if (hUSB.rxMsgRaw[2] == *hUSB.len - 8)
+    {
+      uint32_t crcCalculatedResult;
+      union UInt32UInt8 crcReceive;
+      
+      hUSB.rxMessageLen = hUSB.rxMsgRaw[2];
+      uint32_t crcCalculate[hUSB.rxMessageLen + 1];
+      for (uint8_t i = 0; i<= hUSB.rxMessageLen; i++)
+        crcCalculate[i] = (uint32_t)hUSB.rxMsgRaw[2 + i];
+      crcCalculatedResult = HAL_CRC_Calculate(&hcrc, crcCalculate, hUSB.rxMessageLen + 1);
+      
+      crcReceive.b8[0] = hUSB.rxMsgRaw[*hUSB.len - 5];
+      crcReceive.b8[1] = hUSB.rxMsgRaw[*hUSB.len - 4];
+      crcReceive.b8[2] = hUSB.rxMsgRaw[*hUSB.len - 3];
+      crcReceive.b8[3] = hUSB.rxMsgRaw[*hUSB.len - 2];
+      
+      if (crcCalculatedResult == crcReceive.b32)
+      {
+        memcpy(hUSB.rxMessageCfrm, &hUSB.rxMsgRaw[3], hUSB.rxMessageLen);
+        hUSB.ifNewCargo = 1;
+      }
+    }
+    else
+    {
+      hUSB.invalidRxMsgCount++;
+      return;
+    }
+  }
+  else
+  {
+    hUSB.invalidRxMsgCount++;
+    return;
+  }
 }

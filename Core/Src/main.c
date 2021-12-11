@@ -176,7 +176,8 @@ void LCD_Task(void *argument)
       
     }
     else
-      LED_Off(&hLEDYellowGreen);
+    {
+    }
     
     osDelay(10);
     if (ifButtonPressed(&hButtonTest))
