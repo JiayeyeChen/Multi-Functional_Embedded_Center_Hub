@@ -98,3 +98,32 @@ void MFEC_USB::Communication(void)
         }
     }
 }
+
+void MFEC_USB::Tx2MFEC(uint8_t *data, uint8_t len)
+{
+    uint8_t txBuf[len + 8];
+    txBuf[0] = 0xBB;
+    txBuf[1] = 0xCC;
+    txBuf[2] = len;
+    memcpy(&txBuf[3], data, len);
+    uint32_t crcCalculate[len + 1];
+    crcCalculate[0] = (uint32_t)len;
+    for (uint8_t i = 1; i <= len; i++)
+    {
+        crcCalculate[i] = (uint32_t)*(data + i - 1);
+    }
+    uint32_t crc = CRC32_32BitsInput(crcCalculate, len + 1);
+    std::cout<<"tx crc is: "<<std::hex<<(unsigned int)crc<<std::endl;
+    txBuf[len + 3] = (uint8_t)(crc & 0x000000FF);
+    txBuf[len + 4] = (uint8_t)(crc >> 8 & 0x000000FF);
+    txBuf[len + 5] = (uint8_t)(crc >> 16 & 0x000000FF);
+    txBuf[len + 6] = (uint8_t)(crc >> 24 & 0x000000FF);
+    txBuf[len + 7] = 0x88;
+
+    for (uint8_t i = 0; i <= sizeof(txBuf) - 1; i++)
+    {
+        std::cout<<std::hex<<(unsigned int)txBuf[i]<<" ";
+    }
+    std::cout<<std::endl;
+    MFEC_USB::serialPort.write_some(boost::asio::buffer(txBuf, len + 8));
+}

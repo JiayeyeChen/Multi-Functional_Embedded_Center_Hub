@@ -16,6 +16,8 @@ class MFEC_USB
             uint8_t bytesToRead;
             uint8_t rxMessageCfrm[256];
             uint8_t rxMessageLen;
+            /*Tx message*/
+            void Tx2MFEC(uint8_t *data, uint8_t len);
     private:
 
 };
