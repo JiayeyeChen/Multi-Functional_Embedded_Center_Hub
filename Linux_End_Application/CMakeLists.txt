@@ -11,6 +11,7 @@ include_directories(
 set(SRC
   main.cpp
   mfec_communication.cpp
+  crc32_mpeg.cpp
 )
 
 set(LIBS
