@@ -139,9 +139,13 @@ void USB_DataLogStart(void)
 {
   USB_DataLogInitialization();
   hUSB.ifDataLogStarted = 1;
+  char start_msg[] = "Datalog start";
+  USB_Transmit_Cargo((uint8_t*)start_msg, sizeof(start_msg));
 }
 
 void USB_DataLogEnd(void)
 {
   hUSB.ifDataLogStarted = 0;
+  char end_msg[] = "Datalog end";
+  USB_Transmit_Cargo((uint8_t*)end_msg, sizeof(end_msg));
 }
