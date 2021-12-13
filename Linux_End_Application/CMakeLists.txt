@@ -12,6 +12,7 @@ set(SRC
   main.cpp
   mfec_communication.cpp
   crc32_mpeg.cpp
+  ak10_9_calibration.cpp
 )
 
 set(LIBS

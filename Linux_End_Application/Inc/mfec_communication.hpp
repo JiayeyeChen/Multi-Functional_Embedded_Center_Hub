@@ -3,6 +3,12 @@
 #include <boost/asio.hpp>
 #include <iostream>
 
+union FloatUInt8
+{
+    float   f;
+    uint8_t b8[4];
+};
+
 class MFEC_USB
 {
     public:
@@ -11,6 +17,7 @@ class MFEC_USB
             MFEC_USB(std::string device_repo, int baudrate);
             void Communication(void);
             /*Rx message*/
+            uint8_t ifNewMessage;
             uint8_t tempRx[264];
             uint8_t msgDetectStage;
             uint8_t bytesToRead;
@@ -21,5 +28,7 @@ class MFEC_USB
     private:
 
 };
+
+extern MFEC_USB myMFEC_USB;
 
 #endif

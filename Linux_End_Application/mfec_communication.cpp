@@ -2,7 +2,9 @@
 #include <boost/asio.hpp>
 #include "crc32_mpeg.hpp"
 
-MFEC_USB::MFEC_USB(std::string device_repo, int baudrate) : serialPort(io, device_repo), msgDetectStage(0)
+MFEC_USB myMFEC_USB("/dev/ttyACM0", 921600);
+
+MFEC_USB::MFEC_USB(std::string device_repo, int baudrate) : serialPort(io, device_repo), msgDetectStage(0), ifNewMessage(0)
 {
     if (!MFEC_USB::serialPort.is_open())
     {
@@ -76,10 +78,12 @@ void MFEC_USB::Communication(void)
             if (crcResult == crcFromMFEC && tempRx[bytesToRead + 4] == 0x55)
             {
                 msgDetectStage = 0;
-                std::cout<<"Cargo Received!"<<std::endl;
+                
                 memcpy(rxMessageCfrm, tempRx,bytesToRead);
                 rxMessageLen = bytesToRead;
+                ifNewMessage = 1;
 
+                // std::cout<<"Cargo Received!"<<std::endl;
                 // std::cout<<"Message is :" << std::endl;
                 // for (uint8_t i = 0; i <= bytesToRead - 1; i++)
                 // {
