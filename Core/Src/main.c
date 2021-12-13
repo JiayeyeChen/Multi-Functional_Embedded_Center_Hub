@@ -19,14 +19,12 @@
 void SystemClock_Config(void);
 
 /////for UI testing/////
-ButtonHandle hButtonTest;
-ButtonHandle hButtonTest2;
+ButtonHandle hButtonDataLog;
+ButtonHandle hButtonDataLogEnd;
 uint8_t buttoncount1;
 uint8_t buttoncount2;
 JoystickHandle hJoystickTest;
-/////////////////////
-/////for CRC32 testing////
-//////////////////////////
+
 int main(void)
 {
   HAL_Init();
@@ -149,28 +147,29 @@ void SystemClock_Config(void)
 
 void AK10Calibration_Task(void *argument)
 {
-  AK10_9_ServoMode_Zeroing(&hAKMotorLeftHip);
+//  AK10_9_ServoMode_Zeroing(&hAKMotorLeftHip);
   for(;;)
   {
     if (GPIO_Digital_Filtered_Input(&hButtonOnboardKey, 30))
     {
     }
     LED_Blink(&hLEDBlue, 2);
-    
+    AK10_9_DataLog_Manager(&hAKMotorLeftHip);
+
     osDelay(10);
   }
 }
 
 void LCD_Task(void *argument)
 {
-  hButtonTest = Button_Create(50, 50, 200, 100, VIRTUAL_COMPONENT_SHAPE_RECTANGLE, "test", LCD_GREEN, LCD_RED);
-  hButtonTest2 = Button_Create(50, 300, 200, 200, VIRTUAL_COMPONENT_SHAPE_CIRCLE, "test2", LCD_GREEN, LCD_RED);
+  hButtonDataLog = Button_Create(50, 50, 200, 100, VIRTUAL_COMPONENT_SHAPE_RECTANGLE, "Data Log Start", LCD_GREEN, LCD_RED);
+  hButtonDataLogEnd = Button_Create(50, 300, 200, 200, VIRTUAL_COMPONENT_SHAPE_CIRCLE, "Data Log End", LCD_GREEN, LCD_RED);
   hJoystickTest = Joystick_Create(250, 600, 100, "joystick");
   for(;;)
   {
     Touch_Scan();	// ´¥ÃþÉ¨Ãè
-    ButtonScan(&hButtonTest);
-    ButtonScan(&hButtonTest2);
+    ButtonScan(&hButtonDataLog);
+    ButtonScan(&hButtonDataLogEnd);
     if (touchInfo.flag)
     {
       
@@ -180,33 +179,21 @@ void LCD_Task(void *argument)
     }
     
     osDelay(10);
-    if (ifButtonPressed(&hButtonTest))
+    if (ifButtonPressed(&hButtonDataLog))
     {
       buttoncount1++;
       LCD_DisplayNumber(300, 100, buttoncount1, 1);
-      
-      uint8_t usbsend[4];
-      for (uint8_t i = 0; i <=4; i++)
-      {
-        usbsend[i] = i * 2 + 1;
-      }
-      USB_Transmit_Cargo(usbsend, 4);
+      USB_DataLogStart();
     }
-    if (ifButtonPressed(&hButtonTest2))
+    if (ifButtonPressed(&hButtonDataLogEnd))
     {
       buttoncount2++;
       LCD_DisplayNumber(300, 400, buttoncount2, 1);
-      
-      uint8_t usbsend[7];
-      for (uint8_t i = 0; i <=6; i++)
-      {
-        usbsend[i] = i;
-      }
-      USB_Transmit_Cargo(usbsend, 7);
+      USB_DataLogEnd();
     }
     
-    ButtonRefresh(&hButtonTest2);
-    ButtonRefresh(&hButtonTest);
+    ButtonRefresh(&hButtonDataLogEnd);
+    ButtonRefresh(&hButtonDataLog);
   }
 }
 

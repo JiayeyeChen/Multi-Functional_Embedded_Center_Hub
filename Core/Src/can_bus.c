@@ -1,5 +1,6 @@
 #include "can_bus.h"
 #include "ak10-9_v2_testing.h"
+#include "usb.h"
 
 CAN_FilterTypeDef can_filter_ak10_9_test;
 extern AK10_9Handle hAKMotorLeftHip, hAKMotorLeftKnee, hAKMotorRightHip, hAKMotorRightKnee;
@@ -46,6 +47,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
   
   //Application specific codes
   AK10_9_ServoMode_GetFeedbackMsg(&temRxHeader, &hAKMotorLeftHip, temRxData);
+  
   rxfifo0detected++;
 }
 
@@ -58,5 +60,6 @@ void HAL_CAN_RxFifo1FullCallback(CAN_HandleTypeDef *hcan)
   
   //Application specific codes
   AK10_9_ServoMode_GetFeedbackMsg(&temRxHeader, &hAKMotorLeftHip, temRxData);
+  
   rxfifo1detected++;
 }
