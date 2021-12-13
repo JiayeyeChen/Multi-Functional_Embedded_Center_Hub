@@ -7,6 +7,10 @@ void USB_Init(void)
   hUSB.husbd = &hUsbDeviceHS;
   hUSB.invalidRxMsgCount = 0;
   hUSB.ifNewCargo = 0;
+  hUSB.ifNewDataLogPiece2Send = 0;
+  hUSB.index.b32 = 0;
+  hUSB.ifDataLogInitiated = 0;
+  hUSB.ifDataLogStarted = 0;
 }
 
 void USB_Transmit_Cargo(uint8_t* buf, uint8_t size)
@@ -77,4 +81,67 @@ void USB_Receive_Cargo(void)
     hUSB.invalidRxMsgCount++;
     return;
   }
+}
+
+void USB_DataLogInitialization(void)
+{
+hUSB.dataLogBytes = 0;
+hUSB.ifNewDataLogPiece2Send = 0;
+hUSB.ifDataLogInitiated = 1;
+hUSB.index.b32 = 0;
+}
+
+void AK10_9_DataLog_CargoTransmit(AK10_9Handle* hmotor)
+{
+  uint8_t i = 0;
+  union UInt32UInt8 sysTick;
+  sysTick.b32 = HAL_GetTick();
+  //Index
+  hUSB.txBuf[i++] = hUSB.index.b8[0];
+  hUSB.txBuf[i++] = hUSB.index.b8[1];
+  hUSB.txBuf[i++] = hUSB.index.b8[2];
+  hUSB.txBuf[i++] = hUSB.index.b8[3];
+  hUSB.index.b32++;
+  //Time stamp
+  hUSB.txBuf[i++] = sysTick.b8[0];
+  hUSB.txBuf[i++] = sysTick.b8[1];
+  hUSB.txBuf[i++] = sysTick.b8[2];
+  hUSB.txBuf[i++] = sysTick.b8[3];
+  //Position
+  hUSB.txBuf[i++] = hmotor->realPosition.b8[0];
+  hUSB.txBuf[i++] = hmotor->realPosition.b8[1];
+  hUSB.txBuf[i++] = hmotor->realPosition.b8[2];
+  hUSB.txBuf[i++] = hmotor->realPosition.b8[3];
+  //Velocity
+  hUSB.txBuf[i++] = hmotor->realVelocity.b8[0];
+  hUSB.txBuf[i++] = hmotor->realVelocity.b8[1];
+  hUSB.txBuf[i++] = hmotor->realVelocity.b8[2];
+  hUSB.txBuf[i++] = hmotor->realVelocity.b8[3];
+  //Current
+  hUSB.txBuf[i++] = hmotor->realCurrent.b8[0];
+  hUSB.txBuf[i++] = hmotor->realCurrent.b8[1];
+  hUSB.txBuf[i++] = hmotor->realCurrent.b8[2];
+  hUSB.txBuf[i++] = hmotor->realCurrent.b8[3];
+  //Temperature
+  hUSB.txBuf[i++] = hmotor->temperature;
+  
+  hUSB.dataLogBytes = 21;
+  USB_Transmit_Cargo(hUSB.txBuf, hUSB.dataLogBytes);
+}
+
+void AK10_9_DataLog_Manager(AK10_9Handle* hmotor)
+{
+  if (hUSB.ifDataLogStarted)
+    AK10_9_DataLog_CargoTransmit(hmotor);
+}
+
+void USB_DataLogStart(void)
+{
+  USB_DataLogInitialization();
+  hUSB.ifDataLogStarted = 1;
+}
+
+void USB_DataLogEnd(void)
+{
+  hUSB.ifDataLogStarted = 0;
 }
