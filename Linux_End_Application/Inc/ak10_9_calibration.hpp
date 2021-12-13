@@ -6,7 +6,8 @@
 class AK10_9
 {
     public:
-            float position, velocity, current, temperature;
+            float       position, velocity, current, temperature;
+            uint32_t    systemTime, index;
             AK10_9(void);
             void GetFeedbackCargo(uint8_t * data);
     private:
