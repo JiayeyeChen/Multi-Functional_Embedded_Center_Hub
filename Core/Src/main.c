@@ -147,7 +147,7 @@ void SystemClock_Config(void)
 
 void AK10Calibration_Task(void *argument)
 {
-//  AK10_9_ServoMode_Zeroing(&hAKMotorLeftHip);
+  AK10_9_ServoMode_Zeroing(&hAKMotorLeftHip);
   for(;;)
   {
     if (GPIO_Digital_Filtered_Input(&hButtonOnboardKey, 30))
@@ -162,8 +162,8 @@ void AK10Calibration_Task(void *argument)
 
 void LCD_Task(void *argument)
 {
-  hButtonDataLog = Button_Create(50, 50, 200, 100, VIRTUAL_COMPONENT_SHAPE_RECTANGLE, "Data Log Start", LCD_GREEN, LCD_RED);
-  hButtonDataLogEnd = Button_Create(50, 300, 200, 200, VIRTUAL_COMPONENT_SHAPE_CIRCLE, "Data Log End", LCD_GREEN, LCD_RED);
+  hButtonDataLog = Button_Create(250, 50, 200, 50, "Data Log Start", LIGHT_MAGENTA, LCD_RED);
+  hButtonDataLogEnd = Button_Create(50, 300, 100, 100, "Data Log End", LCD_GREEN, LCD_RED);
   hJoystickTest = Joystick_Create(250, 600, 100, "joystick");
   for(;;)
   {
