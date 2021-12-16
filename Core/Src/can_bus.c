@@ -2,9 +2,6 @@
 #include "ak10-9_v2_testing.h"
 #include "usb.h"
 
-CAN_FilterTypeDef can_filter_ak10_9_test;
-extern AK10_9Handle hAKMotorLeftHip, hAKMotorLeftKnee, hAKMotorRightHip, hAKMotorRightKnee;
-
 //for testing//
 uint8_t rxfifo0detected = 0;
 uint8_t rxfifo1detected = 0;
@@ -36,6 +33,12 @@ CAN_FilterTypeDef ConfigCANFilter_EXT_ID_32BitIDListMode(CAN_HandleTypeDef* hcan
   HAL_CAN_ConfigFilter(hcan, &filter);
   
   return filter;
+}
+
+void CAN_ConfigureFilter(void)
+{
+  hAKMotorLeftHip.rxFilter = ConfigCANFilter_EXT_ID_32BitIDListMode(&hcan2, 0, CAN_FILTER_FIFO0, CAN_ID_EXT, CAN_ID_TMOTOR_EXOSKELETON_LEFT_HIP, 0);
+  
 }
 
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)

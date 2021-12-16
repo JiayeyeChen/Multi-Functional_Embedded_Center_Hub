@@ -34,9 +34,7 @@ int main(void)
   MotorInit();
   
   hAKMotorLeftHip.rxFilter = ConfigCANFilter_EXT_ID_32BitIDListMode(&hcan2, 0, CAN_FILTER_FIFO0, CAN_ID_EXT, CAN_ID_TMOTOR_EXOSKELETON_LEFT_HIP, 0);
-  HAL_CAN_Start(&hcan1);
-  HAL_CAN_Start(&hcan2);
-  
+//  CAN_ConfigureFilter();
   
   osKernelInitialize();
   OSThreads_Init();
@@ -146,21 +144,19 @@ void AK10Calibration_Task(void *argument)
   {
     AK10_9_DataLog_Manager(&hAKMotorLeftHip);
     if (ifMotorProfilingStarted)
-    {
       AK10_9_MotorProfiling_Function1(&hAKMotorLeftHip);
-    }
     osDelay(2);
   }
 }
 
 void UI_Task(void *argument)
 {
-  LED_Blink(&hLEDBlue, 2);
+  
   for(;;)
   {
-    Touch_Scan();	// ´¥ÃþÉ¨Ãè
+    Touch_Scan();
     UI();
-    
+    LED_Blink(&hLEDBlue, 2);
     osDelay(41);
 
   }

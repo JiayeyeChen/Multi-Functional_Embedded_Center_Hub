@@ -5,6 +5,8 @@
 PageHandle UIPage_Home1, UIPage_AK10_9_Calibration, UIPage_AK10_9_ManualControl;
 UIHandle hUI;
 
+ButtonHandle hButtonPageAK10_9Calibration;
+ButtonHandle hButtonPageAK10_9ManualControl;
 ButtonHandle hButtonDataLogStart;
 ButtonHandle hButtonDataLogEnd;
 ButtonHandle hButtonMotorProfilingStart;
@@ -12,6 +14,7 @@ ButtonHandle hButtonMotorProfilingEnd;
 ButtonHandle hButtonMotorZeroing;
 ButtonHandle hButtonMotorSteppingUp;
 ButtonHandle hButtonMotorSteppingDown;
+ButtonHandle hButtonGoBack;
 
 ButtonHandle Button_Create(uint16_t x, uint16_t y, uint16_t xLen, uint16_t yLen, char label[],\
                            uint32_t colorUnpressed, uint32_t colorPressed)
@@ -73,25 +76,22 @@ void UI_Init(void)
   LCD_DisplayDirection(Direction_V);
   
   /*UI handle Initialization*/
-  hUI.curPage = &UIPage_AK10_9_Calibration;
-  hUI.prePage = &UIPage_AK10_9_Calibration;
+  hUI.curPage = &UIPage_Home1;
+  hUI.prePage = &UIPage_Home1;
   
-  /*All Virtual Components Initialization*/
-  VirtualComponents_Init();
+  /*UI Pages*/
+  UIPage_Home1.ifPageInitialized = 0;
+  UIPage_Home1.Page = UI_Page_Home1;
+  UIPage_Home1.PageInit = UI_Page_Home1_Init;
   
-  /*UI Page of AK10-9 Motor Calibration*/
-  UIPage_AK10_9_Calibration.p = UI_Page_AK10_9_Calibration;
-}
-
-void VirtualComponents_Init(void)
-{
-  hButtonDataLogStart = Button_Create(50, 50, 200, 50, "Data Log Start", LIGHT_MAGENTA, LCD_RED);
-  hButtonDataLogEnd = Button_Create(50, 150, 200, 50, "Data Log End", LCD_GREEN, LCD_RED);
-  hButtonMotorProfilingStart = Button_Create(50, 250, 300, 50, "Motor profiling Start", LIGHT_GREY, LCD_RED);
-  hButtonMotorProfilingEnd = Button_Create(50, 350, 300, 50, "Motor profiling Stop", LCD_YELLOW, LCD_RED);
-  hButtonMotorZeroing = Button_Create(50, 450, 200, 50, "Motor Set Zero", LCD_BLUE, LCD_RED);
-  hButtonMotorSteppingUp = Button_Create(300, 50, 120, 50, "Step up", LCD_WHITE, LCD_RED);
-  hButtonMotorSteppingDown = Button_Create(300, 150, 120, 50, "Step down", LCD_WHITE, LCD_RED);
+  UIPage_AK10_9_Calibration.ifPageInitialized = 0;
+  UIPage_AK10_9_Calibration.Page = UI_Page_AK10_9_Calibration;
+  UIPage_AK10_9_Calibration.PageInit = UI_Page_AK10_9_Calibration_Init;
+  
+  UIPage_AK10_9_ManualControl.ifPageInitialized = 0;
+  UIPage_AK10_9_ManualControl.Page = UI_Page_AK10_9_ManualControl;
+  UIPage_AK10_9_ManualControl.PageInit = UI_Page_AK10_9_ManualControl_Init;
+  
 }
 
 JoystickHandle Joystick_Create(uint16_t x, uint16_t y, uint16_t r, char label[])
@@ -126,18 +126,23 @@ void ButtonRefresh(ButtonHandle* hbutton)
 
 void UI(void)
 {
-  hUI.curPage->p();
+  if (!hUI.curPage->ifPageInitialized)
+  {
+    hUI.curPage->PageInit();
+    hUI.curPage->ifPageInitialized = 1;
+  }
+  hUI.curPage->Page();
 }
 
 void UI_Page_AK10_9_Calibration(void)
 {
+  ButtonScan(&hButtonGoBack);
   ButtonScan(&hButtonDataLogStart);
   ButtonScan(&hButtonDataLogEnd);
   ButtonScan(&hButtonMotorProfilingStart);
   ButtonScan(&hButtonMotorProfilingEnd);
   ButtonScan(&hButtonMotorZeroing);
-  ButtonScan(&hButtonMotorSteppingUp);
-  ButtonScan(&hButtonMotorSteppingDown);
+  
   
   if (ifButtonPressed(&hButtonDataLogStart))
   {
@@ -161,24 +166,14 @@ void UI_Page_AK10_9_Calibration(void)
   {
     AK10_9_ServoMode_Zeroing(&hAKMotorLeftHip);
   }
-  if(ifButtonPressed(&hButtonMotorSteppingUp))
-  {
-    positionControlManual+=15.0f;
-    AK10_9_ServoMode_PositionControl(&hAKMotorLeftHip, positionControlManual);
-  }
-  if(ifButtonPressed(&hButtonMotorSteppingDown))
-  {
-    positionControlManual-=15.0f;
-    AK10_9_ServoMode_PositionControl(&hAKMotorLeftHip, positionControlManual);
-  }
   
+  ButtonRefresh(&hButtonGoBack);
   ButtonRefresh(&hButtonDataLogEnd);
   ButtonRefresh(&hButtonDataLogStart);
   ButtonRefresh(&hButtonMotorProfilingStart);
   ButtonRefresh(&hButtonMotorProfilingEnd);
   ButtonRefresh(&hButtonMotorZeroing);
-  ButtonRefresh(&hButtonMotorSteppingUp);
-  ButtonRefresh(&hButtonMotorSteppingDown);
+  
   
   LCD_SetLayer(1); 
   LCD_SetColor(LCD_BLACK);
@@ -193,4 +188,103 @@ void UI_Page_AK10_9_Calibration(void)
   LCD_DisplayDecimals(310, 650, (double)hAKMotorLeftHip.setPosition.f, 10, 4);
   LCD_DisplayDecimals(310, 700, (double)hAKMotorLeftHip.setVelocity.f, 10, 4);
   LCD_DisplayDecimals(310, 750, (double)hAKMotorLeftHip.setCurrent.f, 10, 4);
+  
+  if (ifButtonPressed(&hButtonGoBack))
+    UI_Page_Change_To(&UIPage_Home1);
+}
+
+void UI_Page_AK10_9_Calibration_Init(void)
+{
+  hButtonDataLogStart = Button_Create(50, 50, 200, 50, "Data Log Start", LIGHT_MAGENTA, LCD_RED);
+  hButtonDataLogEnd = Button_Create(50, 150, 200, 50, "Data Log End", LCD_GREEN, LCD_RED);
+  hButtonMotorProfilingStart = Button_Create(50, 250, 300, 50, "Motor profiling Start", LIGHT_GREY, LCD_RED);
+  hButtonMotorProfilingEnd = Button_Create(50, 350, 300, 50, "Motor profiling Stop", LCD_YELLOW, LCD_RED);
+  hButtonMotorZeroing = Button_Create(50, 450, 200, 50, "Motor Set Zero", LCD_BLUE, LCD_RED);
+  hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
+}
+
+void UI_Page_Home1(void)
+{
+  LCD_SetFont(&Font32); 
+  LCD_DisplayString(140, 30, "Welcome Jiaye");
+  LCD_SetFont(&Font24);
+  ButtonScan(&hButtonPageAK10_9Calibration);
+  ButtonRefresh(&hButtonPageAK10_9Calibration);
+  ButtonScan(&hButtonPageAK10_9ManualControl);
+  ButtonRefresh(&hButtonPageAK10_9ManualControl);
+  
+  if (ifButtonPressed(&hButtonPageAK10_9Calibration))
+    UI_Page_Change_To(&UIPage_AK10_9_Calibration);
+  if (ifButtonPressed(&hButtonPageAK10_9ManualControl))
+    UI_Page_Change_To(&UIPage_AK10_9_ManualControl);
+  
+}
+void UI_Page_Home1_Init(void)
+{
+  hButtonPageAK10_9Calibration = Button_Create(100, 100, 300, 50, "AK10-9 V2.0 Calibration", LIGHT_MAGENTA, LCD_RED);
+  hButtonPageAK10_9ManualControl = Button_Create(80, 200, 360, 50, "AK10-9 V2.0 Manual Control", LIGHT_MAGENTA, LCD_RED);
+}
+
+void UI_Page_AK10_9_ManualControl(void)
+{
+  ButtonScan(&hButtonGoBack);
+  ButtonScan(&hButtonMotorSteppingUp);
+  ButtonScan(&hButtonMotorSteppingDown);
+  ButtonScan(&hButtonMotorZeroing);
+  ButtonRefresh(&hButtonGoBack);
+  ButtonRefresh(&hButtonMotorSteppingUp);
+  ButtonRefresh(&hButtonMotorSteppingDown);
+  ButtonRefresh(&hButtonMotorZeroing);
+  
+  if(ifButtonPressed(&hButtonMotorZeroing))
+    AK10_9_ServoMode_Zeroing(&hAKMotorLeftHip);
+  if(ifButtonPressed(&hButtonMotorSteppingUp))
+  {
+    positionControlManual+=15.0f;
+    AK10_9_ServoMode_PositionControl(&hAKMotorLeftHip, positionControlManual);
+  }
+  if(ifButtonPressed(&hButtonMotorSteppingDown))
+  {
+    positionControlManual-=15.0f;
+    AK10_9_ServoMode_PositionControl(&hAKMotorLeftHip, positionControlManual);
+  }
+  
+  
+  LCD_SetLayer(1); 
+  LCD_SetColor(LCD_BLACK);
+  LCD_DisplayString(20, 570, "Temperature:");
+  LCD_DisplayNumber(70, 600, hAKMotorLeftHip.temperature, 2);
+  LCD_DisplayString(230, 600, "Real");
+  LCD_DisplayString(360, 600, "Desired");
+  LCD_DisplayString(50, 650, "Position: ");LCD_DisplayDecimals(170, 650, (double)hAKMotorLeftHip.realPosition.f, 10, 4);
+  LCD_DisplayString(50, 700, "Velocity: ");LCD_DisplayDecimals(170, 700, (double)hAKMotorLeftHip.realVelocity.f, 10, 4);
+  LCD_DisplayString(50, 750, "Current:  ");LCD_DisplayDecimals(170, 750, (double)hAKMotorLeftHip.realCurrent.f, 10, 4);
+  
+  LCD_DisplayDecimals(310, 650, (double)hAKMotorLeftHip.setPosition.f, 10, 4);
+  LCD_DisplayDecimals(310, 700, (double)hAKMotorLeftHip.setVelocity.f, 10, 4);
+  LCD_DisplayDecimals(310, 750, (double)hAKMotorLeftHip.setCurrent.f, 10, 4);
+  
+  if (ifButtonPressed(&hButtonGoBack))
+    UI_Page_Change_To(&UIPage_Home1);
+}
+void UI_Page_AK10_9_ManualControl_Init(void)
+{
+  hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
+  hButtonMotorSteppingUp = Button_Create(300, 50, 120, 50, "Step up", LCD_WHITE, LCD_RED);
+  hButtonMotorSteppingDown = Button_Create(300, 150, 120, 50, "Step down", LCD_WHITE, LCD_RED);
+  hButtonMotorZeroing = Button_Create(50, 450, 200, 50, "Motor Set Zero", LCD_BLUE, LCD_RED);
+}
+
+void UI_Page_Change_To(PageHandle* hpage)
+{
+  hUI.prePage = hUI.curPage;
+  hUI.curPage = hpage;
+  hUI.curPage->ifPageInitialized = 0;
+  
+  LCD_SetLayer(0); 
+	LCD_SetBackColor(LCD_CYAN);
+	LCD_SetColor(LCD_BLACK);
+	LCD_Clear();
+  LCD_SetLayer(1);
+  LCD_Clear();
 }

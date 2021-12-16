@@ -11,7 +11,9 @@
 
 typedef struct
 {
-  void (*p) (void);
+  uint8_t ifPageInitialized;
+  void (*Page) (void);
+  void (*PageInit) (void);
 }PageHandle;
 
 typedef struct
@@ -28,12 +30,6 @@ typedef struct
   uint16_t y;
   uint16_t r;
 }VirtualJoystickPosition;
-
-typedef struct
-{
-  VirtualButtonPosition pos;
-  
-}MenuPageHandle;
 
 typedef struct
 {
@@ -63,11 +59,16 @@ uint8_t      ButtonScan(ButtonHandle* hbutton);
 uint8_t      ifButtonPressed(ButtonHandle* hbutton);
 void         ButtonRefresh(ButtonHandle* hbutton);
 void         UI(void);
-void         VirtualComponents_Init(void);
+void         UI_Page_Change_To(PageHandle* hpage);
 void         UI_Page_AK10_9_Calibration(void);
+void         UI_Page_AK10_9_Calibration_Init(void);
+void         UI_Page_Home1(void);
+void         UI_Page_Home1_Init(void);
+void         UI_Page_AK10_9_ManualControl(void);
+void         UI_Page_AK10_9_ManualControl_Init(void);
 
 JoystickHandle Joystick_Create(uint16_t x, uint16_t y, uint16_t r, char label[]);
 
 
-extern ButtonHandle hButtonDataLogStart, hButtonDataLogEnd, hButtonMotorProfilingStart, hButtonMotorProfilingEnd, hButtonMotorZeroing, hButtonMotorSteppingUp, hButtonMotorSteppingDown;
+//extern ButtonHandle hButtonDataLogStart, hButtonDataLogEnd, hButtonMotorProfilingStart, hButtonMotorProfilingEnd, hButtonMotorZeroing, hButtonMotorSteppingUp, hButtonMotorSteppingDown;
 #endif

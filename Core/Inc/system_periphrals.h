@@ -8,6 +8,7 @@
 #include "usbd_cdc_if.h"
 #include "gpio_digital_filtered_input.h"
 #include "led_control.h"
+#include "can_bus.h"
 
 #define SPI_SCK_Pin GPIO_PIN_2
 #define SPI_SCK_GPIO_Port GPIOE

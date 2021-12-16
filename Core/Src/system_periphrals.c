@@ -93,6 +93,8 @@ static void CAN1_Init(void)
   HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO1_MSG_PENDING);
   HAL_CAN_ActivateNotification(&hcan1, CAN_IT_TX_MAILBOX_EMPTY);
   
+  HAL_CAN_Start(&hcan1);
+  
 }
 
 static void CAN2_Init(void)
@@ -115,6 +117,7 @@ static void CAN2_Init(void)
   HAL_CAN_ActivateNotification(&hcan2, CAN_IT_RX_FIFO1_MSG_PENDING);
   HAL_CAN_ActivateNotification(&hcan2, CAN_IT_TX_MAILBOX_EMPTY);
   
+  HAL_CAN_Start(&hcan2);
 }
 
 static void CRC_Init(void)
@@ -1626,6 +1629,7 @@ void SystemPeriphral_Init(void)
   USB_DEVICE_Init();
   Button_Init();
   LED_Init();
+  
 }
 
 void Button_Init(void)
