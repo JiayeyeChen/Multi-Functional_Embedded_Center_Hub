@@ -63,10 +63,11 @@ uint8_t      ButtonScan(ButtonHandle* hbutton);
 uint8_t      ifButtonPressed(ButtonHandle* hbutton);
 void         ButtonRefresh(ButtonHandle* hbutton);
 void         UI(void);
+void         VirtualComponents_Init(void);
 void         UI_Page_AK10_9_Calibration(void);
 
 JoystickHandle Joystick_Create(uint16_t x, uint16_t y, uint16_t r, char label[]);
 
 
-
+extern ButtonHandle hButtonDataLogStart, hButtonDataLogEnd, hButtonMotorProfilingStart, hButtonMotorProfilingEnd, hButtonMotorZeroing, hButtonMotorSteppingUp, hButtonMotorSteppingDown;
 #endif

@@ -7,9 +7,9 @@ const osThreadAttr_t AK10_Calibration_attributes = {
   .priority = (osPriority_t) osPriorityRealtime,
 };
 
-osThreadId_t LCDTaskHandle;
-const osThreadAttr_t LCDTask_attributes = {
-  .name = "LCD",
+osThreadId_t UITaskHandle;
+const osThreadAttr_t UITask_attributes = {
+  .name = "UI",
   .stack_size = 1024 * 4,
   .priority = (osPriority_t) osPriorityRealtime,
 };
@@ -18,5 +18,5 @@ const osThreadAttr_t LCDTask_attributes = {
 void OSThreads_Init(void)
 {
   AK10_CalibrationnTaskHandle = osThreadNew(AK10Calibration_Task, NULL, &AK10_Calibration_attributes);
-  LCDTaskHandle = osThreadNew(LCD_Task, NULL, &LCDTask_attributes);
+  UITaskHandle = osThreadNew(UI_Task, NULL, &UITask_attributes);
 }

@@ -47,7 +47,6 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
   
   //Application specific codes
   AK10_9_ServoMode_GetFeedbackMsg(&temRxHeader, &hAKMotorLeftHip, temRxData);
-  
   rxfifo0detected++;
 }
 
@@ -60,6 +59,5 @@ void HAL_CAN_RxFifo1FullCallback(CAN_HandleTypeDef *hcan)
   
   //Application specific codes
   AK10_9_ServoMode_GetFeedbackMsg(&temRxHeader, &hAKMotorLeftHip, temRxData);
-  
   rxfifo1detected++;
 }

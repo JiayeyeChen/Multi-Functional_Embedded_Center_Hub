@@ -76,7 +76,15 @@ void UI_Init(void)
   hUI.curPage = &UIPage_AK10_9_Calibration;
   hUI.prePage = &UIPage_AK10_9_Calibration;
   
-  /*All Buttons Initialization*/
+  /*All Virtual Components Initialization*/
+  VirtualComponents_Init();
+  
+  /*UI Page of AK10-9 Motor Calibration*/
+  UIPage_AK10_9_Calibration.p = UI_Page_AK10_9_Calibration;
+}
+
+void VirtualComponents_Init(void)
+{
   hButtonDataLogStart = Button_Create(50, 50, 200, 50, "Data Log Start", LIGHT_MAGENTA, LCD_RED);
   hButtonDataLogEnd = Button_Create(50, 150, 200, 50, "Data Log End", LCD_GREEN, LCD_RED);
   hButtonMotorProfilingStart = Button_Create(50, 250, 300, 50, "Motor profiling Start", LIGHT_GREY, LCD_RED);
@@ -84,9 +92,6 @@ void UI_Init(void)
   hButtonMotorZeroing = Button_Create(50, 450, 200, 50, "Motor Set Zero", LCD_BLUE, LCD_RED);
   hButtonMotorSteppingUp = Button_Create(300, 50, 120, 50, "Step up", LCD_WHITE, LCD_RED);
   hButtonMotorSteppingDown = Button_Create(300, 150, 120, 50, "Step down", LCD_WHITE, LCD_RED);
-  
-  /*UI Page of AK10-9 Motor Calibration*/
-  UIPage_AK10_9_Calibration.p = UI_Page_AK10_9_Calibration;
 }
 
 JoystickHandle Joystick_Create(uint16_t x, uint16_t y, uint16_t r, char label[])
