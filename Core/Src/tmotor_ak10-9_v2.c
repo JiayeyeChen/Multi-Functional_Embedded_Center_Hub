@@ -63,10 +63,10 @@ void AK10_9_ServoMode_PositionControl(AK10_9Handle* hmotor, float position)
   
   union Int32UInt8 temPOS;
   temPOS.b32 = (int32_t)(hmotor->setPosition.f * 10000.0f);
-  hmotor->txBuf[0] = temPOS.b8[0];
-  hmotor->txBuf[1] = temPOS.b8[1];
-  hmotor->txBuf[2] = temPOS.b8[2];
-  hmotor->txBuf[3] = temPOS.b8[3];
+  hmotor->txBuf[0] = temPOS.b8[3];
+  hmotor->txBuf[1] = temPOS.b8[2];
+  hmotor->txBuf[2] = temPOS.b8[1];
+  hmotor->txBuf[3] = temPOS.b8[0];
   HAL_CAN_AddTxMessage(hmotor->hcan, &hmotor->txHeader, hmotor->txBuf, hmotor->pTxMailbox);
 }
 
@@ -85,15 +85,12 @@ void AK10_9_ServoMode_PositionSpeedControl(AK10_9Handle* hmotor, float position,
   hmotor->txBuf[2] = temPOS.b8[1];
   hmotor->txBuf[3] = temPOS.b8[0];
   
-
-  hmotor->txBuf[6] = 0x1F;
-  hmotor->txBuf[7] = 0xFF;
   union Int16UInt8 temSPD;
   temSPD.b16 = (int16_t)(speed * 60.0f * 21.0f * 9.0f / 3600.0f);
   hmotor->txBuf[4] = temSPD.b8[1];
   hmotor->txBuf[5] = temSPD.b8[0];
-//  hmotor->txBuf[6] = (uint8_t)((acceleration >> 8) & 0xFF);
-//  hmotor->txBuf[7] = (uint8_t)(acceleration * 0xFF);
+  hmotor->txBuf[6] = (uint8_t)((acceleration >> 8) & 0xFF);
+  hmotor->txBuf[7] = (uint8_t)(acceleration * 0xFF);
   
   HAL_CAN_AddTxMessage(hmotor->hcan, &hmotor->txHeader, hmotor->txBuf, hmotor->pTxMailbox);
 }
@@ -121,7 +118,7 @@ void AK10_9_ServoMode_Zeroing(AK10_9Handle* hmotor)
   hmotor->txHeader.RTR = CAN_RTR_DATA;
   
   hmotor->txBuf[0] = 1;
-  
+  HAL_CAN_AddTxMessage(hmotor->hcan, &hmotor->txHeader, hmotor->txBuf, hmotor->pTxMailbox);
 }
 
 void AK10_9_SpecialCommand(AK10_9Handle* hmotor, uint8_t specialCmd)

@@ -18,13 +18,6 @@
 
 void SystemClock_Config(void);
 
-/////for UI testing/////
-ButtonHandle hButtonDataLog;
-ButtonHandle hButtonDataLogEnd;
-uint8_t buttoncount1;
-uint8_t buttoncount2;
-JoystickHandle hJoystickTest;
-
 int main(void)
 {
   HAL_Init();
@@ -37,13 +30,15 @@ int main(void)
   USB_Init();
   
 	MX_FMC_Init();
-  UI_Init();
+  
   MotorInit();
   
-  hAKMotorLeftHip.rxFilter = ConfigCANFilter_EXT_ID_32BitIDListMode(&hcan1, 0, CAN_FILTER_FIFO0, CAN_ID_EXT, CAN_ID_TMOTOR_EXOSKELETON_LEFT_HIP, 0);
+  
+  hAKMotorLeftHip.rxFilter = ConfigCANFilter_EXT_ID_32BitIDListMode(&hcan2, 0, CAN_FILTER_FIFO0, CAN_ID_EXT, CAN_ID_TMOTOR_EXOSKELETON_LEFT_HIP, 0);
   HAL_CAN_Start(&hcan1);
   HAL_CAN_Start(&hcan2);
   
+  UI_Init();
   osKernelInitialize();
   OSThreads_Init();
   
@@ -147,7 +142,7 @@ void SystemClock_Config(void)
 
 void AK10Calibration_Task(void *argument)
 {
-  AK10_9_ServoMode_Zeroing(&hAKMotorLeftHip);
+  
   for(;;)
   {
     if (GPIO_Digital_Filtered_Input(&hButtonOnboardKey, 30))
@@ -155,21 +150,22 @@ void AK10Calibration_Task(void *argument)
     }
     LED_Blink(&hLEDBlue, 2);
     AK10_9_DataLog_Manager(&hAKMotorLeftHip);
-
+    
+    if (ifMotorProfilingStarted)
+    {
+      AK10_9_MotorProfiling_Function1(&hAKMotorLeftHip);
+    }
     osDelay(10);
   }
 }
 
 void LCD_Task(void *argument)
 {
-  hButtonDataLog = Button_Create(250, 50, 200, 50, "Data Log Start", LIGHT_MAGENTA, LCD_RED);
-  hButtonDataLogEnd = Button_Create(50, 300, 100, 100, "Data Log End", LCD_GREEN, LCD_RED);
-  hJoystickTest = Joystick_Create(250, 600, 100, "joystick");
+
   for(;;)
   {
     Touch_Scan();	// ´¥ÃþÉ¨Ãè
-    ButtonScan(&hButtonDataLog);
-    ButtonScan(&hButtonDataLogEnd);
+//    UI();
     if (touchInfo.flag)
     {
       
@@ -179,21 +175,7 @@ void LCD_Task(void *argument)
     }
     
     osDelay(10);
-    if (ifButtonPressed(&hButtonDataLog))
-    {
-      buttoncount1++;
-      LCD_DisplayNumber(300, 100, buttoncount1, 1);
-      USB_DataLogStart();
-    }
-    if (ifButtonPressed(&hButtonDataLogEnd))
-    {
-      buttoncount2++;
-      LCD_DisplayNumber(300, 400, buttoncount2, 1);
-      USB_DataLogEnd();
-    }
-    
-    ButtonRefresh(&hButtonDataLogEnd);
-    ButtonRefresh(&hButtonDataLog);
+
   }
 }
 

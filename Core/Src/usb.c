@@ -107,25 +107,30 @@ void AK10_9_DataLog_CargoTransmit(AK10_9Handle* hmotor)
   hUSB.txBuf[i++] = sysTick.b8[1];
   hUSB.txBuf[i++] = sysTick.b8[2];
   hUSB.txBuf[i++] = sysTick.b8[3];
-  //Position
+  //Real Position
   hUSB.txBuf[i++] = hmotor->realPosition.b8[0];
   hUSB.txBuf[i++] = hmotor->realPosition.b8[1];
   hUSB.txBuf[i++] = hmotor->realPosition.b8[2];
   hUSB.txBuf[i++] = hmotor->realPosition.b8[3];
-  //Velocity
+  //Real Velocity
   hUSB.txBuf[i++] = hmotor->realVelocity.b8[0];
   hUSB.txBuf[i++] = hmotor->realVelocity.b8[1];
   hUSB.txBuf[i++] = hmotor->realVelocity.b8[2];
   hUSB.txBuf[i++] = hmotor->realVelocity.b8[3];
-  //Current
+  //Real Current
   hUSB.txBuf[i++] = hmotor->realCurrent.b8[0];
   hUSB.txBuf[i++] = hmotor->realCurrent.b8[1];
   hUSB.txBuf[i++] = hmotor->realCurrent.b8[2];
   hUSB.txBuf[i++] = hmotor->realCurrent.b8[3];
+  //Desired Position
+  hUSB.txBuf[i++] = hmotor->setPosition.b8[0];
+  hUSB.txBuf[i++] = hmotor->setPosition.b8[1];
+  hUSB.txBuf[i++] = hmotor->setPosition.b8[2];
+  hUSB.txBuf[i++] = hmotor->setPosition.b8[3];
   //Temperature
   hUSB.txBuf[i++] = hmotor->temperature;
   
-  hUSB.dataLogBytes = 21;
+  hUSB.dataLogBytes = 25;
   USB_Transmit_Cargo(hUSB.txBuf, hUSB.dataLogBytes);
 }
 
