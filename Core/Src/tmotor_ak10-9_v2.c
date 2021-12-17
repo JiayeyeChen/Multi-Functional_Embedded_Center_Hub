@@ -27,10 +27,10 @@ void AK10_9_ServoMode_CurrentControl(AK10_9Handle* hmotor, float current)
   hmotor->txHeader.RTR = CAN_RTR_DATA;
   union Int32UInt8 temCurrent;
   temCurrent.b32 = (int32_t)(hmotor->setCurrent.f * 1000.0f);
-  hmotor->txBuf[0] = temCurrent.b8[0];
-  hmotor->txBuf[1] = temCurrent.b8[1];
-  hmotor->txBuf[2] = temCurrent.b8[2];
-  hmotor->txBuf[3] = temCurrent.b8[3];
+  hmotor->txBuf[0] = temCurrent.b8[3];
+  hmotor->txBuf[1] = temCurrent.b8[2];
+  hmotor->txBuf[2] = temCurrent.b8[1];
+  hmotor->txBuf[3] = temCurrent.b8[0];
   HAL_CAN_AddTxMessage(hmotor->hcan, &hmotor->txHeader, hmotor->txBuf, hmotor->pTxMailbox);
 }
 
@@ -97,7 +97,7 @@ void AK10_9_ServoMode_PositionSpeedControl(AK10_9Handle* hmotor, float position,
 
 void AK10_9_ServoMode_GetFeedbackMsg(CAN_RxHeaderTypeDef* rxheader, AK10_9Handle* hmotor, uint8_t rxbuf[])
 {
-  
+  hmotor->lastReceivedTime = HAL_GetTick();
   if (rxheader->ExtId == hmotor->canID)
     memcpy(hmotor->rxBuf, rxbuf, 8);
   hmotor->realPosition.f = (float)((int16_t)(hmotor->rxBuf[0] << 8 | hmotor->rxBuf[1]));
@@ -131,4 +131,12 @@ void AK10_9_SpecialCommand(AK10_9Handle* hmotor, uint8_t specialCmd)
     HAL_CAN_AddTxMessage(hmotor->hcan, &hmotor->txHeader, (uint8_t*)can_special_msg_disable_motor, hmotor->pTxMailbox);
   else if (specialCmd == AK10_9_SPECIAL_COMMAND_ZEROING_MOTOR)
     HAL_CAN_AddTxMessage(hmotor->hcan, &hmotor->txHeader, (uint8_t*)can_special_msg_seroing, hmotor->pTxMailbox);
+}
+
+void AK10_9_MotorStatusMonitor(AK10_9Handle* hmotor)
+{
+  if ((HAL_GetTick() - hmotor->lastReceivedTime) > 3)
+    hmotor->status = AK10_9_Offline;
+  else
+    hmotor->status = AK10_9_Online;
 }

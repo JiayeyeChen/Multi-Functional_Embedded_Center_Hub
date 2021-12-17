@@ -15,6 +15,8 @@ ButtonHandle hButtonMotorZeroing;
 ButtonHandle hButtonMotorSteppingUp;
 ButtonHandle hButtonMotorSteppingDown;
 ButtonHandle hButtonGoBack;
+ButtonHandle hButtonStepLengthPlus10, hButtonStepLengthMinus10, hButtonStepLengthPlus1, hButtonStepLengthMinus1;
+ButtonHandle hButtonManualControlMode;
 
 ButtonHandle Button_Create(uint16_t x, uint16_t y, uint16_t xLen, uint16_t yLen, char label[],\
                            uint32_t colorUnpressed, uint32_t colorPressed)
@@ -177,6 +179,10 @@ void UI_Page_AK10_9_Calibration(void)
   
   LCD_SetLayer(1); 
   LCD_SetColor(LCD_BLACK);
+  if (hAKMotorLeftHip.status == AK10_9_Online)
+    LCD_DisplayString(200, 0, "Motor  Online");
+  else
+    LCD_DisplayString(200, 0, "Motor Offline");
   LCD_DisplayString(20, 570, "Temperature:");
   LCD_DisplayNumber(70, 600, hAKMotorLeftHip.temperature, 2);
   LCD_DisplayString(230, 600, "Real");
@@ -231,27 +237,69 @@ void UI_Page_AK10_9_ManualControl(void)
   ButtonScan(&hButtonMotorSteppingUp);
   ButtonScan(&hButtonMotorSteppingDown);
   ButtonScan(&hButtonMotorZeroing);
+  ButtonScan(&hButtonStepLengthPlus10);
+  ButtonScan(&hButtonStepLengthMinus10);
+  ButtonScan(&hButtonStepLengthPlus1);
+  ButtonScan(&hButtonStepLengthMinus1);
+  ButtonScan(&hButtonManualControlMode);
   ButtonRefresh(&hButtonGoBack);
   ButtonRefresh(&hButtonMotorSteppingUp);
   ButtonRefresh(&hButtonMotorSteppingDown);
   ButtonRefresh(&hButtonMotorZeroing);
+  ButtonRefresh(&hButtonStepLengthPlus10);
+  ButtonRefresh(&hButtonStepLengthMinus10);
+  ButtonRefresh(&hButtonStepLengthPlus1);
+  ButtonRefresh(&hButtonStepLengthMinus1);
+  ButtonRefresh(&hButtonManualControlMode);
   
   if(ifButtonPressed(&hButtonMotorZeroing))
     AK10_9_ServoMode_Zeroing(&hAKMotorLeftHip);
   if(ifButtonPressed(&hButtonMotorSteppingUp))
   {
-    positionControlManual+=15.0f;
-    AK10_9_ServoMode_PositionControl(&hAKMotorLeftHip, positionControlManual);
+    if (controlMode == AK10_9_MODE_POSITION)
+      AK10_9_ServoMode_PositionControl(&hAKMotorLeftHip, hAKMotorLeftHip.realPosition.f + manualControlStepLength);
+    else if (controlMode == AK10_9_MODE_CURRENT)
+      AK10_9_ServoMode_CurrentControl(&hAKMotorLeftHip, manualControlStepLength);
   }
   if(ifButtonPressed(&hButtonMotorSteppingDown))
   {
-    positionControlManual-=15.0f;
-    AK10_9_ServoMode_PositionControl(&hAKMotorLeftHip, positionControlManual);
+    if (controlMode == AK10_9_MODE_POSITION)
+      AK10_9_ServoMode_PositionControl(&hAKMotorLeftHip, hAKMotorLeftHip.realPosition.f - manualControlStepLength);
+    else if (controlMode == AK10_9_MODE_CURRENT)
+      AK10_9_ServoMode_CurrentControl(&hAKMotorLeftHip,-manualControlStepLength);
+  }
+  if(ifButtonPressed(&hButtonStepLengthPlus10))
+    manualControlStepLength+=10.0f;
+  if(ifButtonPressed(&hButtonStepLengthMinus10))
+    manualControlStepLength-=10.0f;
+  if(ifButtonPressed(&hButtonStepLengthPlus1))
+    manualControlStepLength+=1.0f;
+  if(ifButtonPressed(&hButtonStepLengthMinus1))
+    manualControlStepLength-=1.0f;
+  if(ifButtonPressed(&hButtonManualControlMode))
+  {
+    controlMode++;
+    if (controlMode > 3)
+      controlMode = 0;
   }
   
   
   LCD_SetLayer(1); 
   LCD_SetColor(LCD_BLACK);
+  if (controlMode == AK10_9_MODE_CURRENT)
+    LCD_DisplayString(0, 240, "Current  Control");
+  else if (controlMode == AK10_9_MODE_POSITION)
+    LCD_DisplayString(0, 240, "Position Control");
+  else if (controlMode == AK10_9_MODE_VELOCITY)
+    LCD_DisplayString(0, 240, "Velocity Control");
+  else if (controlMode == AK10_9_MODE_BRAKE)
+    LCD_DisplayString(0, 240, "     BRAKE      ");
+  LCD_DisplayString(400, 50, "Step: ");
+  LCD_DisplayNumber(400, 80, (int32_t)manualControlStepLength, 3);
+  if (hAKMotorLeftHip.status == AK10_9_Online)
+    LCD_DisplayString(200, 0, "Motor  Online");
+  else
+    LCD_DisplayString(200, 0, "Motor Offline");
   LCD_DisplayString(20, 570, "Temperature:");
   LCD_DisplayNumber(70, 600, hAKMotorLeftHip.temperature, 2);
   LCD_DisplayString(230, 600, "Real");
@@ -270,9 +318,14 @@ void UI_Page_AK10_9_ManualControl(void)
 void UI_Page_AK10_9_ManualControl_Init(void)
 {
   hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
-  hButtonMotorSteppingUp = Button_Create(300, 50, 120, 50, "Step up", LCD_WHITE, LCD_RED);
-  hButtonMotorSteppingDown = Button_Create(300, 150, 120, 50, "Step down", LCD_WHITE, LCD_RED);
-  hButtonMotorZeroing = Button_Create(50, 450, 200, 50, "Motor Set Zero", LCD_BLUE, LCD_RED);
+  hButtonMotorSteppingUp = Button_Create(0, 50, 150, 50, "Step up", LCD_WHITE, LCD_RED);
+  hButtonMotorSteppingDown = Button_Create(0, 120, 150, 50, "Step down", LCD_WHITE, LCD_RED);
+  hButtonMotorZeroing = Button_Create(50, 500, 200, 50, "Motor Set Zero", LCD_BLUE, LCD_RED);
+  hButtonStepLengthPlus10 = Button_Create(180, 50, 190, 50, "Step Length +10", LCD_WHITE, LCD_RED);
+  hButtonStepLengthMinus10 = Button_Create(180, 120, 190, 50, "Step Length -10", LCD_WHITE, LCD_RED);
+  hButtonStepLengthPlus1 = Button_Create(210, 180, 190, 50, "Step Length +1", LCD_WHITE, LCD_RED);
+  hButtonStepLengthMinus1 = Button_Create(210, 250, 190, 50, "Step Length -1", LCD_WHITE, LCD_RED);
+  hButtonManualControlMode = Button_Create(0, 180, 160, 50, "Control Mode", LCD_WHITE, LCD_RED);
 }
 
 void UI_Page_Change_To(PageHandle* hpage)

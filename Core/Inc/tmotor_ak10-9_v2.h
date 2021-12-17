@@ -10,12 +10,19 @@
 #define AK10_9_SPECIAL_COMMAND_DISABLE_MOTOR 1U
 #define AK10_9_SPECIAL_COMMAND_ZEROING_MOTOR 2U
 
+enum AK10_9_Status
+{
+  AK10_9_Online,
+  AK10_9_Offline
+};
+
 typedef struct
 {
   CAN_HandleTypeDef*    hcan;
   uint32_t              canID;
   int8_t                temperature;
   uint8_t               errorCode;
+  enum AK10_9_Status    status;
   
   union FloatUInt8      setCurrent;
   union FloatUInt8      setPosition;
@@ -32,6 +39,7 @@ typedef struct
   uint8_t               rxBuf[8];
   uint32_t              rxFifo;
   CAN_FilterTypeDef     rxFilter;
+  uint32_t              lastReceivedTime;
 }AK10_9Handle;
 
 void AK10_9_V2_Init(void);
@@ -43,7 +51,7 @@ void AK10_9_ServoMode_PositionSpeedControl(AK10_9Handle* hmotor, float position,
 void AK10_9_ServoMode_GetFeedbackMsg(CAN_RxHeaderTypeDef* rxheader, AK10_9Handle* hmotor, uint8_t rxbuf[]);
 void AK10_9_ServoMode_Zeroing(AK10_9Handle* hmotor);
 void AK10_9_SpecialCommand(AK10_9Handle* hmotor, uint8_t specialCmd);
-
+void AK10_9_MotorStatusMonitor(AK10_9Handle* hmotor);
 
 
 
