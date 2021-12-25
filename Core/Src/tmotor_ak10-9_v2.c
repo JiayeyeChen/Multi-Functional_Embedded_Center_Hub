@@ -44,11 +44,11 @@ void AK10_9_ServoMode_VelocityControl(AK10_9Handle* hmotor, float speed)
   hmotor->txHeader.RTR = CAN_RTR_DATA;
   
   union Int32UInt8 temSPD;
-  temSPD.b32 = (int32_t)hmotor->setVelocity.f;
-  hmotor->txBuf[0] = temSPD.b8[0];
-  hmotor->txBuf[1] = temSPD.b8[1];
-  hmotor->txBuf[2] = temSPD.b8[2];
-  hmotor->txBuf[3] = temSPD.b8[3];
+  temSPD.b32 = (int32_t)hmotor->setVelocity.f * 60.0f * 21.0f * 9.0f / 360.0f;;
+  hmotor->txBuf[0] = temSPD.b8[3];
+  hmotor->txBuf[1] = temSPD.b8[2];
+  hmotor->txBuf[2] = temSPD.b8[1];
+  hmotor->txBuf[3] = temSPD.b8[0];
   HAL_CAN_AddTxMessage(hmotor->hcan, &hmotor->txHeader, hmotor->txBuf, hmotor->pTxMailbox);
 }
 
@@ -135,7 +135,7 @@ void AK10_9_SpecialCommand(AK10_9Handle* hmotor, uint8_t specialCmd)
 
 void AK10_9_MotorStatusMonitor(AK10_9Handle* hmotor)
 {
-  if ((HAL_GetTick() - hmotor->lastReceivedTime) > 3)
+  if ((HAL_GetTick() - hmotor->lastReceivedTime) > 100)
     hmotor->status = AK10_9_Offline;
   else
     hmotor->status = AK10_9_Online;

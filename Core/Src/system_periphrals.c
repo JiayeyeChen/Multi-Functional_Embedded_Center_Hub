@@ -108,7 +108,7 @@ static void CAN2_Init(void)
   hcan2.Init.TimeTriggeredMode = DISABLE;
   hcan2.Init.AutoBusOff = DISABLE;
   hcan2.Init.AutoWakeUp = DISABLE;
-  hcan2.Init.AutoRetransmission = ENABLE;
+  hcan2.Init.AutoRetransmission = DISABLE;
   hcan2.Init.ReceiveFifoLocked = DISABLE;
   hcan2.Init.TransmitFifoPriority = DISABLE;
   HAL_CAN_Init(&hcan2);
@@ -1609,7 +1609,7 @@ void SystemPeriphral_Init(void)
   GPIO_Init();
   DMA_Init();
   CRC_Init();
-  CAN1_Init();
+//  CAN1_Init();
   DAC_Init();
   SPI4_Init();
   SPI5_Init();

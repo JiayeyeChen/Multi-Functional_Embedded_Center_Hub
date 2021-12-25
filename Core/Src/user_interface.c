@@ -12,8 +12,8 @@ ButtonHandle hButtonDataLogEnd;
 ButtonHandle hButtonMotorProfilingStart;
 ButtonHandle hButtonMotorProfilingEnd;
 ButtonHandle hButtonMotorZeroing;
-ButtonHandle hButtonMotorSteppingUp;
-ButtonHandle hButtonMotorSteppingDown;
+ButtonHandle hButtonMotorStart;
+ButtonHandle hButtonMotorStop;
 ButtonHandle hButtonGoBack;
 ButtonHandle hButtonStepLengthPlus10, hButtonStepLengthMinus10, hButtonStepLengthPlus1, hButtonStepLengthMinus1;
 ButtonHandle hButtonManualControlMode;
@@ -234,8 +234,8 @@ void UI_Page_Home1_Init(void)
 void UI_Page_AK10_9_ManualControl(void)
 {
   ButtonScan(&hButtonGoBack);
-  ButtonScan(&hButtonMotorSteppingUp);
-  ButtonScan(&hButtonMotorSteppingDown);
+  ButtonScan(&hButtonMotorStart);
+  ButtonScan(&hButtonMotorStop);
   ButtonScan(&hButtonMotorZeroing);
   ButtonScan(&hButtonStepLengthPlus10);
   ButtonScan(&hButtonStepLengthMinus10);
@@ -243,8 +243,8 @@ void UI_Page_AK10_9_ManualControl(void)
   ButtonScan(&hButtonStepLengthMinus1);
   ButtonScan(&hButtonManualControlMode);
   ButtonRefresh(&hButtonGoBack);
-  ButtonRefresh(&hButtonMotorSteppingUp);
-  ButtonRefresh(&hButtonMotorSteppingDown);
+  ButtonRefresh(&hButtonMotorStart);
+  ButtonRefresh(&hButtonMotorStop);
   ButtonRefresh(&hButtonMotorZeroing);
   ButtonRefresh(&hButtonStepLengthPlus10);
   ButtonRefresh(&hButtonStepLengthMinus10);
@@ -254,28 +254,18 @@ void UI_Page_AK10_9_ManualControl(void)
   
   if(ifButtonPressed(&hButtonMotorZeroing))
     AK10_9_ServoMode_Zeroing(&hAKMotorLeftHip);
-  if(ifButtonPressed(&hButtonMotorSteppingUp))
-  {
-    if (controlMode == AK10_9_MODE_POSITION)
-      AK10_9_ServoMode_PositionControl(&hAKMotorLeftHip, hAKMotorLeftHip.realPosition.f + manualControlStepLength);
-    else if (controlMode == AK10_9_MODE_CURRENT)
-      AK10_9_ServoMode_CurrentControl(&hAKMotorLeftHip, manualControlStepLength);
-  }
-  if(ifButtonPressed(&hButtonMotorSteppingDown))
-  {
-    if (controlMode == AK10_9_MODE_POSITION)
-      AK10_9_ServoMode_PositionControl(&hAKMotorLeftHip, hAKMotorLeftHip.realPosition.f - manualControlStepLength);
-    else if (controlMode == AK10_9_MODE_CURRENT)
-      AK10_9_ServoMode_CurrentControl(&hAKMotorLeftHip,-manualControlStepLength);
-  }
+  if(ifButtonPressed(&hButtonMotorStart))
+    ifManualControlStarted = 1;
+  if(ifButtonPressed(&hButtonMotorStop))
+    ifManualControlStarted = 0;
   if(ifButtonPressed(&hButtonStepLengthPlus10))
-    manualControlStepLength+=10.0f;
+    manualControlValue+=10.0f;
   if(ifButtonPressed(&hButtonStepLengthMinus10))
-    manualControlStepLength-=10.0f;
+    manualControlValue-=10.0f;
   if(ifButtonPressed(&hButtonStepLengthPlus1))
-    manualControlStepLength+=1.0f;
+    manualControlValue+=1.0f;
   if(ifButtonPressed(&hButtonStepLengthMinus1))
-    manualControlStepLength-=1.0f;
+    manualControlValue-=1.0f;
   if(ifButtonPressed(&hButtonManualControlMode))
   {
     controlMode++;
@@ -295,7 +285,7 @@ void UI_Page_AK10_9_ManualControl(void)
   else if (controlMode == AK10_9_MODE_BRAKE)
     LCD_DisplayString(0, 240, "     BRAKE      ");
   LCD_DisplayString(400, 50, "Step: ");
-  LCD_DisplayNumber(400, 80, (int32_t)manualControlStepLength, 3);
+  LCD_DisplayNumber(400, 80, (int32_t)manualControlValue, 3);
   if (hAKMotorLeftHip.status == AK10_9_Online)
     LCD_DisplayString(200, 0, "Motor  Online");
   else
@@ -318,8 +308,8 @@ void UI_Page_AK10_9_ManualControl(void)
 void UI_Page_AK10_9_ManualControl_Init(void)
 {
   hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
-  hButtonMotorSteppingUp = Button_Create(0, 50, 150, 50, "Step up", LCD_WHITE, LCD_RED);
-  hButtonMotorSteppingDown = Button_Create(0, 120, 150, 50, "Step down", LCD_WHITE, LCD_RED);
+  hButtonMotorStart = Button_Create(0, 50, 100, 50, "START", LCD_WHITE, LCD_RED);
+  hButtonMotorStop = Button_Create(0, 120, 100, 50, "STOP", LCD_WHITE, LCD_RED);
   hButtonMotorZeroing = Button_Create(50, 500, 200, 50, "Motor Set Zero", LCD_BLUE, LCD_RED);
   hButtonStepLengthPlus10 = Button_Create(180, 50, 190, 50, "Step Length +10", LCD_WHITE, LCD_RED);
   hButtonStepLengthMinus10 = Button_Create(180, 120, 190, 50, "Step Length -10", LCD_WHITE, LCD_RED);
