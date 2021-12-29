@@ -2,11 +2,12 @@
 #include "main.h"
 #include <math.h>
 
-PageHandle UIPage_Home1, UIPage_AK10_9_Calibration, UIPage_AK10_9_ManualControl;
+PageHandle UIPage_Home1, UIPage_AK10_9_Calibration, UIPage_AK10_9_ManualControl, UIPage_AK10_9_ImpedanceControlDemo;
 UIHandle hUI;
 
 ButtonHandle hButtonPageAK10_9Calibration;
 ButtonHandle hButtonPageAK10_9ManualControl;
+ButtonHandle hButtonPageAK10_9ImpedanceControlDemo;
 ButtonHandle hButtonDataLogStart;
 ButtonHandle hButtonDataLogEnd;
 ButtonHandle hButtonMotorProfilingStart;
@@ -17,6 +18,7 @@ ButtonHandle hButtonMotorStop;
 ButtonHandle hButtonGoBack;
 ButtonHandle hButtonStepLengthPlus10, hButtonStepLengthMinus10, hButtonStepLengthPlus1, hButtonStepLengthMinus1;
 ButtonHandle hButtonManualControlMode;
+ButtonHandle hButtonSpringConstantUp, hButtonSpringConstantDown, hButtonDampingConstantUp, hButtonDampingConstantDown;
 
 ButtonHandle Button_Create(uint16_t x, uint16_t y, uint16_t xLen, uint16_t yLen, char label[],\
                            uint32_t colorUnpressed, uint32_t colorPressed)
@@ -94,6 +96,9 @@ void UI_Init(void)
   UIPage_AK10_9_ManualControl.Page = UI_Page_AK10_9_ManualControl;
   UIPage_AK10_9_ManualControl.PageInit = UI_Page_AK10_9_ManualControl_Init;
   
+  UIPage_AK10_9_ImpedanceControlDemo.ifPageInitialized = 0;
+  UIPage_AK10_9_ImpedanceControlDemo.Page = UI_Page_AK10_9_ImpedanceControlDemo;
+  UIPage_AK10_9_ImpedanceControlDemo.PageInit = UI_Page_AK10_9_ImpedanceControlDemo_Init;
 }
 
 JoystickHandle Joystick_Create(uint16_t x, uint16_t y, uint16_t r, char label[])
@@ -148,7 +153,8 @@ void UI_Page_AK10_9_Calibration(void)
   
   if (ifButtonPressed(&hButtonDataLogStart))
   {
-    USB_DataLogStart();
+    USB_DataLogStartNolimit();
+//    USB_DataLogStartTimeSegment(4000);
   }
   if (ifButtonPressed(&hButtonDataLogEnd))
   {
@@ -218,17 +224,22 @@ void UI_Page_Home1(void)
   ButtonRefresh(&hButtonPageAK10_9Calibration);
   ButtonScan(&hButtonPageAK10_9ManualControl);
   ButtonRefresh(&hButtonPageAK10_9ManualControl);
+  ButtonScan(&hButtonPageAK10_9ImpedanceControlDemo);
+  ButtonRefresh(&hButtonPageAK10_9ImpedanceControlDemo);
   
   if (ifButtonPressed(&hButtonPageAK10_9Calibration))
     UI_Page_Change_To(&UIPage_AK10_9_Calibration);
   if (ifButtonPressed(&hButtonPageAK10_9ManualControl))
     UI_Page_Change_To(&UIPage_AK10_9_ManualControl);
+  if (ifButtonPressed(&hButtonPageAK10_9ImpedanceControlDemo))
+    UI_Page_Change_To(&UIPage_AK10_9_ImpedanceControlDemo);
   
 }
 void UI_Page_Home1_Init(void)
 {
   hButtonPageAK10_9Calibration = Button_Create(100, 100, 300, 50, "AK10-9 V2.0 Calibration", LIGHT_MAGENTA, LCD_RED);
   hButtonPageAK10_9ManualControl = Button_Create(80, 200, 360, 50, "AK10-9 V2.0 Manual Control", LIGHT_MAGENTA, LCD_RED);
+  hButtonPageAK10_9ImpedanceControlDemo = Button_Create(30, 300, 430, 50, "AK10-9 V2.0 Impedance Control Demo", LIGHT_MAGENTA, LCD_RED);
 }
 
 void UI_Page_AK10_9_ManualControl(void)
@@ -316,6 +327,75 @@ void UI_Page_AK10_9_ManualControl_Init(void)
   hButtonStepLengthPlus1 = Button_Create(210, 180, 190, 50, "Step Length +1", LCD_WHITE, LCD_RED);
   hButtonStepLengthMinus1 = Button_Create(210, 250, 190, 50, "Step Length -1", LCD_WHITE, LCD_RED);
   hButtonManualControlMode = Button_Create(0, 180, 160, 50, "Control Mode", LCD_WHITE, LCD_RED);
+}
+
+void UI_Page_AK10_9_ImpedanceControlDemo(void)
+{
+  ButtonScan(&hButtonGoBack);
+  ButtonRefresh(&hButtonGoBack);
+  ButtonScan(&hButtonSpringConstantUp);
+  ButtonRefresh(&hButtonSpringConstantUp);
+  ButtonScan(&hButtonSpringConstantDown);
+  ButtonRefresh(&hButtonSpringConstantDown);
+  ButtonScan(&hButtonDampingConstantUp);
+  ButtonRefresh(&hButtonDampingConstantUp);
+  ButtonScan(&hButtonDampingConstantDown);
+  ButtonRefresh(&hButtonDampingConstantDown);
+  ButtonScan(&hButtonMotorStart);
+  ButtonRefresh(&hButtonMotorStart);
+  ButtonScan(&hButtonMotorStop);
+  ButtonRefresh(&hButtonMotorStop);
+  ButtonScan(&hButtonMotorZeroing);
+  ButtonRefresh(&hButtonMotorZeroing);
+  if (ifButtonPressed(&hButtonSpringConstantUp))
+    impedance_control_spring_constant += 0.005f;
+  if (ifButtonPressed(&hButtonSpringConstantDown))
+    impedance_control_spring_constant -= 0.005f;
+  if (ifButtonPressed(&hButtonDampingConstantUp))
+    impedance_control_damping_constant += 0.001f;
+  if (ifButtonPressed(&hButtonDampingConstantDown))
+    impedance_control_damping_constant -= 0.001f;
+  if (ifButtonPressed(&hButtonMotorStart))
+    ifImpedanceControlStarted = 1;
+  if (ifButtonPressed(&hButtonMotorStop))
+    ifImpedanceControlStarted = 0;
+  if(ifButtonPressed(&hButtonMotorZeroing))
+    AK10_9_ServoMode_Zeroing(&hAKMotorLeftHip);
+  
+  LCD_SetLayer(1); 
+  LCD_SetColor(LCD_BLACK);
+  LCD_DisplayDecimals(280, 100, (double)impedance_control_spring_constant, 10, 4);
+  LCD_DisplayDecimals(280, 200, (double)impedance_control_damping_constant, 10, 4);
+  if (hAKMotorLeftHip.status == AK10_9_Online)
+    LCD_DisplayString(200, 0, "Motor  Online");
+  else
+    LCD_DisplayString(200, 0, "Motor Offline");
+  
+  LCD_DisplayString(20, 570, "Temperature:");
+  LCD_DisplayNumber(70, 600, hAKMotorLeftHip.temperature, 2);
+  LCD_DisplayString(230, 600, "Real");
+  LCD_DisplayString(360, 600, "Desired");
+  LCD_DisplayString(50, 650, "Position: ");LCD_DisplayDecimals(170, 650, (double)hAKMotorLeftHip.realPosition.f, 10, 4);
+  LCD_DisplayString(50, 700, "Velocity: ");LCD_DisplayDecimals(170, 700, (double)hAKMotorLeftHip.realVelocity.f, 10, 4);
+  LCD_DisplayString(50, 750, "Current:  ");LCD_DisplayDecimals(170, 750, (double)hAKMotorLeftHip.realCurrent.f, 10, 4);
+  
+  LCD_DisplayDecimals(310, 650, (double)hAKMotorLeftHip.setPosition.f, 10, 4);
+  LCD_DisplayDecimals(310, 700, (double)hAKMotorLeftHip.setVelocity.f, 10, 4);
+  LCD_DisplayDecimals(310, 750, (double)hAKMotorLeftHip.setCurrent.f, 10, 4);
+  
+  if (ifButtonPressed(&hButtonGoBack))
+    UI_Page_Change_To(&UIPage_Home1);
+}
+void UI_Page_AK10_9_ImpedanceControlDemo_Init(void)
+{
+  hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
+  hButtonSpringConstantUp = Button_Create(20, 80, 250, 40, "Spring Constant +", LCD_WHITE, LCD_RED);
+  hButtonSpringConstantDown = Button_Create(20, 130, 250, 40, "Spring Constant -", LCD_WHITE, LCD_RED);
+  hButtonDampingConstantUp = Button_Create(20, 180, 250, 40, "Damping Constant +", LCD_WHITE, LCD_RED);
+  hButtonDampingConstantDown = Button_Create(20, 230, 250, 40, "Damping Constant -", LCD_WHITE, LCD_RED);
+  hButtonMotorZeroing = Button_Create(50, 500, 200, 50, "Motor Set Zero", LCD_BLUE, LCD_RED);
+  hButtonMotorStart = Button_Create(100, 300, 250, 40, "       START", LCD_WHITE, LCD_RED);
+  hButtonMotorStop = Button_Create(100, 360, 250, 40, "        STOP", LCD_WHITE, LCD_RED);
 }
 
 void UI_Page_Change_To(PageHandle* hpage)

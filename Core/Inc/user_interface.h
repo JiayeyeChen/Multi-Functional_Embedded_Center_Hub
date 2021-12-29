@@ -66,6 +66,8 @@ void         UI_Page_Home1(void);
 void         UI_Page_Home1_Init(void);
 void         UI_Page_AK10_9_ManualControl(void);
 void         UI_Page_AK10_9_ManualControl_Init(void);
+void         UI_Page_AK10_9_ImpedanceControlDemo(void);
+void         UI_Page_AK10_9_ImpedanceControlDemo_Init(void);
 
 JoystickHandle Joystick_Create(uint16_t x, uint16_t y, uint16_t r, char label[]);
 

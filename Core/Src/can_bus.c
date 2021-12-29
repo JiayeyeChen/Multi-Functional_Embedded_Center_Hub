@@ -50,6 +50,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
   
   //Application specific codes
   AK10_9_ServoMode_GetFeedbackMsg(&temRxHeader, &hAKMotorLeftHip, temRxData);
+  AK10_9_Calculate_velocity_current_AVG(&hAKMotorLeftHip);
   rxfifo0detected++;
 }
 

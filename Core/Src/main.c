@@ -156,8 +156,13 @@ void AK10Calibration_Task(void *argument)
         AK10_9_ServoMode_VelocityControl(&hAKMotorLeftHip, manualControlValue);
     }
     
+    if (ifImpedanceControlStarted)
+    {
+      AK10_9_ImpedanceControl(&hAKMotorLeftHip, impedance_control_spring_constant, impedance_control_damping_constant, 0.0f);
+    }
+    
     AK10_9_MotorStatusMonitor(&hAKMotorLeftHip);
-    osDelay(10);
+    osDelay(2);
   }
 }
 

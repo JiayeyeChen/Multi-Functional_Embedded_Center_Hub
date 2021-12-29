@@ -91,7 +91,12 @@ hUSB.ifDataLogInitiated = 1;
 hUSB.index.b32 = 0;
 }
 
-void AK10_9_DataLog_CargoTransmit(AK10_9Handle* hmotor)
+void AK10_9_DataLog_CargoTransmit_TimeSegment(AK10_9Handle* hmotor, uint32_t ms)
+{
+  
+}
+
+void AK10_9_DataLog_SingleCargoTransmit(AK10_9Handle* hmotor)
 {
   uint8_t i = 0;
   union UInt32UInt8 sysTick;
@@ -137,13 +142,35 @@ void AK10_9_DataLog_CargoTransmit(AK10_9Handle* hmotor)
 void AK10_9_DataLog_Manager(AK10_9Handle* hmotor)
 {
   if (hUSB.ifDataLogStarted)
-    AK10_9_DataLog_CargoTransmit(hmotor);
+  {
+    if (hUSB.dataLogType == DATALOG_TYPE_NOLIMIT)
+      AK10_9_DataLog_SingleCargoTransmit(hmotor);
+    else if (hUSB.dataLogType == DATALOG_TYPE_TIMESEGMENT)
+    {
+      if (HAL_GetTick() - hUSB.datalogStartTimestamp >= hUSB.timeSegmentDuration)
+        USB_DataLogEnd();
+      else
+        AK10_9_DataLog_SingleCargoTransmit(hmotor);
+    }
+  }
 }
 
-void USB_DataLogStart(void)
+void USB_DataLogStartNolimit(void)
 {
+  hUSB.dataLogType = DATALOG_TYPE_NOLIMIT;
   USB_DataLogInitialization();
   hUSB.ifDataLogStarted = 1;
+  char start_msg[] = "Datalog start";
+  USB_Transmit_Cargo((uint8_t*)start_msg, sizeof(start_msg));
+}
+
+void USB_DataLogStartTimeSegment(uint32_t time)
+{
+  hUSB.datalogStartTimestamp = HAL_GetTick();
+  hUSB.dataLogType = DATALOG_TYPE_TIMESEGMENT;
+  USB_DataLogInitialization();
+  hUSB.ifDataLogStarted = 1;
+  hUSB.timeSegmentDuration = time;
   char start_msg[] = "Datalog start";
   USB_Transmit_Cargo((uint8_t*)start_msg, sizeof(start_msg));
 }
