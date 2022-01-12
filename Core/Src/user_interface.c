@@ -20,6 +20,8 @@ ButtonHandle hButtonStepLengthPlus10, hButtonStepLengthMinus10, hButtonStepLengt
 ButtonHandle hButtonManualControlMode;
 ButtonHandle hButtonSpringConstantUp, hButtonSpringConstantDown, hButtonDampingConstantUp, hButtonDampingConstantDown;
 
+LinearPotentialmeterHandle  hPotentialmeter;
+
 ButtonHandle Button_Create(uint16_t x, uint16_t y, uint16_t xLen, uint16_t yLen, char label[],\
                            uint32_t colorUnpressed, uint32_t colorPressed)
 {
@@ -71,6 +73,19 @@ uint8_t ifButtonPressed(ButtonHandle* hbutton)
       return 1;
   }
   return 0;
+}
+
+LinearPotentialmeterHandle  Potentialmeter_Create(uint16_t x, uint16_t y, uint16_t xLen, uint16_t yLen, uint16_t sliderLen, uint32_t colorUnpressed, uint32_t colorPressed)
+{
+  LinearPotentialmeterHandle hpotentialmeter;
+  hpotentialmeter.pos.x = x;
+  hpotentialmeter.pos.y = y;
+  hpotentialmeter.pos.xLen = xLen;
+  hpotentialmeter.pos.yLen = yLen;
+  hpotentialmeter.pos.xSliderLen = sliderLen;
+  
+  
+  return hpotentialmeter;
 }
 
 void UI_Init(void)
@@ -301,6 +316,8 @@ void UI_Page_AK10_9_ManualControl(void)
     LCD_DisplayString(200, 0, "Motor  Online");
   else
     LCD_DisplayString(200, 0, "Motor Offline");
+  LCD_DisplayString(300, 500, "Torque(Nm):");
+  LCD_DisplayDecimals(320, 530, (double)hAKMotorLeftHip.realTorque.f, 3, 2);
   LCD_DisplayString(20, 570, "Temperature:");
   LCD_DisplayNumber(70, 600, hAKMotorLeftHip.temperature, 2);
   LCD_DisplayString(230, 600, "Real");
@@ -371,6 +388,8 @@ void UI_Page_AK10_9_ImpedanceControlDemo(void)
   else
     LCD_DisplayString(200, 0, "Motor Offline");
   
+  LCD_DisplayString(300, 500, "Torque(Nm):");
+  LCD_DisplayDecimals(320, 530, (double)hAKMotorLeftHip.realTorque.f, 3, 2);
   LCD_DisplayString(20, 570, "Temperature:");
   LCD_DisplayNumber(70, 600, hAKMotorLeftHip.temperature, 2);
   LCD_DisplayString(230, 600, "Real");

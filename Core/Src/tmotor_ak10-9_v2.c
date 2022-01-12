@@ -106,6 +106,7 @@ void AK10_9_ServoMode_GetFeedbackMsg(CAN_RxHeaderTypeDef* rxheader, AK10_9Handle
   hmotor->realVelocity.f = (hmotor->realVelocity.f * 3600.0f / 60.0f) / (21.0f * 9.0f);
   hmotor->realCurrent.f = (float)((int16_t)(hmotor->rxBuf[4] << 8 | hmotor->rxBuf[5]));
   hmotor->realCurrent.f /= 100.0f;
+  hmotor->realTorque.f = hmotor->realCurrent.f * hmotor->kt;
   hmotor->temperature = (int8_t)hmotor->rxBuf[6];
   hmotor->errorCode = hmotor->rxBuf[7];
 }

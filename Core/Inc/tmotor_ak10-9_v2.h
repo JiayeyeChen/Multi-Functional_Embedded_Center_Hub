@@ -24,6 +24,7 @@ typedef struct
   uint8_t               errorCode;
   enum AK10_9_Status    status;
   
+  float                 kt;
   union FloatUInt8      setCurrent;
   union FloatUInt8      setPosition;
   union FloatUInt8      setVelocity;
@@ -31,6 +32,7 @@ typedef struct
   union FloatUInt8      realCurrent;
   union FloatUInt8      realPosition;
   union FloatUInt8      realVelocity;
+  union FloatUInt8      realTorque;
   //CAN BUS transmit
   uint8_t               txBuf[8];
   uint32_t*             pTxMailbox;

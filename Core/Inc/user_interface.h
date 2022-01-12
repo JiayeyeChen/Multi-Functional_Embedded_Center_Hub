@@ -33,7 +33,28 @@ typedef struct
 
 typedef struct
 {
-  VirtualButtonPosition pos;
+  uint16_t x;
+  uint16_t y;
+  uint16_t xLen;
+  uint16_t yLen;
+  uint16_t xSlider;
+  uint16_t ySlider;
+  uint16_t xSliderLen;
+}VirtualLinearPotentialmeterPosition;
+
+typedef struct
+{
+  VirtualLinearPotentialmeterPosition pos;
+  uint8_t     ifPressed;
+  uint32_t    colorPressed;
+  uint32_t    colorUnpressed;
+  float       max;
+  float       min;
+}LinearPotentialmeterHandle;
+
+typedef struct
+{
+  VirtualButtonPosition    pos;
   uint32_t                 colorPressed;
   uint32_t                 colorUnpressed;
   uint8_t                  ifNeedRefresh;
@@ -55,6 +76,7 @@ typedef struct
 
 void UI_Init(void);
 ButtonHandle Button_Create(uint16_t x, uint16_t y, uint16_t xLen, uint16_t yLen, char label[], uint32_t colorUnpressed, uint32_t colorPressed);
+LinearPotentialmeterHandle  Potentialmeter_Create(uint16_t x, uint16_t y, uint16_t xLen, uint16_t yLen, uint16_t sliderLen, uint32_t colorUnpressed, uint32_t colorPressed);
 uint8_t      ButtonScan(ButtonHandle* hbutton);
 uint8_t      ifButtonPressed(ButtonHandle* hbutton);
 void         ButtonRefresh(ButtonHandle* hbutton);
