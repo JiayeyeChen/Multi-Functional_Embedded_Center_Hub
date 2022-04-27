@@ -15,6 +15,7 @@
 #include <math.h>
 #include "user_interface.h"
 #include "os_threads.h"
+#include "adc.h"
 
 void SystemClock_Config(void);
 
@@ -32,6 +33,7 @@ int main(void)
 	MX_FMC_Init();
   UI_Init();
   MotorInit();
+  AD7606_Init(AD7606_RANG_5V, AD7606_OS_RATIO_0);
   
   hAKMotorLeftHip.rxFilter = ConfigCANFilter_EXT_ID_32BitIDListMode(&hcan2, 0, CAN_FILTER_FIFO0, CAN_ID_EXT, CAN_ID_TMOTOR_EXOSKELETON_LEFT_HIP, 0);
   
@@ -171,10 +173,11 @@ void UI_Task(void *argument)
   
   for(;;)
   {
+    ADC_DataRequest();
     Touch_Scan();
     UI();
     LED_Blink(&hLEDBlue, 2);
-    osDelay(20);
+    osDelay(50);//osDelay(20);
 
   }
 }
@@ -183,5 +186,18 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   if (htim->Instance == TIM1) {
     HAL_IncTick();
+  }
+}
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+  switch(GPIO_Pin)
+  {
+  case AD7606_BUSY_PIN:		
+    ADC_Read(&hADC.rawData[0]);
+    break;
+  
+  default:
+    break;
   }
 }

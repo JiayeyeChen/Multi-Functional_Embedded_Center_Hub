@@ -12,8 +12,6 @@
 
 #define SPI_SCK_Pin GPIO_PIN_2
 #define SPI_SCK_GPIO_Port GPIOE
-#define AD7606_RST_Pin GPIO_PIN_3
-#define AD7606_RST_GPIO_Port GPIOE
 #define SPI_CS_Pin GPIO_PIN_4
 #define SPI_CS_GPIO_Port GPIOE
 #define SPI_MISO_Pin GPIO_PIN_5
@@ -22,19 +20,6 @@
 #define SPI_MOSI_GPIO_Port GPIOE
 #define ONBOARD_BUTTON_KEY_Pin GPIO_PIN_8
 #define ONBOARD_BUTTON_KEY_GPIO_Port GPIOI
-#define AD7606_CS_Pin GPIO_PIN_6
-#define AD7606_CS_GPIO_Port GPIOF
-#define AD7606_SCK_Pin GPIO_PIN_7
-#define AD7606_SCK_GPIO_Port GPIOF
-#define AD7606_MISO_Pin GPIO_PIN_8
-#define AD7606_MISO_GPIO_Port GPIOF
-#define AD7606_MOSI_Pin GPIO_PIN_9
-#define AD7606_MOSI_GPIO_Port GPIOF
-#define AD7606_BUSY_Pin GPIO_PIN_10
-#define AD7606_BUSY_GPIO_Port GPIOF
-#define AD7606_BUSY_EXTI_IRQn EXTI15_10_IRQn
-#define AD7606_CV_Pin GPIO_PIN_1
-#define AD7606_CV_GPIO_Port GPIOC
 #define RS422_TX_Pin GPIO_PIN_0
 #define RS422_TX_GPIO_Port GPIOA
 #define RS422_RX_Pin GPIO_PIN_1
@@ -83,7 +68,6 @@ void LED_Init(void);
 
 extern SPI_HandleTypeDef hspi1;
 extern SPI_HandleTypeDef hspi4;
-extern SPI_HandleTypeDef hspi5;
 extern SPI_HandleTypeDef hspi6;
 extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim5;

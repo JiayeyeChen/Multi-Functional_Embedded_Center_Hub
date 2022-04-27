@@ -17,7 +17,6 @@ extern DMA_HandleTypeDef hdma_spi5_rx;
 extern DMA_HandleTypeDef hdma_spi5_tx;
 extern SPI_HandleTypeDef hspi1;
 extern SPI_HandleTypeDef hspi4;
-extern SPI_HandleTypeDef hspi5;
 extern SPI_HandleTypeDef hspi6;
 extern TIM_HandleTypeDef htim3;
 
@@ -311,11 +310,6 @@ void OTG_HS_IRQHandler(void)
 void SPI4_IRQHandler(void)
 {
   HAL_SPI_IRQHandler(&hspi4);
-}
-
-void SPI5_IRQHandler(void)
-{
-  HAL_SPI_IRQHandler(&hspi5);
 }
 
 void SPI6_IRQHandler(void)
