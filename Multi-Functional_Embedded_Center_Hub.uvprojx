@@ -134,10 +134,10 @@
             <RunIndependent>0</RunIndependent>
             <UpdateFlashBeforeDebugging>1</UpdateFlashBeforeDebugging>
             <Capability>1</Capability>
-            <DriverSelection>4101</DriverSelection>
+            <DriverSelection>4096</DriverSelection>
           </Flash1>
           <bUseTDR>1</bUseTDR>
-          <Flash2>BIN\UL2V8M.DLL</Flash2>
+          <Flash2>BIN\UL2CM3.DLL</Flash2>
           <Flash3>"" ()</Flash3>
           <Flash4></Flash4>
           <pFcarmOut></pFcarmOut>
@@ -398,11 +398,6 @@
               <FilePath>..\..\TMotor_AKSeries\Src\ak10-9_v2_testing.c</FilePath>
             </File>
             <File>
-              <FileName>tmotor_ak.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\TMotor_AKSeries\Src\tmotor_ak.c</FilePath>
-            </File>
-            <File>
               <FileName>gpio_digital_filtered_input.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\MY_STM_Common\Src\gpio_digital_filtered_input.c</FilePath>
@@ -446,6 +441,71 @@
               <FileName>can_bus.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Core\Src\can_bus.c</FilePath>
+            </File>
+            <File>
+              <FileName>tmotor_ak10-9_v2.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\tmotor_ak10-9_v2.c</FilePath>
+            </File>
+            <File>
+              <FileName>my_math.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\my_math.c</FilePath>
+            </File>
+            <File>
+              <FileName>led_control.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\led_control.c</FilePath>
+            </File>
+            <File>
+              <FileName>lcd_fonts.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\lcd_fonts.c</FilePath>
+            </File>
+            <File>
+              <FileName>lcd_image.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\lcd_image.c</FilePath>
+            </File>
+            <File>
+              <FileName>lcd_pwm.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\lcd_pwm.c</FilePath>
+            </File>
+            <File>
+              <FileName>lcd_rgb.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\lcd_rgb.c</FilePath>
+            </File>
+            <File>
+              <FileName>sdram.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\sdram.c</FilePath>
+            </File>
+            <File>
+              <FileName>touch_iic.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\touch_iic.c</FilePath>
+            </File>
+            <File>
+              <FileName>touch_800x480.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\touch_800x480.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f4xx_ll_fmc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_ll_fmc.c</FilePath>
+            </File>
+            <File>
+              <FileName>user_interface.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\user_interface.c</FilePath>
+            </File>
+            <File>
+              <FileName>os_threads.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\os_threads.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -911,6 +971,11 @@
               <FileName>stm32f4xx_hal_uart.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f4xx_hal_sdram.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_sdram.c</FilePath>
             </File>
           </Files>
         </Group>

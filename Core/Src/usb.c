@@ -85,10 +85,10 @@ void USB_Receive_Cargo(void)
 
 void USB_DataLogInitialization(void)
 {
-hUSB.dataLogBytes = 0;
-hUSB.ifNewDataLogPiece2Send = 0;
-hUSB.ifDataLogInitiated = 1;
-hUSB.index.b32 = 0;
+  hUSB.dataLogBytes = 0;
+  hUSB.ifNewDataLogPiece2Send = 0;
+  hUSB.ifDataLogInitiated = 1;
+  hUSB.index.b32 = 0;
 }
 
 void AK10_9_DataLog_CargoTransmit_TimeSegment(AK10_9Handle* hmotor, uint32_t ms)
