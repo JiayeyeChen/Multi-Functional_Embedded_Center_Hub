@@ -385,7 +385,7 @@
             <File>
               <FileName>startup_stm32f429xx.s</FileName>
               <FileType>2</FileType>
-              <FilePath>startup_stm32f429xx.s</FilePath>
+              <FilePath>..\Core\Src\startup_stm32f429xx.s</FilePath>
             </File>
           </Files>
         </Group>
@@ -506,6 +506,11 @@
               <FileName>os_threads.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Core\Src\os_threads.c</FilePath>
+            </File>
+            <File>
+              <FileName>adc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\adc.c</FilePath>
             </File>
           </Files>
         </Group>
