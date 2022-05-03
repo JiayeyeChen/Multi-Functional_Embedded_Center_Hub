@@ -34,7 +34,8 @@ int main(void)
 	MX_FMC_Init();
   UI_Init();
   MotorInit();
-  AD7606_Init(AD7606_RANG_10V, AD7606_OS_RATIO_0);
+  AD7606_Init(AD7606_RANG_5V, AD7606_OS_RATIO_8);
+
   
 
 //  hAKMotorLeftHip.rxFilter = ConfigCANFilter_EXT_ID_32BitIDListMode(&hcan2, 0, CAN_FILTER_FIFO0, CAN_ID_EXT, CAN_ID_TMOTOR_EXOSKELETON_LEFT_HIP, 0);
@@ -177,7 +178,6 @@ void UI_Task(void *argument)
   
   for(;;)
   {
-    ADC_DataRequest();
     Touch_Scan();
     UI();
     LED_Blink(&hLEDBlue, 2);
