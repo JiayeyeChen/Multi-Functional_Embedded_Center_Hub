@@ -1,6 +1,7 @@
 #include "can_bus.h"
 #include "ak10-9_v2_testing.h"
 #include "usb.h"
+#include "exoskeleton.h"
 
 //for testing//
 uint8_t rxfifo0detected = 0;
@@ -35,10 +36,41 @@ CAN_FilterTypeDef ConfigCANFilter_EXT_ID_32BitIDListMode(CAN_HandleTypeDef* hcan
   return filter;
 }
 
-void CAN_ConfigureFilter(void)
+void CAN_ConfigureFilters(void)
 {
   hAKMotorLeftHip.rxFilter = ConfigCANFilter_EXT_ID_32BitIDListMode(&hcan2, 0, CAN_FILTER_FIFO0, CAN_ID_EXT, CAN_ID_TMOTOR_EXOSKELETON_LEFT_HIP, 0);
   
+  hIMURightThigh.rxFilter.FilterMode = CAN_FILTERMODE_IDLIST;
+	hIMURightThigh.rxFilter.FilterScale = CAN_FILTERSCALE_16BIT;
+	hIMURightThigh.rxFilter.FilterFIFOAssignment = CAN_FILTER_FIFO0;
+	hIMURightThigh.rxFilter.FilterBank = 1;
+	hIMURightThigh.rxFilter.FilterIdHigh = CAN_ID_IMU_LIACC_EXOSKELETON_RIGHT_THIGH << 5;
+	hIMURightThigh.rxFilter.FilterActivation = ENABLE;
+	HAL_CAN_ConfigFilter(hIMURightThigh.hcan, &hIMURightThigh.rxFilter);
+  
+  hIMURightThigh.rxFilter.FilterMode = CAN_FILTERMODE_IDLIST;
+	hIMURightThigh.rxFilter.FilterScale = CAN_FILTERSCALE_16BIT;
+	hIMURightThigh.rxFilter.FilterFIFOAssignment = CAN_FILTER_FIFO0;
+	hIMURightThigh.rxFilter.FilterBank = 2;
+	hIMURightThigh.rxFilter.FilterIdHigh = CAN_ID_IMU_GYRO_EXOSKELETON_RIGHT_THIGH << 5;
+	hIMURightThigh.rxFilter.FilterActivation = ENABLE;
+	HAL_CAN_ConfigFilter(hIMURightThigh.hcan, &hIMURightThigh.rxFilter);
+  
+  hIMURightThigh.rxFilter.FilterMode = CAN_FILTERMODE_IDLIST;
+	hIMURightThigh.rxFilter.FilterScale = CAN_FILTERSCALE_16BIT;
+	hIMURightThigh.rxFilter.FilterFIFOAssignment = CAN_FILTER_FIFO0;
+	hIMURightThigh.rxFilter.FilterBank = 3;
+	hIMURightThigh.rxFilter.FilterIdHigh = CAN_ID_IMU_QUATERNION_EXOSKELETON_RIGHT_THIGH << 5;
+	hIMURightThigh.rxFilter.FilterActivation = ENABLE;
+	HAL_CAN_ConfigFilter(hIMURightThigh.hcan, &hIMURightThigh.rxFilter);
+  
+  hIMURightThigh.rxFilter.FilterMode = CAN_FILTERMODE_IDLIST;
+	hIMURightThigh.rxFilter.FilterScale = CAN_FILTERSCALE_16BIT;
+	hIMURightThigh.rxFilter.FilterFIFOAssignment = CAN_FILTER_FIFO0;
+	hIMURightThigh.rxFilter.FilterBank = 4;
+	hIMURightThigh.rxFilter.FilterIdHigh = CAN_ID_IMU_STATUS_EXOSKELETON_RIGHT_THIGH << 5;
+	hIMURightThigh.rxFilter.FilterActivation = ENABLE;
+	HAL_CAN_ConfigFilter(hIMURightThigh.hcan, &hIMURightThigh.rxFilter);
 }
 
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
@@ -49,8 +81,22 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
   HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &temRxHeader, temRxData);
   
   //Application specific codes
-  AK10_9_ServoMode_GetFeedbackMsg(&temRxHeader, &hAKMotorLeftHip, temRxData);
-  AK10_9_Calculate_velocity_current_AVG(&hAKMotorLeftHip);
+  //Tmotors
+  if (temRxHeader.ExtId == CAN_ID_TMOTOR_EXOSKELETON_RIGHT_HIP)
+  {
+    AK10_9_ServoMode_GetFeedbackMsg(&temRxHeader, &hAKMotorLeftHip, temRxData);
+    AK10_9_Calculate_velocity_current_AVG(&hAKMotorLeftHip);
+  }
+  //BNO055
+  if (temRxHeader.StdId == CAN_ID_IMU_LIACC_EXOSKELETON_RIGHT_THIGH)
+    EXOSKELETON_GetIMUFeedbackLiAcc(&hIMURightThigh, temRxData);
+  else if (temRxHeader.StdId == CAN_ID_IMU_GYRO_EXOSKELETON_RIGHT_THIGH)
+    EXOSKELETON_GetIMUFeedbackGyro(&hIMURightThigh, temRxData);
+  else if (temRxHeader.StdId == CAN_ID_IMU_QUATERNION_EXOSKELETON_RIGHT_THIGH)
+    EXOSKELETON_GetIMUFeedbackQuaternion(&hIMURightThigh, temRxData);
+  else if (temRxHeader.StdId == CAN_ID_IMU_STATUS_EXOSKELETON_RIGHT_THIGH)
+    EXOSKELETON_GetIMUFeedbackStatus(&hIMURightThigh, temRxData);
+  //End
   rxfifo0detected++;
 }
 

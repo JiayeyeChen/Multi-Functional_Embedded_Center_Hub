@@ -16,6 +16,7 @@
 #include "user_interface.h"
 #include "os_threads.h"
 #include "adc.h"
+#include "exoskeleton.h"
 
 void SystemClock_Config(void);
 
@@ -33,9 +34,12 @@ int main(void)
 	MX_FMC_Init();
   UI_Init();
   MotorInit();
-  AD7606_Init(AD7606_RANG_5V, AD7606_OS_RATIO_0);
+  AD7606_Init(AD7606_RANG_10V, AD7606_OS_RATIO_0);
   
-  hAKMotorLeftHip.rxFilter = ConfigCANFilter_EXT_ID_32BitIDListMode(&hcan2, 0, CAN_FILTER_FIFO0, CAN_ID_EXT, CAN_ID_TMOTOR_EXOSKELETON_LEFT_HIP, 0);
+
+//  hAKMotorLeftHip.rxFilter = ConfigCANFilter_EXT_ID_32BitIDListMode(&hcan2, 0, CAN_FILTER_FIFO0, CAN_ID_EXT, CAN_ID_TMOTOR_EXOSKELETON_LEFT_HIP, 0);
+  EXOSKELETON_Init();
+  CAN_ConfigureFilters();
   
   osKernelInitialize();
   OSThreads_Init();
@@ -177,7 +181,7 @@ void UI_Task(void *argument)
     Touch_Scan();
     UI();
     LED_Blink(&hLEDBlue, 2);
-    osDelay(50);//osDelay(20);
+    osDelay(20);
 
   }
 }

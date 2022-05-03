@@ -2,12 +2,14 @@
 #include "main.h"
 #include <math.h>
 
-PageHandle UIPage_Home1, UIPage_AK10_9_Calibration, UIPage_AK10_9_ManualControl, UIPage_AK10_9_ImpedanceControlDemo;
+PageHandle UIPage_Home1, UIPage_AK10_9_Calibration, UIPage_BNO055_Monitor, \
+           UIPage_AK10_9_ManualControl, UIPage_AK10_9_ImpedanceControlDemo;
 UIHandle hUI;
 
 ButtonHandle hButtonPageAK10_9Calibration;
 ButtonHandle hButtonPageAK10_9ManualControl;
 ButtonHandle hButtonPageAK10_9ImpedanceControlDemo;
+ButtonHandle hButtonPageBNO055_Monitor;
 ButtonHandle hButtonDataLogStart;
 ButtonHandle hButtonDataLogEnd;
 ButtonHandle hButtonMotorProfilingStart;
@@ -19,6 +21,8 @@ ButtonHandle hButtonGoBack;
 ButtonHandle hButtonStepLengthPlus10, hButtonStepLengthMinus10, hButtonStepLengthPlus1, hButtonStepLengthMinus1;
 ButtonHandle hButtonManualControlMode;
 ButtonHandle hButtonSpringConstantUp, hButtonSpringConstantDown, hButtonDampingConstantUp, hButtonDampingConstantDown;
+
+
 
 LinearPotentialmeterHandle  hPotentialmeter;
 
@@ -114,6 +118,10 @@ void UI_Init(void)
   UIPage_AK10_9_ImpedanceControlDemo.ifPageInitialized = 0;
   UIPage_AK10_9_ImpedanceControlDemo.Page = UI_Page_AK10_9_ImpedanceControlDemo;
   UIPage_AK10_9_ImpedanceControlDemo.PageInit = UI_Page_AK10_9_ImpedanceControlDemo_Init;
+  
+  UIPage_BNO055_Monitor.ifPageInitialized = 0;
+  UIPage_BNO055_Monitor.Page = UI_Page_BNO055_Monitor;
+  UIPage_BNO055_Monitor.PageInit = UI_Page_BNO055_Monitor_Init;
 }
 
 JoystickHandle Joystick_Create(uint16_t x, uint16_t y, uint16_t r, char label[])
@@ -241,6 +249,9 @@ void UI_Page_Home1(void)
   ButtonRefresh(&hButtonPageAK10_9ManualControl);
   ButtonScan(&hButtonPageAK10_9ImpedanceControlDemo);
   ButtonRefresh(&hButtonPageAK10_9ImpedanceControlDemo);
+  ButtonScan(&hButtonPageBNO055_Monitor);
+  ButtonRefresh(&hButtonPageBNO055_Monitor);
+  
   
   if (ifButtonPressed(&hButtonPageAK10_9Calibration))
     UI_Page_Change_To(&UIPage_AK10_9_Calibration);
@@ -248,13 +259,15 @@ void UI_Page_Home1(void)
     UI_Page_Change_To(&UIPage_AK10_9_ManualControl);
   if (ifButtonPressed(&hButtonPageAK10_9ImpedanceControlDemo))
     UI_Page_Change_To(&UIPage_AK10_9_ImpedanceControlDemo);
-  
+  if (ifButtonPressed(&hButtonPageBNO055_Monitor))
+    UI_Page_Change_To(&UIPage_BNO055_Monitor);
 }
 void UI_Page_Home1_Init(void)
 {
   hButtonPageAK10_9Calibration = Button_Create(100, 100, 300, 50, "AK10-9 V2.0 Calibration", LIGHT_MAGENTA, LCD_RED);
   hButtonPageAK10_9ManualControl = Button_Create(80, 200, 360, 50, "AK10-9 V2.0 Manual Control", LIGHT_MAGENTA, LCD_RED);
   hButtonPageAK10_9ImpedanceControlDemo = Button_Create(30, 300, 430, 50, "AK10-9 V2.0 Impedance Control Demo", LIGHT_MAGENTA, LCD_RED);
+  hButtonPageBNO055_Monitor = Button_Create(150, 400, 200, 50, "BNO055 Monitor", LIGHT_MAGENTA, LCD_RED);
 }
 
 void UI_Page_AK10_9_ManualControl(void)
@@ -415,6 +428,22 @@ void UI_Page_AK10_9_ImpedanceControlDemo_Init(void)
   hButtonMotorZeroing = Button_Create(50, 500, 200, 50, "Motor Set Zero", LCD_BLUE, LCD_RED);
   hButtonMotorStart = Button_Create(100, 300, 250, 40, "       START", LCD_WHITE, LCD_RED);
   hButtonMotorStop = Button_Create(100, 360, 250, 40, "        STOP", LCD_WHITE, LCD_RED);
+}
+
+void UI_Page_BNO055_Monitor(void)
+{
+  ButtonScan(&hButtonGoBack);
+  ButtonRefresh(&hButtonGoBack);
+  
+  
+  
+  if (ifButtonPressed(&hButtonGoBack))
+    UI_Page_Change_To(&UIPage_Home1);
+}
+
+void UI_Page_BNO055_Monitor_Init(void)
+{
+  hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
 }
 
 void UI_Page_Change_To(PageHandle* hpage)
