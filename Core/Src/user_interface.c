@@ -21,7 +21,7 @@ ButtonHandle hButtonGoBack;
 ButtonHandle hButtonStepLengthPlus10, hButtonStepLengthMinus10, hButtonStepLengthPlus1, hButtonStepLengthMinus1;
 ButtonHandle hButtonManualControlMode;
 ButtonHandle hButtonSpringConstantUp, hButtonSpringConstantDown, hButtonDampingConstantUp, hButtonDampingConstantDown;
-
+ButtonHandle hButtonIMUSetModeNDOF, hButtonIMUSetModeGYROONLY;
 
 
 LinearPotentialmeterHandle  hPotentialmeter;
@@ -434,8 +434,29 @@ void UI_Page_BNO055_Monitor(void)
 {
   ButtonScan(&hButtonGoBack);
   ButtonRefresh(&hButtonGoBack);
+  ButtonScan(&hButtonIMUSetModeNDOF);
+  ButtonRefresh(&hButtonIMUSetModeNDOF);
+  ButtonScan(&hButtonIMUSetModeGYROONLY);
+  ButtonRefresh(&hButtonIMUSetModeGYROONLY);
   
+  LCD_SetLayer(1); 
+  LCD_SetColor(LCD_BLACK);
+  LCD_DisplayDecimals(200, 0, (double)hIMURightThigh.data.liaccX.b16, 7, 1);
+  LCD_DisplayDecimals(200, 50, (double)hIMURightThigh.data.liaccY.b16, 7, 1);
+  LCD_DisplayDecimals(200, 100, (double)hIMURightThigh.data.liaccZ.b16, 7, 1);
+  LCD_DisplayDecimals(200, 150, (double)hIMURightThigh.data.gyroX.b16, 7, 1);
+  LCD_DisplayDecimals(200, 200, (double)hIMURightThigh.data.gyroY.b16, 7, 1);
+  LCD_DisplayDecimals(200, 250, (double)hIMURightThigh.data.gyroZ.b16, 7, 1);
   
+  if (hIMURightThigh.operationModeENUM == IMU_MODE_NDOF)
+    EXOSKELETON_SetIMUMode_9_DOF(&hIMURightThigh);
+  else if (hIMURightThigh.operationModeENUM == IMU_MODE_GYROONLY)
+    EXOSKELETON_SetIMUMode_GYRO_Only(&hIMURightThigh);
+  
+  if (ifButtonPressed(&hButtonIMUSetModeNDOF))
+    hIMURightThigh.operationModeENUM = IMU_MODE_NDOF;
+  if (ifButtonPressed(&hButtonIMUSetModeGYROONLY))
+    hIMURightThigh.operationModeENUM = IMU_MODE_GYROONLY;
   
   if (ifButtonPressed(&hButtonGoBack))
     UI_Page_Change_To(&UIPage_Home1);
@@ -444,6 +465,14 @@ void UI_Page_BNO055_Monitor(void)
 void UI_Page_BNO055_Monitor_Init(void)
 {
   hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
+  hButtonIMUSetModeNDOF = Button_Create(100, 300, 250, 40, "9 DOF Fusion Mode", LIGHT_YELLOW, LCD_RED);
+  hButtonIMUSetModeGYROONLY = Button_Create(100, 350, 200, 40, "Gyro Only Mode", LIGHT_YELLOW, LCD_RED);
+  LCD_DisplayString(100, 0, "LiAccX: ");
+  LCD_DisplayString(100, 50, "LiAccY: ");
+  LCD_DisplayString(100, 100, "LiAccZ: ");
+  LCD_DisplayString(100, 150, "GyroX:  ");
+  LCD_DisplayString(100, 200, "GyroY:  ");
+  LCD_DisplayString(100, 250, "GyroZ:  ");
 }
 
 void UI_Page_Change_To(PageHandle* hpage)

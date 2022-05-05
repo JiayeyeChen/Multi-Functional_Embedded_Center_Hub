@@ -8,6 +8,7 @@
 #include "usb.h"
 #include "tmotor_ak10-9_v2.h"
 #include "ak10-9_v2_testing.h"
+#include "exoskeleton.h"
 
 typedef struct
 {
