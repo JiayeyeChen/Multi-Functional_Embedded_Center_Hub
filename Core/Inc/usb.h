@@ -43,14 +43,13 @@ typedef struct
   uint8_t               ifNewDataLogPiece2Send;
   uint8_t               ifDataLogInitialized;
   union UInt32UInt8     index;
-  float*                dataSlot;
   uint8_t               dataSlotLen;
   uint32_t              datalogStartTimestamp;
   uint32_t              timeSegmentDuration;
   enum DataLogTask      datalogTask;
 }USBHandle;
 
-void USB_Init(union FloatUInt8* data_slots);
+void USB_Init(uint8_t data_slot_len);
 void USB_TransmitCargo(uint8_t* buf, uint8_t size);
 void USB_SendText(char text[]);
 void USB_ReceiveCpltCallback(void);
@@ -62,7 +61,6 @@ void USB_DataLogStart(void);
 void USB_DataLogEnd(void);
 void USB_SendDataSlotLen(void);
 void USB_SendDataSlotLabel(char* label_1, ...);
-void USB_DataLogConfigureDataSlot(float* data, uint8_t len);
 void USB_DataLogSingleCargoTransmit(union FloatUInt8 dala_slots[]);
 
 void USB_DataLogConfigureDataSlot(float* data, uint8_t len);

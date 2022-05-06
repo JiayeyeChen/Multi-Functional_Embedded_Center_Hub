@@ -3,7 +3,7 @@
 USBHandle hUSB;
 union FloatUInt8 dataSlots_AK10_9_Acceleration_Observer_Testing[13];
 
-void USB_Init(union FloatUInt8* data_slots)
+void USB_Init(uint8_t data_slot_len)
 {
   hUSB.husbd = &hUsbDeviceHS;
   hUSB.invalidRxMsgCount = 0;
@@ -11,13 +11,7 @@ void USB_Init(union FloatUInt8* data_slots)
   hUSB.ifNewDataLogPiece2Send = 0;
   hUSB.index.b32 = 0;
   hUSB.datalogTask = DATALOG_TASK_FREE;
-  USB_DataLogConfigureDataSlot((float*)data_slots, sizeof(data_slots)/4);
-}
-
-void USB_DataLogConfigureDataSlot(float* data, uint8_t len)
-{
-  hUSB.dataSlot = data;
-  hUSB.dataSlotLen = len;
+  hUSB.dataSlotLen = data_slot_len;
 }
 
 void USB_SendText(char text[])
@@ -75,6 +69,8 @@ void USB_ReceiveCargo(void)
       crcReceive.b8[2] = hUSB.rxMsgRaw[*hUSB.len - 3];
       crcReceive.b8[3] = hUSB.rxMsgRaw[*hUSB.len - 2];
       
+//      memcpy(hUSB.rxMessageCfrm, &hUSB.rxMsgRaw[3], hUSB.rxMessageLen);
+//      hUSB.ifNewCargo = 1;
       if (crcCalculatedResult == crcReceive.b32)
       {
         memcpy(hUSB.rxMessageCfrm, &hUSB.rxMsgRaw[3], hUSB.rxMessageLen);

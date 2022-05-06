@@ -29,7 +29,7 @@ int main(void)
   MX_FATFS_Init();
   
   SystemPeriphral_Init();
-  USB_Init(dataSlots_AK10_9_Acceleration_Observer_Testing);
+  USB_Init(sizeof(dataSlots_AK10_9_Acceleration_Observer_Testing)/4);
   
 	MX_FMC_Init();
   UI_Init();
