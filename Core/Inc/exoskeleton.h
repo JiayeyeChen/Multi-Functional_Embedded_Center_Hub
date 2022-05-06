@@ -19,7 +19,18 @@ typedef struct
 	union Int16UInt8 gyroY;
 	union Int16UInt8 gyroZ;
 	union Int16UInt8 Quat[4];
-}BNO055_Data_Struct;
+}BNO055_Raw_Data_Struct;
+
+typedef struct
+{
+	union FloatUInt8 liaccX;
+	union FloatUInt8 liaccY;
+	union FloatUInt8 liaccZ;
+	union FloatUInt8 gyroX;
+	union FloatUInt8 gyroY;
+	union FloatUInt8 gyroZ;
+	union FloatUInt8 Quat[4];
+}BNO055_Parsed_Data_Struct;
 
 typedef struct
 {
@@ -27,7 +38,8 @@ typedef struct
   enum IMU_Operation_Mode   operationModeENUM;
 	uint8_t										calibStatus;
 	uint8_t										deadCount;
-	BNO055_Data_Struct				data;
+	BNO055_Raw_Data_Struct	  rawData;
+  BNO055_Parsed_Data_Struct parsedData;
   
   CAN_HandleTypeDef*    hcan;
   //CAN BUS transmit

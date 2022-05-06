@@ -176,8 +176,7 @@ void UI_Page_AK10_9_Calibration(void)
   
   if (ifButtonPressed(&hButtonDataLogStart))
   {
-    USB_DataLogStartNolimit();
-//    USB_DataLogStartTimeSegment(4000);
+    USB_DataLogStart();
   }
   if (ifButtonPressed(&hButtonDataLogEnd))
   {
@@ -441,12 +440,12 @@ void UI_Page_BNO055_Monitor(void)
   
   LCD_SetLayer(1); 
   LCD_SetColor(LCD_BLACK);
-  LCD_DisplayDecimals(200, 0, (double)hIMURightThigh.data.liaccX.b16, 7, 1);
-  LCD_DisplayDecimals(200, 50, (double)hIMURightThigh.data.liaccY.b16, 7, 1);
-  LCD_DisplayDecimals(200, 100, (double)hIMURightThigh.data.liaccZ.b16, 7, 1);
-  LCD_DisplayDecimals(200, 150, (double)hIMURightThigh.data.gyroX.b16, 7, 1);
-  LCD_DisplayDecimals(200, 200, (double)hIMURightThigh.data.gyroY.b16, 7, 1);
-  LCD_DisplayDecimals(200, 250, (double)hIMURightThigh.data.gyroZ.b16, 7, 1);
+  LCD_DisplayDecimals(200, 0, (double)hIMURightThigh.rawData.liaccX.b16, 7, 1);
+  LCD_DisplayDecimals(200, 50, (double)hIMURightThigh.rawData.liaccY.b16, 7, 1);
+  LCD_DisplayDecimals(200, 100, (double)hIMURightThigh.rawData.liaccZ.b16, 7, 1);
+  LCD_DisplayDecimals(200, 150, (double)hIMURightThigh.rawData.gyroX.b16, 7, 1);
+  LCD_DisplayDecimals(200, 200, (double)hIMURightThigh.rawData.gyroY.b16, 7, 1);
+  LCD_DisplayDecimals(200, 250, (double)hIMURightThigh.rawData.gyroZ.b16, 7, 1);
   
   if (hIMURightThigh.operationModeENUM == IMU_MODE_NDOF)
     EXOSKELETON_SetIMUMode_9_DOF(&hIMURightThigh);

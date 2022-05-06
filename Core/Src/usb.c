@@ -1,19 +1,31 @@
 #include "usb.h"
 
 USBHandle hUSB;
+union FloatUInt8 dataSlots_AK10_9_Acceleration_Observer_Testing[13];
 
-void USB_Init(void)
+void USB_Init(union FloatUInt8* data_slots)
 {
   hUSB.husbd = &hUsbDeviceHS;
   hUSB.invalidRxMsgCount = 0;
   hUSB.ifNewCargo = 0;
   hUSB.ifNewDataLogPiece2Send = 0;
   hUSB.index.b32 = 0;
-  hUSB.ifDataLogInitiated = 0;
-  hUSB.ifDataLogStarted = 0;
+  hUSB.datalogTask = DATALOG_TASK_FREE;
+  USB_DataLogConfigureDataSlot((float*)data_slots, sizeof(data_slots)/4);
 }
 
-void USB_Transmit_Cargo(uint8_t* buf, uint8_t size)
+void USB_DataLogConfigureDataSlot(float* data, uint8_t len)
+{
+  hUSB.dataSlot = data;
+  hUSB.dataSlotLen = len;
+}
+
+void USB_SendText(char text[])
+{
+  USB_TransmitCargo((uint8_t*)text, strlen(text));
+}
+
+void USB_TransmitCargo(uint8_t* buf, uint8_t size)
 {
   uint8_t tx_buf[size + 8];
   tx_buf[0] = 0xAA;
@@ -38,13 +50,12 @@ void USB_Transmit_Cargo(uint8_t* buf, uint8_t size)
 
 void USB_ReceiveCpltCallback(void)
 {
-  HAL_GPIO_TogglePin(ONBOARD_LED_YELLOWGREEN_GPIO_Port, ONBOARD_LED_YELLOWGREEN_Pin);
   memset(hUSB.rxMsgRaw, 0, sizeof(hUSB.rxMsgRaw));
   memcpy(hUSB.rxMsgRaw, hUSB.buf, *hUSB.len);
-  USB_Receive_Cargo();
+  USB_ReceiveCargo();
 }
 
-void USB_Receive_Cargo(void)
+void USB_ReceiveCargo(void)
 {
   if (hUSB.rxMsgRaw[0] == (char)0xBB && hUSB.rxMsgRaw[1] == (char)0xCC && hUSB.rxMsgRaw[*hUSB.len - 1] == (char)0x88)
   {
@@ -83,20 +94,73 @@ void USB_Receive_Cargo(void)
   }
 }
 
-void USB_DataLogInitialization(void)
+void USB_CargoReceiveManager(void (*LabelSetFunc)(void))
 {
-  hUSB.dataLogBytes = 0;
-  hUSB.ifNewDataLogPiece2Send = 0;
-  hUSB.ifDataLogInitiated = 1;
-  hUSB.index.b32 = 0;
+  if (hUSB.ifNewCargo)
+  {
+    char msg[hUSB.rxMessageLen];
+    memcpy(msg, hUSB.rxMessageCfrm, hUSB.rxMessageLen);
+    if (hUSB.datalogTask == DATALOG_TASK_FREE)
+    {
+      if (!strcmp(msg, "Datalog start"))
+      {
+        hUSB.datalogTask = DATALOG_TASK_SEND_DATA_SLOT_LEN;
+        USB_SendDataSlotLen();
+      }
+    }
+    else if (hUSB.datalogTask == DATALOG_TASK_START)
+    {
+      if (!strcmp(msg, "Roger that"))
+      {
+        hUSB.datalogTask = DATALOG_TASK_SEND_DATA_SLOT_LEN;
+        USB_SendDataSlotLen();
+      }
+    }
+    else if (hUSB.datalogTask == DATALOG_TASK_SEND_DATA_SLOT_LEN)
+    {
+      if (!strcmp(msg, "Roger that"))
+      {
+        hUSB.datalogTask = DATALOG_TASK_SEND_DATA_SLOT_MSG;
+        (*LabelSetFunc)();
+      }
+    }
+    else if (hUSB.datalogTask == DATALOG_TASK_SEND_DATA_SLOT_MSG)
+    {
+      if (!strcmp(msg, "Roger that"))
+      {
+        hUSB.datalogTask = DATALOG_TASK_DATALOG;
+      }
+    }
+    else if (hUSB.datalogTask == DATALOG_TASK_DATALOG)
+    {
+      if (!strcmp(msg, "Datalog end"))
+        hUSB.datalogTask = DATALOG_TASK_FREE;
+      USB_SendText("Roger that");
+    }
+    else if (hUSB.datalogTask == DATALOG_TASK_END)
+    {
+      if (!strcmp(msg, "Roger that"))
+        hUSB.datalogTask = DATALOG_TASK_FREE;
+    }
+    
+    hUSB.ifNewCargo = 0;
+  }
 }
 
-void AK10_9_DataLog_CargoTransmit_TimeSegment(AK10_9Handle* hmotor, uint32_t ms)
+void USB_DataLogManager(float* data_slots, uint8_t len, void (*LabelSetFunc)(void), union FloatUInt8 dala_slots[])
 {
-  
+  USB_CargoReceiveManager(LabelSetFunc);
+  if (hUSB.datalogTask == DATALOG_TASK_DATALOG)
+  {
+    if (hUSB.ifNewDataLogPiece2Send)
+    {
+      USB_DataLogSingleCargoTransmit(dala_slots);
+      hUSB.ifNewDataLogPiece2Send = 0;
+    }
+  }
 }
 
-void AK10_9_DataLog_SingleCargoTransmit(AK10_9Handle* hmotor)
+void USB_DataLogSingleCargoTransmit(union FloatUInt8 dala_slots[])
 {
   uint8_t i = 0;
   union UInt32UInt8 sysTick;
@@ -112,72 +176,56 @@ void AK10_9_DataLog_SingleCargoTransmit(AK10_9Handle* hmotor)
   hUSB.txBuf[i++] = sysTick.b8[1];
   hUSB.txBuf[i++] = sysTick.b8[2];
   hUSB.txBuf[i++] = sysTick.b8[3];
-  //Real Position
-  hUSB.txBuf[i++] = hmotor->realPosition.b8[0];
-  hUSB.txBuf[i++] = hmotor->realPosition.b8[1];
-  hUSB.txBuf[i++] = hmotor->realPosition.b8[2];
-  hUSB.txBuf[i++] = hmotor->realPosition.b8[3];
-  //Real Velocity
-  hUSB.txBuf[i++] = hmotor->realVelocity.b8[0];
-  hUSB.txBuf[i++] = hmotor->realVelocity.b8[1];
-  hUSB.txBuf[i++] = hmotor->realVelocity.b8[2];
-  hUSB.txBuf[i++] = hmotor->realVelocity.b8[3];
-  //Real Current
-  hUSB.txBuf[i++] = hmotor->realCurrent.b8[0];
-  hUSB.txBuf[i++] = hmotor->realCurrent.b8[1];
-  hUSB.txBuf[i++] = hmotor->realCurrent.b8[2];
-  hUSB.txBuf[i++] = hmotor->realCurrent.b8[3];
-  //Desired Position
-  hUSB.txBuf[i++] = hmotor->setPosition.b8[0];
-  hUSB.txBuf[i++] = hmotor->setPosition.b8[1];
-  hUSB.txBuf[i++] = hmotor->setPosition.b8[2];
-  hUSB.txBuf[i++] = hmotor->setPosition.b8[3];
-  //Temperature
-  hUSB.txBuf[i++] = hmotor->temperature;
-  
-  hUSB.dataLogBytes = 25;
-  USB_Transmit_Cargo(hUSB.txBuf, hUSB.dataLogBytes);
-}
-
-void AK10_9_DataLog_Manager(AK10_9Handle* hmotor)
-{
-  if (hUSB.ifDataLogStarted)
+  //Data
+  for (uint8_t j = 0; j < hUSB.dataSlotLen; j++)
   {
-    if (hUSB.dataLogType == DATALOG_TYPE_NOLIMIT)
-      AK10_9_DataLog_SingleCargoTransmit(hmotor);
-    else if (hUSB.dataLogType == DATALOG_TYPE_TIMESEGMENT)
-    {
-      if (HAL_GetTick() - hUSB.datalogStartTimestamp >= hUSB.timeSegmentDuration)
-        USB_DataLogEnd();
-      else
-        AK10_9_DataLog_SingleCargoTransmit(hmotor);
-    }
+    hUSB.txBuf[i++] = dala_slots[j].b8[0];
+    hUSB.txBuf[i++] = dala_slots[j].b8[1];
+    hUSB.txBuf[i++] = dala_slots[j].b8[2];
+    hUSB.txBuf[i++] = dala_slots[j].b8[3];
   }
+  USB_TransmitCargo(hUSB.txBuf, hUSB.dataSlotLen * 4 + 8);
 }
 
-void USB_DataLogStartNolimit(void)
+void USB_DataLogInitialization(void)
 {
-  hUSB.dataLogType = DATALOG_TYPE_NOLIMIT;
-  USB_DataLogInitialization();
-  hUSB.ifDataLogStarted = 1;
-  char start_msg[] = "Datalog start";
-  USB_Transmit_Cargo((uint8_t*)start_msg, sizeof(start_msg));
+  hUSB.ifDataLogInitialized = 1;
+  hUSB.ifNewDataLogPiece2Send = 0;
+  hUSB.index.b32 = 0;
 }
 
-void USB_DataLogStartTimeSegment(uint32_t time)
+void USB_DataLogStart(void)
 {
-  hUSB.datalogStartTimestamp = HAL_GetTick();
-  hUSB.dataLogType = DATALOG_TYPE_TIMESEGMENT;
   USB_DataLogInitialization();
-  hUSB.ifDataLogStarted = 1;
-  hUSB.timeSegmentDuration = time;
-  char start_msg[] = "Datalog start";
-  USB_Transmit_Cargo((uint8_t*)start_msg, sizeof(start_msg));
+  hUSB.datalogTask = DATALOG_TASK_START;
+  USB_SendText("Datalog start");
 }
-
 void USB_DataLogEnd(void)
 {
-  hUSB.ifDataLogStarted = 0;
-  char end_msg[] = "Datalog end";
-  USB_Transmit_Cargo((uint8_t*)end_msg, sizeof(end_msg));
+  hUSB.datalogTask = DATALOG_TASK_END;
+  USB_SendText("Datalog end");
+}
+
+void USB_SendDataSlotLen(void)
+{
+  char numStr[2];
+  int numStrLen;
+  numStrLen = sprintf(numStr, "%d", hUSB.dataSlotLen);
+  USB_TransmitCargo((uint8_t*)numStr, numStrLen);
+}
+
+void USB_SendDataSlotLabel(char* label_1, ...)
+{
+  va_list label_ptr;
+  va_start(label_ptr, label_1);
+ 
+  uint8_t numOfLabels = atoi(label_1);
+  for (uint8_t i = 0; i < numOfLabels; i++)
+  {
+    char buf[50];
+    strcpy(buf, va_arg(label_ptr, char*));
+    USB_TransmitCargo((uint8_t*)buf, strlen(buf));
+    osDelay(10);
+  }
+  va_end(label_ptr);
 }

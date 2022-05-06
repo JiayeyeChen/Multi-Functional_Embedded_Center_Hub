@@ -3,6 +3,10 @@
 
 #include "system_periphrals.h"
 #include "tmotor_ak10-9_v2.h"
+#include <string.h>
+#include "cmsis_os2.h"
+#include "common.h"
+#include <stdarg.h>
 
 enum DatalogType
 {
@@ -10,11 +14,21 @@ enum DatalogType
   DATALOG_TYPE_TIMESEGMENT
 };
 
+enum DataLogTask
+{
+  DATALOG_TASK_FREE,
+  DATALOG_TASK_START,
+  DATALOG_TASK_SEND_DATA_SLOT_LEN,
+  DATALOG_TASK_SEND_DATA_SLOT_MSG,
+  DATALOG_TASK_DATALOG,
+  DATALOG_TASK_END
+};
+
 typedef struct
 {
   USBD_HandleTypeDef*   husbd;
   /*Tx Message*/
-  uint8_t              txBuf[256];
+  uint8_t               txBuf[256];
   /*Rx Message*/
   uint8_t*              buf;
   uint32_t*             len;
@@ -26,27 +40,33 @@ typedef struct
   uint32_t              invalidRxMsgCount;
   uint8_t               ifNewCargo;
   /*Data log*/
-  enum DatalogType      dataLogType;
-  uint8_t               dataLogBytes;
   uint8_t               ifNewDataLogPiece2Send;
-  uint8_t               ifDataLogInitiated;
-  uint8_t               ifDataLogStarted;
+  uint8_t               ifDataLogInitialized;
   union UInt32UInt8     index;
+  float*                dataSlot;
+  uint8_t               dataSlotLen;
   uint32_t              datalogStartTimestamp;
   uint32_t              timeSegmentDuration;
+  enum DataLogTask      datalogTask;
 }USBHandle;
 
-void USB_Init(void);
-void USB_Transmit_Cargo(uint8_t* buf, uint8_t size);
+void USB_Init(union FloatUInt8* data_slots);
+void USB_TransmitCargo(uint8_t* buf, uint8_t size);
+void USB_SendText(char text[]);
 void USB_ReceiveCpltCallback(void);
-void USB_Receive_Cargo(void);
+void USB_ReceiveCargo(void);
+void USB_CargoReceiveManager(void (*LabelSetFunc)(void));
+void USB_DataLogManager(float* data_slots, uint8_t len, void (*LabelSetFunc)(void), union FloatUInt8 dala_slots[]);
 void USB_DataLogInitialization(void);
-void USB_DataLogStartNolimit(void);
-void USB_DataLogStartTimeSegment(uint32_t time);
+void USB_DataLogStart(void);
 void USB_DataLogEnd(void);
-void AK10_9_DataLog_SingleCargoTransmit(AK10_9Handle* hmotor);
-void AK10_9_DataLog_CargoTransmit_TimeSegment(AK10_9Handle* hmotor, uint32_t ms);
-void AK10_9_DataLog_Manager(AK10_9Handle* hmotor);
+void USB_SendDataSlotLen(void);
+void USB_SendDataSlotLabel(char* label_1, ...);
+void USB_DataLogConfigureDataSlot(float* data, uint8_t len);
+void USB_DataLogSingleCargoTransmit(union FloatUInt8 dala_slots[]);
+
+void USB_DataLogConfigureDataSlot(float* data, uint8_t len);
 
 extern USBHandle hUSB;
+extern union FloatUInt8 dataSlots_AK10_9_Acceleration_Observer_Testing[13];
 #endif

@@ -13,22 +13,22 @@ void EXOSKELETON_Init(void)
 
 void EXOSKELETON_GetIMUFeedbackLiAcc(BNO055Handle* himu, uint8_t data[])
 {
-  himu->data.liaccX.b8[0] = data[0];
-  himu->data.liaccX.b8[1] = data[1];
-  himu->data.liaccY.b8[0] = data[2];
-  himu->data.liaccY.b8[1] = data[3];
-  himu->data.liaccZ.b8[0] = data[4];
-  himu->data.liaccZ.b8[1] = data[5];
+  himu->rawData.liaccX.b8[0] = data[0];
+  himu->rawData.liaccX.b8[1] = data[1];
+  himu->rawData.liaccY.b8[0] = data[2];
+  himu->rawData.liaccY.b8[1] = data[3];
+  himu->rawData.liaccZ.b8[0] = data[4];
+  himu->rawData.liaccZ.b8[1] = data[5];
 }
 
 void EXOSKELETON_GetIMUFeedbackGyro(BNO055Handle* himu, uint8_t data[])
 {
-  himu->data.gyroX.b8[0] = data[0];
-  himu->data.gyroX.b8[1] = data[1];
-  himu->data.gyroY.b8[0] = data[2];
-  himu->data.gyroY.b8[1] = data[3];
-  himu->data.gyroZ.b8[0] = data[4];
-  himu->data.gyroZ.b8[1] = data[5];
+  himu->rawData.gyroX.b8[0] = data[0];
+  himu->rawData.gyroX.b8[1] = data[1];
+  himu->rawData.gyroY.b8[0] = data[2];
+  himu->rawData.gyroY.b8[1] = data[3];
+  himu->rawData.gyroZ.b8[0] = data[4];
+  himu->rawData.gyroZ.b8[1] = data[5];
 }
 void EXOSKELETON_GetIMUFeedbackQuaternion(BNO055Handle* himu, uint8_t data[])
 {

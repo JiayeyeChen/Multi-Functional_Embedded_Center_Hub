@@ -29,7 +29,7 @@ int main(void)
   MX_FATFS_Init();
   
   SystemPeriphral_Init();
-  USB_Init();
+  USB_Init(dataSlots_AK10_9_Acceleration_Observer_Testing);
   
 	MX_FMC_Init();
   UI_Init();
@@ -148,7 +148,7 @@ void AK10Calibration_Task(void *argument)
   
   for(;;)
   {
-    AK10_9_DataLog_Manager(&hAKMotorLeftHip);
+    AK10_9_DataLog_Manager(&hAKMotorLeftHip, &hIMURightThigh);
     if (ifMotorProfilingStarted)
       AK10_9_MotorProfiling_Function1(&hAKMotorLeftHip);
       //AK10_9_MotorProfiling_Function2_CurrentControlStepResponse(&hAKMotorLeftHip);
