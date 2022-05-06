@@ -56,7 +56,7 @@ void USB_SendText(char text[]);
 void USB_ReceiveCpltCallback(void);
 void USB_ReceiveCargo(void);
 void USB_CargoReceiveManager(void (*LabelSetFunc)(void));
-void USB_DataLogManager(float* data_slots, uint8_t len, void (*LabelSetFunc)(void), union FloatUInt8 dala_slots[]);
+void USB_DataLogManager(void (*LabelSetFunc)(void), union FloatUInt8 dala_slots[]);
 void USB_DataLogInitialization(void);
 void USB_DataLogStart(void);
 void USB_DataLogEnd(void);

@@ -147,7 +147,7 @@ void USB_CargoReceiveManager(void (*LabelSetFunc)(void))
   }
 }
 
-void USB_DataLogManager(float* data_slots, uint8_t len, void (*LabelSetFunc)(void), union FloatUInt8 dala_slots[])
+void USB_DataLogManager(void (*LabelSetFunc)(void), union FloatUInt8 dala_slots[])
 {
   USB_CargoReceiveManager(LabelSetFunc);
   if (hUSB.datalogTask == DATALOG_TASK_DATALOG)
