@@ -7,7 +7,7 @@ PageHandle UIPage_Home1, UIPage_AK10_9_Calibration, UIPage_BNO055_Monitor, \
            UIPage_TMotor_Acceleration_Observer_Project;
 UIHandle hUI;
 
-ButtonHandle hButtonPageAK10_9Calibration;
+ButtonHandle hButtonPageAK10_9KtTesting;
 ButtonHandle hButtonPageAK10_9ManualControl;
 ButtonHandle hButtonPageAK10_9ImpedanceControlDemo;
 ButtonHandle hButtonPageBNO055_Monitor;
@@ -25,6 +25,7 @@ ButtonHandle hButtonStepLengthPlus10, hButtonStepLengthMinus10, hButtonStepLengt
 ButtonHandle hButtonManualControlMode;
 ButtonHandle hButtonSpringConstantUp, hButtonSpringConstantDown, hButtonDampingConstantUp, hButtonDampingConstantDown;
 ButtonHandle hButtonIMUSetModeNDOF, hButtonIMUSetModeGYROONLY;
+ButtonHandle hButtonMotorSelectRightHip, hButtonMotorSelectRightKnee;
 
 
 LinearPotentialmeterHandle  hPotentialmeter;
@@ -111,8 +112,8 @@ void UI_Init(void)
   UIPage_Home1.PageInit = UI_Page_Home1_Init;
   
   UIPage_AK10_9_Calibration.ifPageInitialized = 0;
-  UIPage_AK10_9_Calibration.Page = UI_Page_AK10_9_Calibration;
-  UIPage_AK10_9_Calibration.PageInit = UI_Page_AK10_9_Calibration_Init;
+  UIPage_AK10_9_Calibration.Page = UI_Page_AK10_9_Kt_Testing;
+  UIPage_AK10_9_Calibration.PageInit = UI_Page_AK10_9_Kt_Testing_Init;
   
   UIPage_AK10_9_ManualControl.ifPageInitialized = 0;
   UIPage_AK10_9_ManualControl.Page = UI_Page_AK10_9_ManualControl;
@@ -171,7 +172,7 @@ void UI(void)
   hUI.curPage->Page();
 }
 
-void UI_Page_AK10_9_Calibration(void)
+void UI_Page_AK10_9_Kt_Testing(void)
 {
   ButtonScan(&hButtonGoBack);
   ButtonScan(&hButtonDataLogStart);
@@ -234,7 +235,7 @@ void UI_Page_AK10_9_Calibration(void)
     UI_Page_Change_To(&UIPage_Home1);
 }
 
-void UI_Page_AK10_9_Calibration_Init(void)
+void UI_Page_AK10_9_Kt_Testing_Init(void)
 {
   hButtonDataLogStart = Button_Create(50, 50, 200, 50, "Data Log Start", LIGHT_MAGENTA, LCD_RED);
   hButtonDataLogEnd = Button_Create(50, 150, 200, 50, "Data Log End", LCD_GREEN, LCD_RED);
@@ -249,8 +250,8 @@ void UI_Page_Home1(void)
   LCD_SetFont(&Font32); 
   LCD_DisplayString(140, 30, "Welcome Jiaye");
   LCD_SetFont(&Font24);
-  ButtonScan(&hButtonPageAK10_9Calibration);
-  ButtonRefresh(&hButtonPageAK10_9Calibration);
+  ButtonScan(&hButtonPageAK10_9KtTesting);
+  ButtonRefresh(&hButtonPageAK10_9KtTesting);
   ButtonScan(&hButtonPageAK10_9ManualControl);
   ButtonRefresh(&hButtonPageAK10_9ManualControl);
   ButtonScan(&hButtonPageAK10_9ImpedanceControlDemo);
@@ -260,7 +261,7 @@ void UI_Page_Home1(void)
   ButtonScan(&hButtonPageTMotorAccelerationObserverProject);
   ButtonRefresh(&hButtonPageTMotorAccelerationObserverProject);
   
-  if (ifButtonPressed(&hButtonPageAK10_9Calibration))
+  if (ifButtonPressed(&hButtonPageAK10_9KtTesting))
     UI_Page_Change_To(&UIPage_AK10_9_Calibration);
   if (ifButtonPressed(&hButtonPageAK10_9ManualControl))
     UI_Page_Change_To(&UIPage_AK10_9_ManualControl);
@@ -273,7 +274,7 @@ void UI_Page_Home1(void)
 }
 void UI_Page_Home1_Init(void)
 {
-  hButtonPageAK10_9Calibration = Button_Create(100, 100, 300, 50, "AK10-9 V2.0 Calibration", LIGHT_MAGENTA, LCD_RED);
+  hButtonPageAK10_9KtTesting = Button_Create(100, 100, 300, 50, "AK10-9 V2.0 Kt Testing", LIGHT_MAGENTA, LCD_RED);
   hButtonPageAK10_9ManualControl = Button_Create(80, 200, 360, 50, "AK10-9 V2.0 Manual Control", LIGHT_MAGENTA, LCD_RED);
   hButtonPageAK10_9ImpedanceControlDemo = Button_Create(30, 300, 430, 50, "AK10-9 V2.0 Impedance Control Demo", LIGHT_MAGENTA, LCD_RED);
   hButtonPageBNO055_Monitor = Button_Create(150, 400, 200, 50, "BNO055 Monitor", LIGHT_MAGENTA, LCD_RED);
@@ -291,6 +292,8 @@ void UI_Page_AK10_9_ManualControl(void)
   ButtonScan(&hButtonStepLengthPlus1);
   ButtonScan(&hButtonStepLengthMinus1);
   ButtonScan(&hButtonManualControlMode);
+  ButtonScan(&hButtonMotorSelectRightHip);
+  ButtonScan(&hButtonMotorSelectRightKnee);
   ButtonRefresh(&hButtonGoBack);
   ButtonRefresh(&hButtonMotorStart);
   ButtonRefresh(&hButtonMotorStop);
@@ -300,9 +303,11 @@ void UI_Page_AK10_9_ManualControl(void)
   ButtonRefresh(&hButtonStepLengthPlus1);
   ButtonRefresh(&hButtonStepLengthMinus1);
   ButtonRefresh(&hButtonManualControlMode);
+  ButtonRefresh(&hButtonMotorSelectRightHip);
+  ButtonRefresh(&hButtonMotorSelectRightKnee);
   
   if(ifButtonPressed(&hButtonMotorZeroing))
-    AK10_9_ServoMode_Zeroing(&hAKMotorLeftHip);
+    AK10_9_ServoMode_Zeroing(hMotorPtrManualControl);
   if(ifButtonPressed(&hButtonMotorStart))
     ifManualControlStarted = 1;
   if(ifButtonPressed(&hButtonMotorStop))
@@ -321,7 +326,10 @@ void UI_Page_AK10_9_ManualControl(void)
     if (controlMode > 3)
       controlMode = 0;
   }
-  
+  if (ifButtonPressed(&hButtonMotorSelectRightHip))
+    hMotorPtrManualControl = &hAKMotorRightHip;
+  else if (ifButtonPressed(&hButtonMotorSelectRightKnee))
+    hMotorPtrManualControl = &hAKMotorRightKnee;
   
   LCD_SetLayer(1); 
   LCD_SetColor(LCD_BLACK);
@@ -335,23 +343,23 @@ void UI_Page_AK10_9_ManualControl(void)
     LCD_DisplayString(0, 240, "     BRAKE      ");
   LCD_DisplayString(400, 50, "Step: ");
   LCD_DisplayNumber(400, 80, (int32_t)manualControlValue, 3);
-  if (hAKMotorLeftHip.status == AK10_9_Online)
+  if (hMotorPtrManualControl->status == AK10_9_Online)
     LCD_DisplayString(200, 0, "Motor  Online");
   else
     LCD_DisplayString(200, 0, "Motor Offline");
   LCD_DisplayString(300, 500, "Torque(Nm):");
-  LCD_DisplayDecimals(320, 530, (double)hAKMotorLeftHip.realTorque.f, 3, 2);
+  LCD_DisplayDecimals(320, 530, (double)hMotorPtrManualControl->realTorque.f, 3, 2);
   LCD_DisplayString(20, 570, "Temperature:");
-  LCD_DisplayNumber(70, 600, hAKMotorLeftHip.temperature, 2);
+  LCD_DisplayNumber(70, 600, hMotorPtrManualControl->temperature, 2);
   LCD_DisplayString(230, 600, "Real");
   LCD_DisplayString(360, 600, "Desired");
-  LCD_DisplayString(50, 650, "Position: ");LCD_DisplayDecimals(170, 650, (double)hAKMotorLeftHip.realPosition.f, 10, 4);
-  LCD_DisplayString(50, 700, "Velocity: ");LCD_DisplayDecimals(170, 700, (double)hAKMotorLeftHip.realVelocity.f, 10, 4);
-  LCD_DisplayString(50, 750, "Current:  ");LCD_DisplayDecimals(170, 750, (double)hAKMotorLeftHip.realCurrent.f, 10, 4);
+  LCD_DisplayString(50, 650, "Position: ");LCD_DisplayDecimals(170, 650, (double)hMotorPtrManualControl->realPosition.f, 10, 4);
+  LCD_DisplayString(50, 700, "Velocity: ");LCD_DisplayDecimals(170, 700, (double)hMotorPtrManualControl->realVelocity.f, 10, 4);
+  LCD_DisplayString(50, 750, "Current:  ");LCD_DisplayDecimals(170, 750, (double)hMotorPtrManualControl->realCurrent.f, 10, 4);
   
-  LCD_DisplayDecimals(310, 650, (double)hAKMotorLeftHip.setPosition.f, 10, 4);
-  LCD_DisplayDecimals(310, 700, (double)hAKMotorLeftHip.setVelocity.f, 10, 4);
-  LCD_DisplayDecimals(310, 750, (double)hAKMotorLeftHip.setCurrent.f, 10, 4);
+  LCD_DisplayDecimals(310, 650, (double)hMotorPtrManualControl->setPosition.f, 10, 4);
+  LCD_DisplayDecimals(310, 700, (double)hMotorPtrManualControl->setVelocity.f, 10, 4);
+  LCD_DisplayDecimals(310, 750, (double)hMotorPtrManualControl->setCurrent.f, 10, 4);
   
   if (ifButtonPressed(&hButtonGoBack))
     UI_Page_Change_To(&UIPage_Home1);
@@ -367,6 +375,10 @@ void UI_Page_AK10_9_ManualControl_Init(void)
   hButtonStepLengthPlus1 = Button_Create(210, 180, 190, 50, "Step Length +1", LCD_WHITE, LCD_RED);
   hButtonStepLengthMinus1 = Button_Create(210, 250, 190, 50, "Step Length -1", LCD_WHITE, LCD_RED);
   hButtonManualControlMode = Button_Create(0, 180, 160, 50, "Control Mode", LCD_WHITE, LCD_RED);
+  hButtonMotorSelectRightHip = Button_Create(0, 300, 160, 50, "Right Hip", DARK_YELLOW, LCD_RED);
+  hButtonMotorSelectRightKnee = Button_Create(0, 400, 160, 50, "Right Knee", DARK_YELLOW, LCD_RED);
+  
+  hMotorPtrManualControl = &hAKMotorRightHip;
 }
 
 void UI_Page_AK10_9_ImpedanceControlDemo(void)

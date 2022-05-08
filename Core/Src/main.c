@@ -158,19 +158,19 @@ void AK10Calibration_Task(void *argument)
     if (ifManualControlStarted)
     {
       if (controlMode == AK10_9_MODE_POSITION)
-        AK10_9_ServoMode_PositionControl(&hAKMotorLeftHip, manualControlValue);
+        AK10_9_ServoMode_PositionControl(hMotorPtrManualControl, manualControlValue);
       else if (controlMode == AK10_9_MODE_CURRENT)
-        AK10_9_ServoMode_CurrentControl(&hAKMotorLeftHip, manualControlValue);
+        AK10_9_ServoMode_CurrentControl(hMotorPtrManualControl, manualControlValue);
       else if (controlMode == AK10_9_MODE_VELOCITY)
-        AK10_9_ServoMode_VelocityControl(&hAKMotorLeftHip, manualControlValue);
+        AK10_9_ServoMode_VelocityControl(hMotorPtrManualControl, manualControlValue);
     }
     
     if (ifImpedanceControlStarted)
     {
-      AK10_9_ImpedanceControl(&hAKMotorLeftHip, impedance_control_spring_constant, impedance_control_damping_constant, 0.0f);
+      AK10_9_ImpedanceControl(hMotorPtrManualControl, impedance_control_spring_constant, impedance_control_damping_constant, 0.0f);
     }
     
-    AK10_9_MotorStatusMonitor(&hAKMotorLeftHip);
+    AK10_9_MotorStatusMonitor(hMotorPtrManualControl);
     osDelay(1);
   }
 }
