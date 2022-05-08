@@ -148,6 +148,8 @@ void AK10Calibration_Task(void *argument)
   
   for(;;)
   {
+    EXOSKELETON_SetIMUMode_GYRO_Only(&hIMURightThigh);
+    
     AK10_9_DataLog_Manager(&hAKMotorLeftHip, &hIMURightThigh);
     if (ifMotorProfilingStarted)
       AK10_9_MotorProfiling_Function1(&hAKMotorLeftHip);
@@ -169,7 +171,7 @@ void AK10Calibration_Task(void *argument)
     }
     
     AK10_9_MotorStatusMonitor(&hAKMotorLeftHip);
-    osDelay(2);
+    osDelay(1);
   }
 }
 
