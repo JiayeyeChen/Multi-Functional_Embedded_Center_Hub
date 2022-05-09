@@ -6,9 +6,10 @@ void EXOSKELETON_Init(void)
 {
   hIMURightThigh.hcan = &hcan2;
   hIMURightThigh.operationMode = 0xFF;
-  hIMURightThigh.operationModeENUM = IMU_MODE_NDOF;
+  hIMURightThigh.operationModeENUM = IMU_MODE_AMG;
   hIMURightThigh.CANID_SET_MODE_NDOF = CAN_ID_IMU_GET_DATA_NDOF_RIGHT_THIGH;
   hIMURightThigh.CANID_SET_MODE_GYROONLY = CAN_ID_IMU_GET_DATA_GYROONLY_RIGHT_THIGH;
+  hIMURightThigh.CANID_SET_MODE_AMG = CAN_ID_IMU_GET_DATA_AMG_RIGHT_THIGH;
 }
 
 void EXOSKELETON_GetIMUFeedbackLiAcc(BNO055Handle* himu, uint8_t data[])
@@ -57,4 +58,32 @@ void EXOSKELETON_SetIMUMode_GYRO_Only(BNO055Handle* himu)
   himu->txHeader.IDE = 0;
   himu->txHeader.DLC = 1;
   HAL_CAN_AddTxMessage(himu->hcan, &himu->txHeader, himu->txBuf, himu->pTxMailbox);
+}
+
+void EXOSKELETON_SetIMUMode_AMG(BNO055Handle* himu)
+{
+  himu->txHeader.StdId = himu->CANID_SET_MODE_AMG;
+  himu->txHeader.RTR = 0;
+  himu->txHeader.IDE = 0;
+  himu->txHeader.DLC = 1;
+  HAL_CAN_AddTxMessage(himu->hcan, &himu->txHeader, himu->txBuf, himu->pTxMailbox);
+}
+
+void EXOSKELETON_GetIMUFeedbackAcc(BNO055Handle* himu, uint8_t data[])
+{
+  himu->rawData.AccX.b8[0] = data[0];
+  himu->rawData.AccX.b8[1] = data[1];
+  himu->rawData.AccY.b8[0] = data[2];
+  himu->rawData.AccY.b8[1] = data[3];
+  himu->rawData.AccZ.b8[0] = data[4];
+  himu->rawData.AccZ.b8[1] = data[5];
+}
+void EXOSKELETON_GetIMUFeedbackMag(BNO055Handle* himu, uint8_t data[])
+{
+  himu->rawData.MagX.b8[0] = data[0];
+  himu->rawData.MagX.b8[1] = data[1];
+  himu->rawData.MagY.b8[0] = data[2];
+  himu->rawData.MagY.b8[1] = data[3];
+  himu->rawData.MagZ.b8[0] = data[4];
+  himu->rawData.MagZ.b8[1] = data[5];
 }

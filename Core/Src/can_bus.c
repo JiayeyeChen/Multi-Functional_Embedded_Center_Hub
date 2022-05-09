@@ -60,7 +60,7 @@ void CAN_ConfigureFilters(void)
   hIMURightThigh.rxFilter.FilterMode = CAN_FILTERMODE_IDLIST;
 	hIMURightThigh.rxFilter.FilterScale = CAN_FILTERSCALE_16BIT;
 	hIMURightThigh.rxFilter.FilterFIFOAssignment = CAN_FILTER_FIFO0;
-	hIMURightThigh.rxFilter.FilterBank = 3;
+	hIMURightThigh.rxFilter.FilterBank = 5;
 	hIMURightThigh.rxFilter.FilterIdHigh = CAN_ID_IMU_QUATERNION_EXOSKELETON_RIGHT_THIGH << 5;
 	hIMURightThigh.rxFilter.FilterActivation = ENABLE;
 	HAL_CAN_ConfigFilter(hIMURightThigh.hcan, &hIMURightThigh.rxFilter);
@@ -70,6 +70,22 @@ void CAN_ConfigureFilters(void)
 	hIMURightThigh.rxFilter.FilterFIFOAssignment = CAN_FILTER_FIFO0;
 	hIMURightThigh.rxFilter.FilterBank = 4;
 	hIMURightThigh.rxFilter.FilterIdHigh = CAN_ID_IMU_STATUS_EXOSKELETON_RIGHT_THIGH << 5;
+	hIMURightThigh.rxFilter.FilterActivation = ENABLE;
+	HAL_CAN_ConfigFilter(hIMURightThigh.hcan, &hIMURightThigh.rxFilter);
+  //Filter bank 5
+  hIMURightThigh.rxFilter.FilterMode = CAN_FILTERMODE_IDLIST;
+	hIMURightThigh.rxFilter.FilterScale = CAN_FILTERSCALE_16BIT;
+	hIMURightThigh.rxFilter.FilterFIFOAssignment = CAN_FILTER_FIFO0;
+	hIMURightThigh.rxFilter.FilterBank = 3;
+	hIMURightThigh.rxFilter.FilterIdHigh = CAN_ID_IMU_ACC_EXOSKELETON_RIGHT_THIGH << 5;
+	hIMURightThigh.rxFilter.FilterActivation = ENABLE;
+	HAL_CAN_ConfigFilter(hIMURightThigh.hcan, &hIMURightThigh.rxFilter);
+  //Filter bank 6
+  hIMURightThigh.rxFilter.FilterMode = CAN_FILTERMODE_IDLIST;
+	hIMURightThigh.rxFilter.FilterScale = CAN_FILTERSCALE_16BIT;
+	hIMURightThigh.rxFilter.FilterFIFOAssignment = CAN_FILTER_FIFO0;
+	hIMURightThigh.rxFilter.FilterBank = 6;
+	hIMURightThigh.rxFilter.FilterIdHigh = CAN_ID_IMU_MAG_EXOSKELETON_RIGHT_THIGH << 5;
 	hIMURightThigh.rxFilter.FilterActivation = ENABLE;
 	HAL_CAN_ConfigFilter(hIMURightThigh.hcan, &hIMURightThigh.rxFilter);
 }
@@ -102,6 +118,10 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
     EXOSKELETON_GetIMUFeedbackQuaternion(&hIMURightThigh, temRxData);
   else if (temRxHeader.StdId == CAN_ID_IMU_STATUS_EXOSKELETON_RIGHT_THIGH)
     EXOSKELETON_GetIMUFeedbackStatus(&hIMURightThigh, temRxData);
+  else if (temRxHeader.StdId == CAN_ID_IMU_ACC_EXOSKELETON_RIGHT_THIGH)
+    EXOSKELETON_GetIMUFeedbackAcc(&hIMURightThigh, temRxData);
+  else if (temRxHeader.StdId == CAN_ID_IMU_MAG_EXOSKELETON_RIGHT_THIGH)
+    EXOSKELETON_GetIMUFeedbackMag(&hIMURightThigh, temRxData);
   //End
   rxfifo0detected++;
 }
