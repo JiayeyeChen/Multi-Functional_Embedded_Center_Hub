@@ -24,7 +24,7 @@ ButtonHandle hButtonGoBack;
 ButtonHandle hButtonStepLengthPlus10, hButtonStepLengthMinus10, hButtonStepLengthPlus1, hButtonStepLengthMinus1;
 ButtonHandle hButtonManualControlMode;
 ButtonHandle hButtonSpringConstantUp, hButtonSpringConstantDown, hButtonDampingConstantUp, hButtonDampingConstantDown;
-ButtonHandle hButtonIMUSetModeNDOF, hButtonIMUSetModeAMG;
+ButtonHandle hButtonIMUSetModeNDOF, hButtonIMUSetModeACCGYRO, hButtonIMUSetModeGYROONLY;
 ButtonHandle hButtonMotorSelectRightHip, hButtonMotorSelectRightKnee;
 
 
@@ -458,8 +458,10 @@ void UI_Page_BNO055_Monitor(void)
   ButtonRefresh(&hButtonGoBack);
   ButtonScan(&hButtonIMUSetModeNDOF);
   ButtonRefresh(&hButtonIMUSetModeNDOF);
-  ButtonScan(&hButtonIMUSetModeAMG);
-  ButtonRefresh(&hButtonIMUSetModeAMG);
+  ButtonScan(&hButtonIMUSetModeACCGYRO);
+  ButtonRefresh(&hButtonIMUSetModeACCGYRO);
+  ButtonScan(&hButtonIMUSetModeGYROONLY);
+  ButtonRefresh(&hButtonIMUSetModeGYROONLY);
   
   LCD_SetLayer(1); 
   LCD_SetColor(LCD_BLACK);
@@ -478,13 +480,17 @@ void UI_Page_BNO055_Monitor(void)
   
   if (hIMURightThigh.operationModeENUM == IMU_MODE_NDOF)
     EXOSKELETON_SetIMUMode_9_DOF(&hIMURightThigh);
-  else if (hIMURightThigh.operationModeENUM == IMU_MODE_AMG)
+  else if (hIMURightThigh.operationModeENUM == IMU_MODE_ACCGYRO)
     EXOSKELETON_SetIMUMode_AMG(&hIMURightThigh);
+  else if (hIMURightThigh.operationModeENUM == IMU_MODE_GYROONLY)
+    EXOSKELETON_SetIMUMode_GYRO_Only(&hIMURightThigh);
   
   if (ifButtonPressed(&hButtonIMUSetModeNDOF))
     hIMURightThigh.operationModeENUM = IMU_MODE_NDOF;
-  if (ifButtonPressed(&hButtonIMUSetModeAMG))
-    hIMURightThigh.operationModeENUM = IMU_MODE_AMG;
+  if (ifButtonPressed(&hButtonIMUSetModeACCGYRO))
+    hIMURightThigh.operationModeENUM = IMU_MODE_ACCGYRO;
+  if (ifButtonPressed(&hButtonIMUSetModeGYROONLY))
+    hIMURightThigh.operationModeENUM = IMU_MODE_GYROONLY;
   
   if (ifButtonPressed(&hButtonGoBack))
     UI_Page_Change_To(&UIPage_Home1);
@@ -494,7 +500,8 @@ void UI_Page_BNO055_Monitor_Init(void)
 {
   hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
   hButtonIMUSetModeNDOF = Button_Create(100, 700, 250, 40, "9 DOF Fusion Mode", LIGHT_YELLOW, LCD_RED);
-  hButtonIMUSetModeAMG = Button_Create(100, 750, 200, 40, "AMG Mode", LIGHT_YELLOW, LCD_RED);
+  hButtonIMUSetModeACCGYRO = Button_Create(100, 750, 200, 40, "ACCGYRO Mode", LIGHT_YELLOW, LCD_RED);
+  hButtonIMUSetModeGYROONLY = Button_Create(100, 650, 200, 40, "GYROONLY Mode", LIGHT_YELLOW, LCD_RED);
   LCD_DisplayString(100, 0, "LiAccX: ");
   LCD_DisplayString(100, 50, "LiAccY: ");
   LCD_DisplayString(100, 100, "LiAccZ: ");

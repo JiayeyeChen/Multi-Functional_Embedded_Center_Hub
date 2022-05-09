@@ -39,7 +39,7 @@ CAN_FilterTypeDef ConfigCANFilter_EXT_ID_32BitIDListMode(CAN_HandleTypeDef* hcan
 void CAN_ConfigureFilters(void)
 {
   //Filter bank 0
-  hAKMotorRightKnee.rxFilter = ConfigCANFilter_EXT_ID_32BitIDListMode(&hcan2, 0, CAN_FILTER_FIFO0, CAN_ID_EXT, CAN_ID_TMOTOR_EXOSKELETON_RIGHT_KNEE, 0);
+  hAKMotorRightKnee.rxFilter = ConfigCANFilter_EXT_ID_32BitIDListMode(&hcan2, 0, CAN_FILTER_FIFO1, CAN_ID_EXT, CAN_ID_TMOTOR_EXOSKELETON_RIGHT_KNEE, 0);
   //Filter bank 1
   hIMURightThigh.rxFilter.FilterMode = CAN_FILTERMODE_IDLIST;
 	hIMURightThigh.rxFilter.FilterScale = CAN_FILTERSCALE_16BIT;
@@ -98,17 +98,6 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
   HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &temRxHeader, temRxData);
   
   //Application specific codes
-  //Tmotors
-  if (temRxHeader.ExtId == CAN_ID_TMOTOR_EXOSKELETON_RIGHT_HIP)
-  {
-    AK10_9_ServoMode_GetFeedbackMsg(&temRxHeader, &hAKMotorRightHip, temRxData);
-    AK10_9_Calculate_velocity_current_AVG(&hAKMotorRightHip);
-  }
-  else if (temRxHeader.ExtId == CAN_ID_TMOTOR_EXOSKELETON_RIGHT_KNEE)
-  {
-    AK10_9_ServoMode_GetFeedbackMsg(&temRxHeader, &hAKMotorRightKnee, temRxData);
-    AK10_9_Calculate_velocity_current_AVG(&hAKMotorRightKnee);
-  }
   //BNO055
   if (temRxHeader.StdId == CAN_ID_IMU_LIACC_EXOSKELETON_RIGHT_THIGH)
     EXOSKELETON_GetIMUFeedbackLiAcc(&hIMURightThigh, temRxData);
@@ -126,7 +115,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
   rxfifo0detected++;
 }
 
-void HAL_CAN_RxFifo1FullCallback(CAN_HandleTypeDef *hcan)
+void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
   //General codes
   CAN_RxHeaderTypeDef temRxHeader;
@@ -134,6 +123,16 @@ void HAL_CAN_RxFifo1FullCallback(CAN_HandleTypeDef *hcan)
   HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO1, &temRxHeader, temRxData);
   
   //Application specific codes
-  AK10_9_ServoMode_GetFeedbackMsg(&temRxHeader, &hAKMotorLeftHip, temRxData);
+  //Tmotors
+  if (temRxHeader.ExtId == CAN_ID_TMOTOR_EXOSKELETON_RIGHT_HIP)
+  {
+    AK10_9_ServoMode_GetFeedbackMsg(&temRxHeader, &hAKMotorRightHip, temRxData);
+    AK10_9_Calculate_velocity_current_AVG(&hAKMotorRightHip);
+  }
+  else if (temRxHeader.ExtId == CAN_ID_TMOTOR_EXOSKELETON_RIGHT_KNEE)
+  {
+    AK10_9_ServoMode_GetFeedbackMsg(&temRxHeader, &hAKMotorRightKnee, temRxData);
+    AK10_9_Calculate_velocity_current_AVG(&hAKMotorRightKnee);
+  }
   rxfifo1detected++;
 }

@@ -6,7 +6,7 @@ void EXOSKELETON_Init(void)
 {
   hIMURightThigh.hcan = &hcan2;
   hIMURightThigh.operationMode = 0xFF;
-  hIMURightThigh.operationModeENUM = IMU_MODE_AMG;
+  hIMURightThigh.operationModeENUM = IMU_MODE_ACCGYRO;
   hIMURightThigh.CANID_SET_MODE_NDOF = CAN_ID_IMU_GET_DATA_NDOF_RIGHT_THIGH;
   hIMURightThigh.CANID_SET_MODE_GYROONLY = CAN_ID_IMU_GET_DATA_GYROONLY_RIGHT_THIGH;
   hIMURightThigh.CANID_SET_MODE_AMG = CAN_ID_IMU_GET_DATA_AMG_RIGHT_THIGH;

@@ -8,7 +8,7 @@ enum IMU_Operation_Mode
 {
   IMU_MODE_NDOF,
   IMU_MODE_GYROONLY,
-  IMU_MODE_AMG
+  IMU_MODE_ACCGYRO
 };
 
 typedef struct
