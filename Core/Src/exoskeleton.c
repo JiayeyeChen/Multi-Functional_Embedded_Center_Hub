@@ -6,10 +6,10 @@ void EXOSKELETON_Init(void)
 {
   hIMURightThigh.hcan = &hcan2;
   hIMURightThigh.operationMode = 0xFF;
-  hIMURightThigh.operationModeENUM = IMU_MODE_ACCGYRO;
+  hIMURightThigh.operationModeENUM = IMU_MODE_ACCONLY;
   hIMURightThigh.CANID_SET_MODE_NDOF = CAN_ID_IMU_GET_DATA_NDOF_RIGHT_THIGH;
   hIMURightThigh.CANID_SET_MODE_GYROONLY = CAN_ID_IMU_GET_DATA_GYROONLY_RIGHT_THIGH;
-  hIMURightThigh.CANID_SET_MODE_AMG = CAN_ID_IMU_GET_DATA_AMG_RIGHT_THIGH;
+  hIMURightThigh.CANID_SET_MODE_ACCONLY = CAN_ID_IMU_GET_DATA_ACCONLY_RIGHT_THIGH;
 }
 
 void EXOSKELETON_GetIMUFeedbackLiAcc(BNO055Handle* himu, uint8_t data[])
@@ -60,9 +60,9 @@ void EXOSKELETON_SetIMUMode_GYRO_Only(BNO055Handle* himu)
   HAL_CAN_AddTxMessage(himu->hcan, &himu->txHeader, himu->txBuf, himu->pTxMailbox);
 }
 
-void EXOSKELETON_SetIMUMode_AMG(BNO055Handle* himu)
+void EXOSKELETON_SetIMUMode_ACC_Only(BNO055Handle* himu)
 {
-  himu->txHeader.StdId = himu->CANID_SET_MODE_AMG;
+  himu->txHeader.StdId = himu->CANID_SET_MODE_ACCONLY;
   himu->txHeader.RTR = 0;
   himu->txHeader.IDE = 0;
   himu->txHeader.DLC = 1;

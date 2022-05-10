@@ -24,7 +24,7 @@ ButtonHandle hButtonGoBack;
 ButtonHandle hButtonStepLengthPlus10, hButtonStepLengthMinus10, hButtonStepLengthPlus1, hButtonStepLengthMinus1;
 ButtonHandle hButtonManualControlMode;
 ButtonHandle hButtonSpringConstantUp, hButtonSpringConstantDown, hButtonDampingConstantUp, hButtonDampingConstantDown;
-ButtonHandle hButtonIMUSetModeNDOF, hButtonIMUSetModeACCGYRO, hButtonIMUSetModeGYROONLY;
+ButtonHandle hButtonIMUSetModeNDOF, hButtonIMUSetModeACCONLY, hButtonIMUSetModeGYROONLY;
 ButtonHandle hButtonMotorSelectRightHip, hButtonMotorSelectRightKnee;
 
 
@@ -180,7 +180,12 @@ void UI_Page_AK10_9_Kt_Testing(void)
   ButtonScan(&hButtonMotorProfilingStart);
   ButtonScan(&hButtonMotorProfilingEnd);
   ButtonScan(&hButtonMotorZeroing);
-  
+  ButtonRefresh(&hButtonGoBack);
+  ButtonRefresh(&hButtonDataLogEnd);
+  ButtonRefresh(&hButtonDataLogStart);
+  ButtonRefresh(&hButtonMotorProfilingStart);
+  ButtonRefresh(&hButtonMotorProfilingEnd);
+  ButtonRefresh(&hButtonMotorZeroing);
   
   if (ifButtonPressed(&hButtonDataLogStart))
   {
@@ -204,14 +209,6 @@ void UI_Page_AK10_9_Kt_Testing(void)
   {
     AK10_9_ServoMode_Zeroing(&hAKMotorLeftHip);
   }
-  
-  ButtonRefresh(&hButtonGoBack);
-  ButtonRefresh(&hButtonDataLogEnd);
-  ButtonRefresh(&hButtonDataLogStart);
-  ButtonRefresh(&hButtonMotorProfilingStart);
-  ButtonRefresh(&hButtonMotorProfilingEnd);
-  ButtonRefresh(&hButtonMotorZeroing);
-  
   
   LCD_SetLayer(1); 
   LCD_SetColor(LCD_BLACK);
@@ -458,8 +455,8 @@ void UI_Page_BNO055_Monitor(void)
   ButtonRefresh(&hButtonGoBack);
   ButtonScan(&hButtonIMUSetModeNDOF);
   ButtonRefresh(&hButtonIMUSetModeNDOF);
-  ButtonScan(&hButtonIMUSetModeACCGYRO);
-  ButtonRefresh(&hButtonIMUSetModeACCGYRO);
+  ButtonScan(&hButtonIMUSetModeACCONLY);
+  ButtonRefresh(&hButtonIMUSetModeACCONLY);
   ButtonScan(&hButtonIMUSetModeGYROONLY);
   ButtonRefresh(&hButtonIMUSetModeGYROONLY);
   
@@ -480,15 +477,15 @@ void UI_Page_BNO055_Monitor(void)
   
   if (hIMURightThigh.operationModeENUM == IMU_MODE_NDOF)
     EXOSKELETON_SetIMUMode_9_DOF(&hIMURightThigh);
-  else if (hIMURightThigh.operationModeENUM == IMU_MODE_ACCGYRO)
-    EXOSKELETON_SetIMUMode_AMG(&hIMURightThigh);
+  else if (hIMURightThigh.operationModeENUM == IMU_MODE_ACCONLY)
+    EXOSKELETON_SetIMUMode_ACC_Only(&hIMURightThigh);
   else if (hIMURightThigh.operationModeENUM == IMU_MODE_GYROONLY)
     EXOSKELETON_SetIMUMode_GYRO_Only(&hIMURightThigh);
   
   if (ifButtonPressed(&hButtonIMUSetModeNDOF))
     hIMURightThigh.operationModeENUM = IMU_MODE_NDOF;
-  if (ifButtonPressed(&hButtonIMUSetModeACCGYRO))
-    hIMURightThigh.operationModeENUM = IMU_MODE_ACCGYRO;
+  if (ifButtonPressed(&hButtonIMUSetModeACCONLY))
+    hIMURightThigh.operationModeENUM = IMU_MODE_ACCONLY;
   if (ifButtonPressed(&hButtonIMUSetModeGYROONLY))
     hIMURightThigh.operationModeENUM = IMU_MODE_GYROONLY;
   
@@ -500,7 +497,7 @@ void UI_Page_BNO055_Monitor_Init(void)
 {
   hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
   hButtonIMUSetModeNDOF = Button_Create(100, 700, 250, 40, "9 DOF Fusion Mode", LIGHT_YELLOW, LCD_RED);
-  hButtonIMUSetModeACCGYRO = Button_Create(100, 750, 200, 40, "ACCGYRO Mode", LIGHT_YELLOW, LCD_RED);
+  hButtonIMUSetModeACCONLY = Button_Create(100, 750, 200, 40, "ACCONLY Mode", LIGHT_YELLOW, LCD_RED);
   hButtonIMUSetModeGYROONLY = Button_Create(100, 650, 200, 40, "GYROONLY Mode", LIGHT_YELLOW, LCD_RED);
   LCD_DisplayString(100, 0, "LiAccX: ");
   LCD_DisplayString(100, 50, "LiAccY: ");
@@ -534,11 +531,87 @@ void UI_Page_TMotor_Acceleration_Observer_Project(void)
 {
   ButtonScan(&hButtonGoBack);
   ButtonRefresh(&hButtonGoBack);
+  ButtonScan(&hButtonDataLogStart);
+  ButtonScan(&hButtonDataLogEnd);
+  ButtonScan(&hButtonMotorProfilingStart);
+  ButtonScan(&hButtonMotorProfilingEnd);
+  ButtonScan(&hButtonMotorZeroing);
+  ButtonRefresh(&hButtonDataLogEnd);
+  ButtonRefresh(&hButtonDataLogStart);
+  ButtonRefresh(&hButtonMotorProfilingStart);
+  ButtonRefresh(&hButtonMotorProfilingEnd);
+  ButtonRefresh(&hButtonMotorZeroing);
+  
+  if (ifButtonPressed(&hButtonDataLogStart))
+    USB_DataLogStart();
+  if (ifButtonPressed(&hButtonDataLogEnd))
+    USB_DataLogEnd();
+  if(ifButtonPressed(&hButtonMotorProfilingStart))
+  {
+    ifMotorProfilingStarted = 1;
+    timeDifference = HAL_GetTick();
+  }
+  if(ifButtonPressed(&hButtonMotorProfilingEnd))
+  {
+    ifMotorProfilingStarted = 0;
+    timeDifference = 0;
+  }
+  if(ifButtonPressed(&hButtonMotorZeroing))
+    AK10_9_ServoMode_Zeroing(&hAKMotorRightKnee);
+  
+  LCD_SetLayer(1); 
+  LCD_SetColor(LCD_BLACK);
+  if (hAKMotorRightKnee.status == AK10_9_Online)
+    LCD_DisplayString(200, 0, "Motor  Online");
+  else
+    LCD_DisplayString(200, 0, "Motor Offline");
+  
+  
+  LCD_DisplayDecimals(140, 720, (double)hAKMotorRightKnee.realPosition.f, 10, 4);
+  LCD_DisplayDecimals(140, 745, (double)hAKMotorRightKnee.setPosition.f, 10, 4);
+  LCD_DisplayDecimals(140, 770, (double)hAKMotorRightKnee.realVelocity.f, 10, 4);
+  LCD_SetColor(DARK_RED);
+  LCD_DisplayDecimals(90, 495, (double)hIMURightThigh.rawData.liaccX.b16, 7, 1);
+  LCD_DisplayDecimals(90, 520, (double)hIMURightThigh.rawData.liaccY.b16, 7, 1);
+  LCD_DisplayDecimals(90, 545, (double)hIMURightThigh.rawData.liaccZ.b16, 7, 1);
+  LCD_DisplayDecimals(90, 570, (double)hIMURightThigh.rawData.AccX.b16, 7, 1);
+  LCD_DisplayDecimals(90, 595, (double)hIMURightThigh.rawData.AccY.b16, 7, 1);
+  LCD_DisplayDecimals(90, 620, (double)hIMURightThigh.rawData.AccZ.b16, 7, 1);
+  LCD_DisplayDecimals(90, 645, (double)hIMURightThigh.rawData.gyroX.b16, 7, 1);
+  LCD_DisplayDecimals(90, 670, (double)hIMURightThigh.rawData.gyroY.b16, 7, 1);
+  LCD_DisplayDecimals(90, 695, (double)hIMURightThigh.rawData.gyroZ.b16, 7, 1);
+  LCD_SetColor(LCD_BLACK);
   
   if (ifButtonPressed(&hButtonGoBack))
+  {
     UI_Page_Change_To(&UIPage_Home1);
+    ifIMUFeedbackStarted = 0;
+  }
 }
 void UI_Page_TMotor_Acceleration_Observer_Project_Init(void)
 {
+  hButtonDataLogStart = Button_Create(10, 100, 200, 40, "Data Log Start", LIGHT_MAGENTA, LCD_RED);
+  hButtonDataLogEnd = Button_Create(10, 150, 200, 40, "Data Log End", LCD_GREEN, LCD_RED);
+  hButtonMotorProfilingStart = Button_Create(10, 200, 300, 40, "Motor profiling Start", LIGHT_GREY, LCD_RED);
+  hButtonMotorProfilingEnd = Button_Create(10, 250, 300, 40, "Motor profiling Stop", LCD_YELLOW, LCD_RED);
+  hButtonMotorZeroing = Button_Create(10, 330, 200, 40, "Motor Set Zero", LCD_BLUE, LCD_RED);
   hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
+  
+  LCD_SetLayer(0); 
+  LCD_SetColor(LCD_BLACK);
+  LCD_DisplayString(10, 720, "Position mes: ");
+  LCD_DisplayString(10, 745, "Position des: ");
+  LCD_DisplayString(10, 770, "Velocity: ");
+  LCD_SetColor(DARK_RED);
+  LCD_DisplayString(10, 495, "LiAccX: ");
+  LCD_DisplayString(10, 520, "LiAccY: ");
+  LCD_DisplayString(10, 545, "LiAccZ: ");
+  LCD_DisplayString(10, 570, "AccX: ");
+  LCD_DisplayString(10, 595, "AccY: ");
+  LCD_DisplayString(10, 620, "AccZ: ");
+  LCD_DisplayString(10, 645, "GyroX:  ");
+  LCD_DisplayString(10, 670, "GyroY:  ");
+  LCD_DisplayString(10, 695, "GyroZ:  ");
+  
+  ifIMUFeedbackStarted = 1;
 }

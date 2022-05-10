@@ -8,7 +8,7 @@ enum IMU_Operation_Mode
 {
   IMU_MODE_NDOF,
   IMU_MODE_GYROONLY,
-  IMU_MODE_ACCGYRO
+  IMU_MODE_ACCONLY
 };
 
 typedef struct
@@ -67,7 +67,7 @@ typedef struct
   //CAN IDs
   uint32_t              CANID_SET_MODE_NDOF;
   uint32_t              CANID_SET_MODE_GYROONLY;
-  uint32_t              CANID_SET_MODE_AMG;
+  uint32_t              CANID_SET_MODE_ACCONLY;
 }BNO055Handle;
 
 void EXOSKELETON_Init(void);
@@ -77,7 +77,7 @@ void EXOSKELETON_GetIMUFeedbackQuaternion(BNO055Handle* himu, uint8_t data[]);
 void EXOSKELETON_GetIMUFeedbackStatus(BNO055Handle* himu, uint8_t data[]);
 void EXOSKELETON_SetIMUMode_9_DOF(BNO055Handle* himu);
 void EXOSKELETON_SetIMUMode_GYRO_Only(BNO055Handle* himu);
-void EXOSKELETON_SetIMUMode_AMG(BNO055Handle* himu);
+void EXOSKELETON_SetIMUMode_ACC_Only(BNO055Handle* himu);
 void EXOSKELETON_GetIMUFeedbackAcc(BNO055Handle* himu, uint8_t data[]);
 void EXOSKELETON_GetIMUFeedbackMag(BNO055Handle* himu, uint8_t data[]);
 

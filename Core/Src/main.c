@@ -145,10 +145,9 @@ void AK10Calibration_Task(void *argument)
   
   for(;;)
   {
-    EXOSKELETON_SetIMUMode_GYRO_Only(&hIMURightThigh);
-    AK10_9_DataLog_Manager(&hAKMotorLeftHip, &hIMURightThigh);
+    AK10_9_DataLog_Manager(&hAKMotorRightKnee, &hIMURightThigh);
     if (ifMotorProfilingStarted)
-      AK10_9_MotorProfiling_Function1(&hAKMotorLeftHip);
+      AK10_9_MotorProfiling_Function1(&hAKMotorRightKnee);
       //AK10_9_MotorProfiling_Function2_CurrentControlStepResponse(&hAKMotorLeftHip);
     
     if (ifManualControlStarted)
@@ -162,11 +161,13 @@ void AK10Calibration_Task(void *argument)
     }
     
     if (ifImpedanceControlStarted)
-    {
       AK10_9_ImpedanceControl(hMotorPtrManualControl, impedance_control_spring_constant, impedance_control_damping_constant, 0.0f);
-    }
     
-    AK10_9_MotorStatusMonitor(hMotorPtrManualControl);
+    if (ifIMUFeedbackStarted)
+      EXOSKELETON_SetIMUMode_ACC_Only(&hIMURightThigh);
+    
+    AK10_9_MotorStatusMonitor(&hAKMotorRightKnee);
+    AK10_9_MotorStatusMonitor(&hAKMotorRightHip);
     osDelay(1);
   }
 }
