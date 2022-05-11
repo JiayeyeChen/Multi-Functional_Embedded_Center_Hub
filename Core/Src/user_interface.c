@@ -21,14 +21,13 @@ ButtonHandle hButtonMotorZeroing;
 ButtonHandle hButtonMotorStart;
 ButtonHandle hButtonMotorStop;
 ButtonHandle hButtonGoBack;
-ButtonHandle hButtonStepLengthPlus10, hButtonStepLengthMinus10, hButtonStepLengthPlus1, hButtonStepLengthMinus1;
 ButtonHandle hButtonManualControlMode;
 ButtonHandle hButtonSpringConstantUp, hButtonSpringConstantDown, hButtonDampingConstantUp, hButtonDampingConstantDown;
 ButtonHandle hButtonIMUSetModeNDOF, hButtonIMUSetModeACCONLY, hButtonIMUSetModeGYROONLY;
 ButtonHandle hButtonMotorSelectRightHip, hButtonMotorSelectRightKnee;
 
 
-LinearPotentialmeterHandle  hPotentialmeter;
+LinearPotentialmeterHandle  hTMotorManualControlPot;
 
 ButtonHandle Button_Create(uint16_t x, uint16_t y, uint16_t xLen, uint16_t yLen, char label[],\
                            uint32_t colorUnpressed, uint32_t colorPressed)
@@ -83,17 +82,84 @@ uint8_t ifButtonPressed(ButtonHandle* hbutton)
   return 0;
 }
 
-LinearPotentialmeterHandle  Potentialmeter_Create(uint16_t x, uint16_t y, uint16_t xLen, uint16_t yLen, uint16_t sliderLen, uint32_t colorUnpressed, uint32_t colorPressed)
+LinearPotentialmeterHandle  Potentialmeter_Create(uint16_t x, uint16_t y, uint16_t xLen, \
+                                                  uint16_t yLen, uint16_t sliderLen, uint16_t sliderWidth, \
+                                                  uint32_t sliderColorUnpressed, uint32_t sliderColorPressed, \
+                                                  uint32_t slotColor, float minVal, float maxVal, float startVal, float* ctrVal)
 {
   LinearPotentialmeterHandle hpotentialmeter;
   hpotentialmeter.pos.x = x;
   hpotentialmeter.pos.y = y;
   hpotentialmeter.pos.xLen = xLen;
   hpotentialmeter.pos.yLen = yLen;
-  hpotentialmeter.pos.xSliderLen = sliderLen;
+  hpotentialmeter.pos.sliderLen = sliderLen;
+  hpotentialmeter.pos.sliderWidth = sliderWidth;
+  hpotentialmeter.pos.ySlider = y + yLen - sliderLen - (yLen - sliderLen)*(uint16_t)(startVal - minVal)/(uint16_t)(maxVal - minVal);
+  hpotentialmeter.pos.xSlider = x + (xLen - sliderWidth) / 2;
+  hpotentialmeter.minVal = minVal;
+  hpotentialmeter.maxVal = maxVal;
+  hpotentialmeter.sliderColorPressed = sliderColorPressed;
+  hpotentialmeter.sliderColorUnpressed = sliderColorUnpressed;
+  hpotentialmeter.ifSliderPressed = 0;
+  hpotentialmeter.preIfSliderPressed = 0;
+  hpotentialmeter.ifNeedRefresh = 0;
+  hpotentialmeter.controlledValue = ctrVal;
+  
+  LCD_SetLayer(0);
+  LCD_SetColor(slotColor);
+  LCD_FillRect(x, y, xLen, yLen);
+  LCD_SetColor(LCD_BLACK);
+  LCD_DrawRect(x, y, xLen, yLen);
+  LCD_SetLayer(1);
+  LCD_SetColor(sliderColorUnpressed);
+  LCD_FillRect(hpotentialmeter.pos.xSlider, hpotentialmeter.pos.ySlider, hpotentialmeter.pos.sliderWidth, hpotentialmeter.pos.sliderLen);
+  LCD_SetColor(LCD_BLACK);
+  LCD_DrawRect(hpotentialmeter.pos.xSlider, hpotentialmeter.pos.ySlider, hpotentialmeter.pos.sliderWidth, hpotentialmeter.pos.sliderLen);
   
   
   return hpotentialmeter;
+}
+
+void PotentialmeterUpdate(LinearPotentialmeterHandle* hpot)
+{
+  for (uint8_t i = 0; i <= 4; i++)
+  {
+    if ((touchInfo.xVertical[i] > hpot->pos.xSlider && touchInfo.xVertical[i] < (hpot->pos.xSlider + hpot->pos.sliderWidth)) &&\
+        (touchInfo.yVertical[i] > hpot->pos.ySlider && touchInfo.yVertical[i] < (hpot->pos.ySlider + hpot->pos.sliderLen)))
+    {
+      hpot->ifSliderPressed = 1;
+      if (hpot->preIfSliderPressed != hpot->ifSliderPressed)
+      {
+        hpot->preFingerPosY = touchInfo.yVertical[i];
+        hpot->preIfSliderPressed = hpot->ifSliderPressed;
+        return;
+      }
+      LCD_SetLayer(1);
+      LCD_ClearRect(hpot->pos.xSlider - 1, hpot->pos.ySlider, hpot->pos.sliderWidth + 1, hpot->pos.sliderLen + 1);
+      LCD_SetColor(hpot->sliderColorPressed);
+      hpot->pos.ySlider += touchInfo.yVertical[i] - hpot->preFingerPosY;
+      LIMIT_MIN_MAX(hpot->pos.ySlider, hpot->pos.y, hpot->pos.y + hpot->pos.yLen - hpot->pos.sliderLen);
+      hpot->preFingerPosY = touchInfo.yVertical[i];
+      LCD_FillRect(hpot->pos.xSlider, hpot->pos.ySlider, hpot->pos.sliderWidth, hpot->pos.sliderLen);
+      LCD_SetColor(LCD_BLACK);
+      LCD_DrawRect(hpot->pos.xSlider, hpot->pos.ySlider, hpot->pos.sliderWidth, hpot->pos.sliderLen);
+      *(hpot->controlledValue) = hpot->maxVal - (hpot->maxVal - hpot->minVal) * ((float)(hpot->pos.ySlider - hpot->pos.y)/(float)(hpot->pos.yLen - hpot->pos.sliderLen));
+      return;
+    }
+    else
+    {
+      hpot->ifSliderPressed = 0;
+      if (hpot->preIfSliderPressed != hpot->ifSliderPressed)
+      {
+        hpot->preIfSliderPressed = hpot->ifSliderPressed;
+        LCD_SetLayer(1);
+        LCD_SetColor(hpot->sliderColorUnpressed);
+        LCD_FillRect(hpot->pos.xSlider, hpot->pos.ySlider, hpot->pos.sliderWidth, hpot->pos.sliderLen);
+        LCD_SetColor(LCD_BLACK);
+        LCD_DrawRect(hpot->pos.xSlider, hpot->pos.ySlider, hpot->pos.sliderWidth, hpot->pos.sliderLen);
+      }
+    }
+  }
 }
 
 void UI_Init(void)
@@ -284,10 +350,6 @@ void UI_Page_AK10_9_ManualControl(void)
   ButtonScan(&hButtonMotorStart);
   ButtonScan(&hButtonMotorStop);
   ButtonScan(&hButtonMotorZeroing);
-  ButtonScan(&hButtonStepLengthPlus10);
-  ButtonScan(&hButtonStepLengthMinus10);
-  ButtonScan(&hButtonStepLengthPlus1);
-  ButtonScan(&hButtonStepLengthMinus1);
   ButtonScan(&hButtonManualControlMode);
   ButtonScan(&hButtonMotorSelectRightHip);
   ButtonScan(&hButtonMotorSelectRightKnee);
@@ -295,13 +357,10 @@ void UI_Page_AK10_9_ManualControl(void)
   ButtonRefresh(&hButtonMotorStart);
   ButtonRefresh(&hButtonMotorStop);
   ButtonRefresh(&hButtonMotorZeroing);
-  ButtonRefresh(&hButtonStepLengthPlus10);
-  ButtonRefresh(&hButtonStepLengthMinus10);
-  ButtonRefresh(&hButtonStepLengthPlus1);
-  ButtonRefresh(&hButtonStepLengthMinus1);
   ButtonRefresh(&hButtonManualControlMode);
   ButtonRefresh(&hButtonMotorSelectRightHip);
   ButtonRefresh(&hButtonMotorSelectRightKnee);
+  PotentialmeterUpdate(&hTMotorManualControlPot);
   
   if(ifButtonPressed(&hButtonMotorZeroing))
     AK10_9_ServoMode_Zeroing(hMotorPtrManualControl);
@@ -309,14 +368,6 @@ void UI_Page_AK10_9_ManualControl(void)
     ifManualControlStarted = 1;
   if(ifButtonPressed(&hButtonMotorStop))
     ifManualControlStarted = 0;
-  if(ifButtonPressed(&hButtonStepLengthPlus10))
-    manualControlValue+=10.0f;
-  if(ifButtonPressed(&hButtonStepLengthMinus10))
-    manualControlValue-=10.0f;
-  if(ifButtonPressed(&hButtonStepLengthPlus1))
-    manualControlValue+=1.0f;
-  if(ifButtonPressed(&hButtonStepLengthMinus1))
-    manualControlValue-=1.0f;
   if(ifButtonPressed(&hButtonManualControlMode))
   {
     controlMode++;
@@ -338,8 +389,7 @@ void UI_Page_AK10_9_ManualControl(void)
     LCD_DisplayString(0, 240, "Velocity Control");
   else if (controlMode == AK10_9_MODE_BRAKE)
     LCD_DisplayString(0, 240, "     BRAKE      ");
-  LCD_DisplayString(400, 50, "Step: ");
-  LCD_DisplayNumber(400, 80, (int32_t)manualControlValue, 3);
+  LCD_DisplayDecimals(300, 40, (double)manualControlValue, 4, 2);
   if (hMotorPtrManualControl->status == AK10_9_Online)
     LCD_DisplayString(200, 0, "Motor  Online");
   else
@@ -367,13 +417,11 @@ void UI_Page_AK10_9_ManualControl_Init(void)
   hButtonMotorStart = Button_Create(0, 50, 100, 50, "START", LCD_WHITE, LCD_RED);
   hButtonMotorStop = Button_Create(0, 120, 100, 50, "STOP", LCD_WHITE, LCD_RED);
   hButtonMotorZeroing = Button_Create(50, 500, 200, 50, "Motor Set Zero", LCD_BLUE, LCD_RED);
-  hButtonStepLengthPlus10 = Button_Create(180, 50, 190, 50, "Step Length +10", LCD_WHITE, LCD_RED);
-  hButtonStepLengthMinus10 = Button_Create(180, 120, 190, 50, "Step Length -10", LCD_WHITE, LCD_RED);
-  hButtonStepLengthPlus1 = Button_Create(210, 180, 190, 50, "Step Length +1", LCD_WHITE, LCD_RED);
-  hButtonStepLengthMinus1 = Button_Create(210, 250, 190, 50, "Step Length -1", LCD_WHITE, LCD_RED);
   hButtonManualControlMode = Button_Create(0, 180, 160, 50, "Control Mode", LCD_WHITE, LCD_RED);
   hButtonMotorSelectRightHip = Button_Create(0, 300, 160, 50, "Right Hip", DARK_YELLOW, LCD_RED);
   hButtonMotorSelectRightKnee = Button_Create(0, 400, 160, 50, "Right Knee", DARK_YELLOW, LCD_RED);
+  
+  hTMotorManualControlPot = Potentialmeter_Create(300, 80, 30, 400, 100, 80, LCD_MAGENTA, LCD_RED, LIGHT_GREY, -500.0f, 500.0f, 0.0f, &manualControlValue);
   
   hMotorPtrManualControl = &hAKMotorRightHip;
 }

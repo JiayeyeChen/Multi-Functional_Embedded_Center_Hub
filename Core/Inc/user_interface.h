@@ -40,17 +40,23 @@ typedef struct
   uint16_t yLen;
   uint16_t xSlider;
   uint16_t ySlider;
-  uint16_t xSliderLen;
+  uint16_t sliderLen;
+  uint16_t sliderWidth;
 }VirtualLinearPotentialmeterPosition;
 
 typedef struct
 {
   VirtualLinearPotentialmeterPosition pos;
-  uint8_t     ifPressed;
-  uint32_t    colorPressed;
-  uint32_t    colorUnpressed;
-  float       max;
-  float       min;
+  uint8_t     ifSliderPressed;
+  uint8_t     preIfSliderPressed;
+  uint32_t    sliderColorPressed;
+  uint32_t    sliderColorUnpressed;
+  float       maxVal;
+  float       minVal;
+  uint16_t    preFingerPosX;
+  uint16_t    preFingerPosY;
+  uint8_t     ifNeedRefresh;
+  float*      controlledValue;
 }LinearPotentialmeterHandle;
 
 typedef struct
@@ -77,7 +83,11 @@ typedef struct
 
 void UI_Init(void);
 ButtonHandle Button_Create(uint16_t x, uint16_t y, uint16_t xLen, uint16_t yLen, char label[], uint32_t colorUnpressed, uint32_t colorPressed);
-LinearPotentialmeterHandle  Potentialmeter_Create(uint16_t x, uint16_t y, uint16_t xLen, uint16_t yLen, uint16_t sliderLen, uint32_t colorUnpressed, uint32_t colorPressed);
+LinearPotentialmeterHandle  Potentialmeter_Create(uint16_t x, uint16_t y, uint16_t xLen, \
+                                                  uint16_t yLen, uint16_t sliderLen, uint16_t sliderWidth, \
+                                                  uint32_t sliderColorUnpressed, uint32_t sliderColorPressed, \
+                                                  uint32_t slotColor, float minVal, float maxVal, float startVal, float* ctrVal);
+void         PotentialmeterUpdate(LinearPotentialmeterHandle* hpot);
 uint8_t      ButtonScan(ButtonHandle* hbutton);
 uint8_t      ifButtonPressed(ButtonHandle* hbutton);
 void         ButtonRefresh(ButtonHandle* hbutton);
