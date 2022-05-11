@@ -40,6 +40,7 @@ void CAN_ConfigureFilters(void)
 {
   //Filter bank 0
   hAKMotorRightKnee.rxFilter = ConfigCANFilter_EXT_ID_32BitIDListMode(&hcan2, 0, CAN_FILTER_FIFO1, CAN_ID_EXT, CAN_ID_TMOTOR_EXOSKELETON_RIGHT_KNEE, 0);
+  hAKMotorRightHip.rxFilter = ConfigCANFilter_EXT_ID_32BitIDListMode(&hcan2, 7, CAN_FILTER_FIFO1, CAN_ID_EXT, CAN_ID_TMOTOR_EXOSKELETON_RIGHT_HIP, 0);
   //Filter bank 1
   hIMURightThigh.rxFilter.FilterMode = CAN_FILTERMODE_IDLIST;
 	hIMURightThigh.rxFilter.FilterScale = CAN_FILTERSCALE_16BIT;
@@ -60,8 +61,8 @@ void CAN_ConfigureFilters(void)
   hIMURightThigh.rxFilter.FilterMode = CAN_FILTERMODE_IDLIST;
 	hIMURightThigh.rxFilter.FilterScale = CAN_FILTERSCALE_16BIT;
 	hIMURightThigh.rxFilter.FilterFIFOAssignment = CAN_FILTER_FIFO0;
-	hIMURightThigh.rxFilter.FilterBank = 5;
-	hIMURightThigh.rxFilter.FilterIdHigh = CAN_ID_IMU_QUATERNION_EXOSKELETON_RIGHT_THIGH << 5;
+	hIMURightThigh.rxFilter.FilterBank = 3;
+	hIMURightThigh.rxFilter.FilterIdHigh = CAN_ID_IMU_ACC_EXOSKELETON_RIGHT_THIGH << 5;
 	hIMURightThigh.rxFilter.FilterActivation = ENABLE;
 	HAL_CAN_ConfigFilter(hIMURightThigh.hcan, &hIMURightThigh.rxFilter);
   //Filter bank 4
@@ -76,8 +77,8 @@ void CAN_ConfigureFilters(void)
   hIMURightThigh.rxFilter.FilterMode = CAN_FILTERMODE_IDLIST;
 	hIMURightThigh.rxFilter.FilterScale = CAN_FILTERSCALE_16BIT;
 	hIMURightThigh.rxFilter.FilterFIFOAssignment = CAN_FILTER_FIFO0;
-	hIMURightThigh.rxFilter.FilterBank = 3;
-	hIMURightThigh.rxFilter.FilterIdHigh = CAN_ID_IMU_ACC_EXOSKELETON_RIGHT_THIGH << 5;
+	hIMURightThigh.rxFilter.FilterBank = 5;
+	hIMURightThigh.rxFilter.FilterIdHigh = CAN_ID_IMU_QUATERNION_EXOSKELETON_RIGHT_THIGH << 5;
 	hIMURightThigh.rxFilter.FilterActivation = ENABLE;
 	HAL_CAN_ConfigFilter(hIMURightThigh.hcan, &hIMURightThigh.rxFilter);
   //Filter bank 6
