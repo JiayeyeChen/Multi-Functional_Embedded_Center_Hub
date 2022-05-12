@@ -88,6 +88,7 @@ LinearPotentialmeterHandle  Potentialmeter_Create(uint16_t x, uint16_t y, uint16
                                                   uint32_t sliderColorUnpressed, uint32_t sliderColorPressed, \
                                                   uint32_t slotColor, float minVal, float maxVal, float startVal, float* ctrVal);
 void         PotentialmeterUpdate(LinearPotentialmeterHandle* hpot);
+void         PotentialmeterSliderGoTo(LinearPotentialmeterHandle* hpot, float go_to_val);
 uint8_t      ButtonScan(ButtonHandle* hbutton);
 uint8_t      ifButtonPressed(ButtonHandle* hbutton);
 void         ButtonRefresh(ButtonHandle* hbutton);

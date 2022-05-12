@@ -153,11 +153,11 @@ void AK10Calibration_Task(void *argument)
     if (ifManualControlStarted)
     {
       if (controlMode == AK10_9_MODE_POSITION)
-        AK10_9_ServoMode_PositionControl(hMotorPtrManualControl, manualControlValue);
+        AK10_9_ServoMode_PositionControl(hMotorPtrManualControl, manualControlValue_pos);
       else if (controlMode == AK10_9_MODE_CURRENT)
-        AK10_9_ServoMode_CurrentControl(hMotorPtrManualControl, manualControlValue);
+        AK10_9_ServoMode_CurrentControl(hMotorPtrManualControl, manualControlValue_cur);
       else if (controlMode == AK10_9_MODE_VELOCITY)
-        AK10_9_ServoMode_VelocityControl(hMotorPtrManualControl, manualControlValue);
+        AK10_9_ServoMode_VelocityControl(hMotorPtrManualControl, manualControlValue_vel);
     }
     
     if (ifImpedanceControlStarted)

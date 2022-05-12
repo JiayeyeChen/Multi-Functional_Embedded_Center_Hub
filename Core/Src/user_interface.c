@@ -27,7 +27,7 @@ ButtonHandle hButtonIMUSetModeNDOF, hButtonIMUSetModeACCONLY, hButtonIMUSetModeG
 ButtonHandle hButtonMotorSelectRightHip, hButtonMotorSelectRightKnee;
 
 
-LinearPotentialmeterHandle  hTMotorManualControlPot;
+LinearPotentialmeterHandle  hTMotorManualControlPot_pos, hTMotorManualControlPot_vel, hTMotorManualControlPot_cur;
 
 ButtonHandle Button_Create(uint16_t x, uint16_t y, uint16_t xLen, uint16_t yLen, char label[],\
                            uint32_t colorUnpressed, uint32_t colorPressed)
@@ -160,6 +160,19 @@ void PotentialmeterUpdate(LinearPotentialmeterHandle* hpot)
       }
     }
   }
+}
+
+void PotentialmeterSliderGoTo(LinearPotentialmeterHandle* hpot, float go_to_val)
+{
+  LCD_SetLayer(1);
+  LCD_ClearRect(hpot->pos.xSlider - 1, hpot->pos.ySlider, hpot->pos.sliderWidth + 1, hpot->pos.sliderLen + 1);
+  hpot->pos.ySlider = hpot->pos.y + (uint16_t)((float)(hpot->pos.yLen - hpot->pos.sliderLen)) * ((hpot->maxVal - go_to_val) / (hpot->maxVal - hpot->minVal));
+  LCD_SetColor(hpot->sliderColorUnpressed);
+  hpot->preFingerPosY = hpot->pos.ySlider;
+  LCD_FillRect(hpot->pos.xSlider, hpot->pos.ySlider, hpot->pos.sliderWidth, hpot->pos.sliderLen);
+  LCD_SetColor(LCD_BLACK);
+  LCD_DrawRect(hpot->pos.xSlider, hpot->pos.ySlider, hpot->pos.sliderWidth, hpot->pos.sliderLen);
+  *(hpot->controlledValue) = go_to_val;
 }
 
 void UI_Init(void)
@@ -360,68 +373,121 @@ void UI_Page_AK10_9_ManualControl(void)
   ButtonRefresh(&hButtonManualControlMode);
   ButtonRefresh(&hButtonMotorSelectRightHip);
   ButtonRefresh(&hButtonMotorSelectRightKnee);
-  PotentialmeterUpdate(&hTMotorManualControlPot);
+  PotentialmeterUpdate(&hTMotorManualControlPot_pos);
+  PotentialmeterUpdate(&hTMotorManualControlPot_vel);
+  PotentialmeterUpdate(&hTMotorManualControlPot_cur);
   
   if(ifButtonPressed(&hButtonMotorZeroing))
     AK10_9_ServoMode_Zeroing(hMotorPtrManualControl);
   if(ifButtonPressed(&hButtonMotorStart))
     ifManualControlStarted = 1;
   if(ifButtonPressed(&hButtonMotorStop))
+  {
     ifManualControlStarted = 0;
+    LCD_ClearRect(0, 370, 400, 30);
+    PotentialmeterSliderGoTo(&hTMotorManualControlPot_pos, 0.0f);
+    PotentialmeterSliderGoTo(&hTMotorManualControlPot_vel, 0.0f);
+    PotentialmeterSliderGoTo(&hTMotorManualControlPot_cur, 0.0f);
+  }
   if(ifButtonPressed(&hButtonManualControlMode))
   {
+    LCD_ClearRect(0, 370, 400, 30);
+    PotentialmeterSliderGoTo(&hTMotorManualControlPot_pos, 0.0f);
+    PotentialmeterSliderGoTo(&hTMotorManualControlPot_vel, 0.0f);
+    PotentialmeterSliderGoTo(&hTMotorManualControlPot_cur, 0.0f);
+    ifManualControlStarted = 0;
     controlMode++;
     if (controlMode > 3)
       controlMode = 0;
   }
   if (ifButtonPressed(&hButtonMotorSelectRightHip))
+  {
+    ifManualControlStarted = 0;
     hMotorPtrManualControl = &hAKMotorRightHip;
+    LCD_ClearRect(0, 370, 400, 30);
+    PotentialmeterSliderGoTo(&hTMotorManualControlPot_pos, 0.0f);
+    PotentialmeterSliderGoTo(&hTMotorManualControlPot_vel, 0.0f);
+    PotentialmeterSliderGoTo(&hTMotorManualControlPot_cur, 0.0f);
+  }
   else if (ifButtonPressed(&hButtonMotorSelectRightKnee))
+  {
+    ifManualControlStarted = 0;
     hMotorPtrManualControl = &hAKMotorRightKnee;
+    LCD_ClearRect(0, 370, 400, 30);
+    PotentialmeterSliderGoTo(&hTMotorManualControlPot_pos, 0.0f);
+    PotentialmeterSliderGoTo(&hTMotorManualControlPot_vel, 0.0f);
+    PotentialmeterSliderGoTo(&hTMotorManualControlPot_cur, 0.0f);
+  }
   
   LCD_SetLayer(1); 
   LCD_SetColor(LCD_BLACK);
   if (controlMode == AK10_9_MODE_CURRENT)
-    LCD_DisplayString(0, 240, "Current  Control");
+  {
+    LCD_DisplayString(0, 340, "Current  Control");
+    LCD_SetColor(LCD_RED);
+    LCD_DisplayDecimals(0, 370, (double)manualControlValue_cur, 4, 2);
+    LCD_SetColor(LCD_BLACK);
+  }
   else if (controlMode == AK10_9_MODE_POSITION)
-    LCD_DisplayString(0, 240, "Position Control");
+  {
+    LCD_DisplayString(0, 340, "Position Control");
+    LCD_SetColor(LCD_RED);
+    LCD_DisplayDecimals(0, 370, (double)manualControlValue_pos, 4, 2);
+    LCD_SetColor(LCD_BLACK);
+  }
   else if (controlMode == AK10_9_MODE_VELOCITY)
-    LCD_DisplayString(0, 240, "Velocity Control");
+  {
+    LCD_DisplayString(0, 340, "Velocity Control");
+    LCD_SetColor(LCD_RED);
+    
+    LCD_DisplayDecimals(0, 370, (double)manualControlValue_vel, 4, 2);
+    LCD_SetColor(LCD_BLACK);
+  }
   else if (controlMode == AK10_9_MODE_BRAKE)
-    LCD_DisplayString(0, 240, "     BRAKE      ");
-  LCD_DisplayDecimals(300, 40, (double)manualControlValue, 4, 2);
+    LCD_DisplayString(0, 340, "     BRAKE      ");
   if (hMotorPtrManualControl->status == AK10_9_Online)
     LCD_DisplayString(200, 0, "Motor  Online");
   else
     LCD_DisplayString(200, 0, "Motor Offline");
-  LCD_DisplayString(300, 500, "Torque(Nm):");
-  LCD_DisplayDecimals(320, 530, (double)hMotorPtrManualControl->realTorque.f, 3, 2);
-  LCD_DisplayString(20, 570, "Temperature:");
-  LCD_DisplayNumber(70, 600, hMotorPtrManualControl->temperature, 2);
-  LCD_DisplayString(230, 600, "Real");
-  LCD_DisplayString(360, 600, "Desired");
-  LCD_DisplayString(50, 650, "Position: ");LCD_DisplayDecimals(170, 650, (double)hMotorPtrManualControl->realPosition.f, 10, 4);
-  LCD_DisplayString(50, 700, "Velocity: ");LCD_DisplayDecimals(170, 700, (double)hMotorPtrManualControl->realVelocity.f, 10, 4);
-  LCD_DisplayString(50, 750, "Current:  ");LCD_DisplayDecimals(170, 750, (double)hMotorPtrManualControl->realCurrent.f, 10, 4);
   
-  LCD_DisplayDecimals(310, 650, (double)hMotorPtrManualControl->setPosition.f, 10, 4);
-  LCD_DisplayDecimals(310, 700, (double)hMotorPtrManualControl->setVelocity.f, 10, 4);
-  LCD_DisplayDecimals(310, 750, (double)hMotorPtrManualControl->setCurrent.f, 10, 4);
+  LCD_DisplayDecimals(400, 735, (double)hMotorPtrManualControl->realTorque.f, 3, 2);
+  LCD_DisplayNumber(400, 760, hMotorPtrManualControl->temperature, 2);
+  LCD_DisplayDecimals(150, 710, (double)hMotorPtrManualControl->realPosition.f, 6, 3);
+  LCD_DisplayDecimals(150, 735, (double)hMotorPtrManualControl->realVelocity.f, 6, 3);
+  LCD_DisplayDecimals(150, 760, (double)hMotorPtrManualControl->realCurrent.f, 6, 3);
+  LCD_DisplayDecimals(250, 710, (double)hMotorPtrManualControl->setPosition.f, 6, 3);
+  LCD_DisplayDecimals(250, 735, (double)hMotorPtrManualControl->setVelocity.f, 6, 3);
+  LCD_DisplayDecimals(250, 760, (double)hMotorPtrManualControl->setCurrent.f, 6, 3);
   
   if (ifButtonPressed(&hButtonGoBack))
+  {
     UI_Page_Change_To(&UIPage_Home1);
+    ifManualControlStarted = 0;
+  }
 }
 void UI_Page_AK10_9_ManualControl_Init(void)
 {
   hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
-  hButtonMotorStart = Button_Create(0, 50, 100, 50, "START", LCD_WHITE, LCD_RED);
-  hButtonMotorStop = Button_Create(0, 120, 100, 50, "STOP", LCD_WHITE, LCD_RED);
-  hButtonMotorZeroing = Button_Create(50, 500, 200, 50, "Motor Set Zero", LCD_BLUE, LCD_RED);
-  hButtonManualControlMode = Button_Create(0, 180, 160, 50, "Control Mode", LCD_WHITE, LCD_RED);
-  hButtonMotorSelectRightHip = Button_Create(0, 300, 160, 50, "Right Hip", DARK_YELLOW, LCD_RED);
-  hButtonMotorSelectRightKnee = Button_Create(0, 400, 160, 50, "Right Knee", DARK_YELLOW, LCD_RED);
+  hButtonMotorStart = Button_Create(0, 420, 100, 40, "START", LCD_WHITE, LCD_RED);
+  hButtonMotorStop = Button_Create(0, 80, 150, 250, "STOP", LCD_RED, LCD_YELLOW);
+  hButtonMotorZeroing = Button_Create(0, 620, 200, 40, "Motor Set Zero", LCD_BLUE, LCD_RED);
+  hButtonManualControlMode = Button_Create(0, 470, 160, 40, "Control Mode", LCD_WHITE, LCD_RED);
+  hButtonMotorSelectRightHip = Button_Create(0, 520, 160, 40, "Right Hip", DARK_YELLOW, LCD_RED);
+  hButtonMotorSelectRightKnee = Button_Create(0, 570, 160, 40, "Right Knee", DARK_YELLOW, LCD_RED);
+  hTMotorManualControlPot_pos = Potentialmeter_Create(250, 80, 30, 550, 130, 70, LCD_MAGENTA, LCD_RED, LIGHT_GREY, -500.0f, 500.0f, 0.0f, &manualControlValue_pos);
+  hTMotorManualControlPot_vel = Potentialmeter_Create(340, 80, 30, 550, 130, 70, LCD_MAGENTA, LCD_RED, LIGHT_GREY, -500.0f, 500.0f, 0.0f, &manualControlValue_vel);
+  hTMotorManualControlPot_cur = Potentialmeter_Create(420, 80, 30, 550, 130, 70, LCD_MAGENTA, LCD_RED, LIGHT_GREY, -50.0f, 50.0f, 0.0f, &manualControlValue_cur);
   
-  hTMotorManualControlPot = Potentialmeter_Create(300, 80, 30, 400, 100, 80, LCD_MAGENTA, LCD_RED, LIGHT_GREY, -500.0f, 500.0f, 0.0f, &manualControlValue);
+  LCD_DisplayString(250, 50, "pos");
+  LCD_DisplayString(340, 50, "vel");
+  LCD_DisplayString(420, 50, "cur");
+  LCD_DisplayString(170, 685, "mes");
+  LCD_DisplayString(270, 685, "des");
+  LCD_DisplayString(10, 710, "Position: ");
+  LCD_DisplayString(10, 735, "Velocity: ");
+  LCD_DisplayString(10, 760, "Current:  ");
+  LCD_DisplayString(330, 760, "Temp:");
+  LCD_DisplayString(330, 735, "T(Nm):");
   
   hMotorPtrManualControl = &hAKMotorRightHip;
 }
