@@ -180,8 +180,7 @@ void UI_Task(void *argument)
     Touch_Scan();
     UI();
     LED_Blink(&hLEDBlue, 2);
-    osDelay(20);
-
+    osDelay(15);
   }
 }
 

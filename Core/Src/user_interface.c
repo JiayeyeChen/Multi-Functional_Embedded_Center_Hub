@@ -391,7 +391,7 @@ void UI_Page_AK10_9_ManualControl(void)
   }
   if(ifButtonPressed(&hButtonManualControlMode))
   {
-    LCD_ClearRect(0, 370, 400, 30);
+    LCD_ClearRect(0, 370, 200, 30);
     PotentialmeterSliderGoTo(&hTMotorManualControlPot_pos, 0.0f);
     PotentialmeterSliderGoTo(&hTMotorManualControlPot_vel, 0.0f);
     PotentialmeterSliderGoTo(&hTMotorManualControlPot_cur, 0.0f);
@@ -408,6 +408,10 @@ void UI_Page_AK10_9_ManualControl(void)
     PotentialmeterSliderGoTo(&hTMotorManualControlPot_pos, 0.0f);
     PotentialmeterSliderGoTo(&hTMotorManualControlPot_vel, 0.0f);
     PotentialmeterSliderGoTo(&hTMotorManualControlPot_cur, 0.0f);
+    hButtonMotorSelectRightHip.colorUnpressed = LIGHT_YELLOW;
+    hButtonMotorSelectRightKnee.colorUnpressed = DARK_YELLOW;
+    hButtonMotorSelectRightHip.ifNeedRefresh = 1;
+    hButtonMotorSelectRightKnee.ifNeedRefresh = 1;
   }
   else if (ifButtonPressed(&hButtonMotorSelectRightKnee))
   {
@@ -417,6 +421,10 @@ void UI_Page_AK10_9_ManualControl(void)
     PotentialmeterSliderGoTo(&hTMotorManualControlPot_pos, 0.0f);
     PotentialmeterSliderGoTo(&hTMotorManualControlPot_vel, 0.0f);
     PotentialmeterSliderGoTo(&hTMotorManualControlPot_cur, 0.0f);
+    hButtonMotorSelectRightHip.colorUnpressed = DARK_YELLOW;
+    hButtonMotorSelectRightKnee.colorUnpressed = LIGHT_YELLOW;
+    hButtonMotorSelectRightHip.ifNeedRefresh = 1;
+    hButtonMotorSelectRightKnee.ifNeedRefresh = 1;
   }
   
   LCD_SetLayer(1); 
@@ -489,7 +497,7 @@ void UI_Page_AK10_9_ManualControl_Init(void)
   LCD_DisplayString(330, 760, "Temp:");
   LCD_DisplayString(330, 735, "T(Nm):");
   
-  hMotorPtrManualControl = &hAKMotorRightHip;
+  hMotorPtrManualControl = NULL;
 }
 
 void UI_Page_AK10_9_ImpedanceControlDemo(void)
