@@ -145,9 +145,9 @@ void AK10Calibration_Task(void *argument)
   
   for(;;)
   {
-    AK10_9_DataLog_Manager(&hAKMotorRightKnee, &hIMURightThigh);
+    AK10_9_DataLog_Manager(&hAKMotorRightHip, &hIMURightThigh);
     if (ifMotorProfilingStarted)
-      AK10_9_MotorProfiling_Function1(&hAKMotorRightKnee);
+      AK10_9_MotorProfiling_Function1_Half_Sin(&hAKMotorRightHip, tmotorProfilingSinWaveFrequency);
       //AK10_9_MotorProfiling_Function2_CurrentControlStepResponse(&hAKMotorLeftHip);
     
     if (ifManualControlStarted)

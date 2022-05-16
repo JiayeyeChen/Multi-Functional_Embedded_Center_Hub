@@ -28,6 +28,7 @@ ButtonHandle hButtonMotorSelectRightHip, hButtonMotorSelectRightKnee;
 
 
 LinearPotentialmeterHandle  hTMotorManualControlPot_pos, hTMotorManualControlPot_vel, hTMotorManualControlPot_cur;
+LinearPotentialmeterHandle  hPotTMotorProfilingFrequency;
 
 ButtonHandle Button_Create(uint16_t x, uint16_t y, uint16_t xLen, uint16_t yLen, char label[],\
                            uint32_t colorUnpressed, uint32_t colorPressed)
@@ -663,6 +664,7 @@ void UI_Page_TMotor_Acceleration_Observer_Project(void)
   ButtonRefresh(&hButtonMotorProfilingStart);
   ButtonRefresh(&hButtonMotorProfilingEnd);
   ButtonRefresh(&hButtonMotorZeroing);
+  PotentialmeterUpdate(&hPotTMotorProfilingFrequency);
   
   if (ifButtonPressed(&hButtonDataLogStart))
     USB_DataLogStart();
@@ -679,19 +681,19 @@ void UI_Page_TMotor_Acceleration_Observer_Project(void)
     timeDifference = 0;
   }
   if(ifButtonPressed(&hButtonMotorZeroing))
-    AK10_9_ServoMode_Zeroing(&hAKMotorRightKnee);
+    AK10_9_ServoMode_Zeroing(&hAKMotorRightHip);
   
   LCD_SetLayer(1); 
   LCD_SetColor(LCD_BLACK);
-  if (hAKMotorRightKnee.status == AK10_9_Online)
+  if (hAKMotorRightHip.status == AK10_9_Online)
     LCD_DisplayString(200, 0, "Motor  Online");
   else
     LCD_DisplayString(200, 0, "Motor Offline");
   
   
-  LCD_DisplayDecimals(140, 720, (double)hAKMotorRightKnee.realPosition.f, 10, 4);
-  LCD_DisplayDecimals(140, 745, (double)hAKMotorRightKnee.setPosition.f, 10, 4);
-  LCD_DisplayDecimals(140, 770, (double)hAKMotorRightKnee.realVelocity.f, 10, 4);
+  LCD_DisplayDecimals(140, 720, (double)hAKMotorRightHip.realPosition.f, 10, 4);
+  LCD_DisplayDecimals(140, 745, (double)hAKMotorRightHip.setPosition.f, 10, 4);
+  LCD_DisplayDecimals(140, 770, (double)hAKMotorRightHip.realVelocity.f, 10, 4);
   LCD_SetColor(DARK_RED);
   LCD_DisplayDecimals(90, 495, (double)hIMURightThigh.rawData.liaccX.b16, 7, 1);
   LCD_DisplayDecimals(90, 520, (double)hIMURightThigh.rawData.liaccY.b16, 7, 1);
@@ -702,6 +704,8 @@ void UI_Page_TMotor_Acceleration_Observer_Project(void)
   LCD_DisplayDecimals(90, 645, (double)hIMURightThigh.rawData.gyroX.b16, 7, 1);
   LCD_DisplayDecimals(90, 670, (double)hIMURightThigh.rawData.gyroY.b16, 7, 1);
   LCD_DisplayDecimals(90, 695, (double)hIMURightThigh.rawData.gyroZ.b16, 7, 1);
+  LCD_DisplayDecimals(200, 470, (double)tmotorProfilingSinWaveFrequency, 3, 4);
+  LCD_DisplayDecimals(230, 445, (double)(hAKMotorRightHip.realPosition.f - hAKMotorRightHip.setPosition.f), 3, 4);
   LCD_SetColor(LCD_BLACK);
   
   if (ifButtonPressed(&hButtonGoBack))
@@ -718,6 +722,7 @@ void UI_Page_TMotor_Acceleration_Observer_Project_Init(void)
   hButtonMotorProfilingEnd = Button_Create(10, 250, 300, 40, "Motor profiling Stop", LCD_YELLOW, LCD_RED);
   hButtonMotorZeroing = Button_Create(10, 330, 200, 40, "Motor Set Zero", LCD_BLUE, LCD_RED);
   hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
+  hPotTMotorProfilingFrequency = Potentialmeter_Create(420, 80, 30, 550, 130, 70, LCD_MAGENTA, LCD_RED, LIGHT_GREY, 0.0f, 1.0f, 0.0f, &tmotorProfilingSinWaveFrequency);
   
   LCD_SetLayer(0); 
   LCD_SetColor(LCD_BLACK);
@@ -725,6 +730,8 @@ void UI_Page_TMotor_Acceleration_Observer_Project_Init(void)
   LCD_DisplayString(10, 745, "Position des: ");
   LCD_DisplayString(10, 770, "Velocity: ");
   LCD_SetColor(DARK_RED);
+  LCD_DisplayString(10, 445, "Position error: ");
+  LCD_DisplayString(10, 470, "Profile Freq: ");
   LCD_DisplayString(10, 495, "LiAccX: ");
   LCD_DisplayString(10, 520, "LiAccY: ");
   LCD_DisplayString(10, 545, "LiAccZ: ");

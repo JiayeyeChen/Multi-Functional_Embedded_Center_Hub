@@ -24,8 +24,8 @@
 #define CAN_ID_IMU_GET_DATA_GYROONLY_RIGHT_SHANK       38U
 #define CAN_ID_IMU_GET_DATA_ACCONLY_RIGHT_SHANK        39U
 
-#define CAN_ID_TMOTOR_EXOSKELETON_LEFT_HIP           0x2904
-#define CAN_ID_TMOTOR_EXOSKELETON_RIGHT_HIP          0x2901
+#define CAN_ID_TMOTOR_EXOSKELETON_LEFT_HIP           0x2901
+#define CAN_ID_TMOTOR_EXOSKELETON_RIGHT_HIP          0x2904
 #define CAN_ID_TMOTOR_EXOSKELETON_RIGHT_KNEE         0x2902
 
 CAN_FilterTypeDef ConfigCANFilter_EXT_ID_32BitIDListMode(CAN_HandleTypeDef* hcan, uint32_t FilterBank, uint32_t FilterFIFOAssignment, uint8_t IDE, uint32_t ID1, uint32_t ID2);

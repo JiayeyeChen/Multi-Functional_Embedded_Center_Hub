@@ -66,5 +66,5 @@ void USB_DataLogSingleCargoTransmit(union FloatUInt8 dala_slots[]);
 void USB_DataLogConfigureDataSlot(float* data, uint8_t len);
 
 extern USBHandle hUSB;
-extern union FloatUInt8 dataSlots_AK10_9_Acceleration_Observer_Testing[13];
+extern union FloatUInt8 dataSlots_AK10_9_Acceleration_Observer_Testing[14];
 #endif

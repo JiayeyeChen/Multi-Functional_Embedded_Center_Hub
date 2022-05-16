@@ -28,11 +28,12 @@ typedef struct
   union FloatUInt8      setCurrent;
   union FloatUInt8      setPosition;
   union FloatUInt8      setVelocity;
-  union FloatUInt8      setAcceleration;
   union FloatUInt8      realCurrent;
   union FloatUInt8      realPosition;
   union FloatUInt8      realVelocity;
   union FloatUInt8      realTorque;
+  union FloatUInt8      setAcceleration;
+  union FloatUInt8      estimateAcceleration;
   //CAN BUS transmit
   uint8_t               txBuf[8];
   uint32_t*             pTxMailbox;
