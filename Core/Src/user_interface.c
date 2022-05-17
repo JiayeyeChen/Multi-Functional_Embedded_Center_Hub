@@ -267,9 +267,11 @@ void UI_Page_AK10_9_Kt_Testing(void)
   ButtonRefresh(&hButtonMotorProfilingEnd);
   ButtonRefresh(&hButtonMotorZeroing);
   
+  ADC_DataRequest();
   if (ifButtonPressed(&hButtonDataLogStart))
   {
     USB_DataLogStart();
+    
   }
   if (ifButtonPressed(&hButtonDataLogEnd))
   {
@@ -303,6 +305,15 @@ void UI_Page_AK10_9_Kt_Testing(void)
   LCD_DisplayString(50, 650, "Position: ");LCD_DisplayDecimals(170, 650, (double)hAKMotorLeftHip.realPosition.f, 10, 4);
   LCD_DisplayString(50, 700, "Velocity: ");LCD_DisplayDecimals(170, 700, (double)hAKMotorLeftHip.realVelocity.f, 10, 4);
   LCD_DisplayString(50, 750, "Current:  ");LCD_DisplayDecimals(170, 750, (double)hAKMotorLeftHip.realCurrent.f, 10, 4);
+  
+  LCD_DisplayNumber(260, 450, hADC.rawData[0], 5);
+  LCD_DisplayNumber(260, 475, hADC.rawData[1], 5);
+  LCD_DisplayNumber(260, 500, hADC.rawData[2], 5);
+  LCD_DisplayNumber(260, 525, hADC.rawData[3], 5);
+  LCD_DisplayNumber(260, 550, hADC.rawData[4], 5);
+  LCD_DisplayNumber(260, 575, hADC.rawData[5], 5);
+  LCD_DisplayNumber(260, 600, hADC.rawData[6], 5);
+  LCD_DisplayNumber(260, 625, hADC.rawData[7], 5);
   
   LCD_DisplayDecimals(310, 650, (double)hAKMotorLeftHip.setPosition.f, 10, 4);
   LCD_DisplayDecimals(310, 700, (double)hAKMotorLeftHip.setVelocity.f, 10, 4);

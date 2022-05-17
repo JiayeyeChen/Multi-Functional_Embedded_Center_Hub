@@ -2,7 +2,8 @@
 
 SPI_HandleTypeDef hspi5;
 ADCHandle         hADC;
-
+uint8_t           adcTx = 0x55;
+HAL_StatusTypeDef adcresult;
 void AD7606_Init(uint8_t AD7606_RANGE, uint8_t AD7606_OVER_SAMPLING)
 {
 	GPIO_InitTypeDef GPIO_InitStruct = {0};
@@ -21,14 +22,13 @@ void AD7606_Init(uint8_t AD7606_RANGE, uint8_t AD7606_OVER_SAMPLING)
   hspi5.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi5.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi5.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
-  hspi5.Init.CRCPolynomial = 10;
   HAL_SPI_Init(&hspi5);
 	
 	/* AD7606 GPIO configuration*/
 	GPIO_InitStruct.Pin = AD7606_CS_PIN;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
   HAL_GPIO_Init(AD7606_CS_GPIO_PORT, &GPIO_InitStruct);
   
   GPIO_InitStruct.Pin = AD7606_CLK_PIN;
@@ -62,31 +62,31 @@ void AD7606_Init(uint8_t AD7606_RANGE, uint8_t AD7606_OVER_SAMPLING)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(AD7606_BUSY_GPIO_PORT, &GPIO_InitStruct);
   
-	HAL_NVIC_SetPriority(AD7606_BUSY_EXTI_IRQn, 1, 0);
+	HAL_NVIC_SetPriority(AD7606_BUSY_EXTI_IRQn, 3, 0);
   HAL_NVIC_EnableIRQ(AD7606_BUSY_EXTI_IRQn);
   
   GPIO_InitStruct.Pin = AD7606_OS0_PIN;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
   HAL_GPIO_Init(AD7606_OS0_GPIO_PORT, &GPIO_InitStruct);
   
   GPIO_InitStruct.Pin = AD7606_OS1_PIN;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
   HAL_GPIO_Init(AD7606_OS1_GPIO_PORT, &GPIO_InitStruct);
   
   GPIO_InitStruct.Pin = AD7606_OS2_PIN;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
   HAL_GPIO_Init(AD7606_OS2_GPIO_PORT, &GPIO_InitStruct);
   
   GPIO_InitStruct.Pin = AD7606_RANG_PIN;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
   HAL_GPIO_Init(AD7606_RANG_GPIO_PORT, &GPIO_InitStruct);
 
   hADC.hspi = &hspi5;
@@ -149,9 +149,9 @@ void AD7606_Init(uint8_t AD7606_RANGE, uint8_t AD7606_OVER_SAMPLING)
 	
 	// Reset AD7606
 	AD7606_RST_LOW;
-	HAL_Delay(1);
+	HAL_Delay(10);
 	AD7606_RST_HIGH;
-	HAL_Delay(1);
+	HAL_Delay(10);
 	AD7606_RST_LOW;
 }
 
@@ -163,8 +163,7 @@ void ADC_DataRequest(void)
 
 void ADC_Read(int16_t *data)
 {
-  
 	AD7606_CS_LOW;
-	HAL_SPI_Receive(&hspi5, (uint8_t *)data, 8, 10);
+	adcresult = HAL_SPI_Receive(&hspi5, (uint8_t *)data, 8, 2);
 	AD7606_CS_HIGH;
 }

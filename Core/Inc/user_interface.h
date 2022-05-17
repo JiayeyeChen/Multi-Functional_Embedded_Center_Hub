@@ -9,6 +9,7 @@
 #include "tmotor_ak10-9_v2.h"
 #include "ak10-9_v2_testing.h"
 #include "exoskeleton.h"
+#include "adc.h"
 
 typedef struct
 {

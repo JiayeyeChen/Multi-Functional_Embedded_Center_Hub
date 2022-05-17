@@ -34,7 +34,7 @@ int main(void)
 	MX_FMC_Init();
   UI_Init();
   MotorInit();
-  AD7606_Init(AD7606_RANG_5V, AD7606_OS_RATIO_8);
+  AD7606_Init(AD7606_RANG_5V, AD7606_OS_RATIO_0);
 
   EXOSKELETON_Init();
   CAN_ConfigureFilters();
@@ -168,7 +168,7 @@ void AK10Calibration_Task(void *argument)
     
     AK10_9_MotorStatusMonitor(&hAKMotorRightKnee);
     AK10_9_MotorStatusMonitor(&hAKMotorRightHip);
-    osDelay(1);
+    osDelay(100);
   }
 }
 
@@ -177,10 +177,11 @@ void UI_Task(void *argument)
   
   for(;;)
   {
+    
     Touch_Scan();
     UI();
     LED_Blink(&hLEDBlue, 2);
-    osDelay(15);
+    osDelay(20);
   }
 }
 
