@@ -197,7 +197,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
   switch(GPIO_Pin)
   {
   case AD7606_BUSY_PIN:		
-    ADC_Read(&hADC.rawData[0]);
+    ADC_ReadRawData(&hADC);
     break;
   
   default:

@@ -61,13 +61,15 @@ typedef struct
 {
   SPI_HandleTypeDef*      hspi;
   int16_t                 rawData[8];
+  float                   volt[8];
 }ADCHandle;
 
 void AD7606_Init(uint8_t AD7606_RANGE, uint8_t AD7606_OVER_SAMPLING);
 
 void ADC_DataRequest(void);
 
-void ADC_Read(int16_t *data);
+void ADC_ReadRawData(ADCHandle* hadc);
+void ADC_GetVoltage(ADCHandle* hadc);
 
 extern ADCHandle  hADC;
 #endif

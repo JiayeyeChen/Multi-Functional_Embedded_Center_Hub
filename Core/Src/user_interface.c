@@ -759,28 +759,28 @@ void UI_Page_TMotor_Acceleration_Observer_Project_Init(void)
 void UI_Page_ADC_Monitor_Init(void)
 {
   hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
-  LCD_DisplayString(100, 200, "Channel 1: ");
-  LCD_DisplayString(100, 225, "Channel 2: ");
-  LCD_DisplayString(100, 250, "Channel 3: ");
-  LCD_DisplayString(100, 275, "Channel 4: ");
-  LCD_DisplayString(100, 300, "Channel 5: ");
-  LCD_DisplayString(100, 325, "Channel 6: ");
-  LCD_DisplayString(100, 350, "Channel 7: ");
-  LCD_DisplayString(100, 375, "Channel 8: ");
+  LCD_DisplayString(100, 200, "Channel 1 (V): ");
+  LCD_DisplayString(100, 225, "Channel 2 (V): ");
+  LCD_DisplayString(100, 250, "Channel 3 (V): ");
+  LCD_DisplayString(100, 275, "Channel 4 (V): ");
+  LCD_DisplayString(100, 300, "Channel 5 (V): ");
+  LCD_DisplayString(100, 325, "Channel 6 (V): ");
+  LCD_DisplayString(100, 350, "Channel 7 (V): ");
+  LCD_DisplayString(100, 375, "Channel 8 (V): ");
 }
 void UI_Page_ADC_Monitor(void)
 {
   ButtonScan(&hButtonGoBack);
   ButtonRefresh(&hButtonGoBack);
   
-  LCD_DisplayNumber(230, 200, hADC.rawData[0], 5);
-  LCD_DisplayNumber(230, 225, hADC.rawData[1], 5);
-  LCD_DisplayNumber(230, 250, hADC.rawData[2], 5);
-  LCD_DisplayNumber(230, 275, hADC.rawData[3], 5);
-  LCD_DisplayNumber(230, 300, hADC.rawData[4], 5);
-  LCD_DisplayNumber(230, 325, hADC.rawData[5], 5);
-  LCD_DisplayNumber(230, 350, hADC.rawData[6], 5);
-  LCD_DisplayNumber(230, 375, hADC.rawData[7], 5);
+  LCD_DisplayDecimals(300, 200, hADC.volt[0], 5, 4);
+  LCD_DisplayDecimals(300, 225, hADC.volt[1], 5, 4);
+  LCD_DisplayDecimals(300, 250, hADC.volt[2], 5, 4);
+  LCD_DisplayDecimals(300, 275, hADC.volt[3], 5, 4);
+  LCD_DisplayDecimals(300, 300, hADC.volt[4], 5, 4);
+  LCD_DisplayDecimals(300, 325, hADC.volt[5], 5, 4);
+  LCD_DisplayDecimals(300, 350, hADC.volt[6], 5, 4);
+  LCD_DisplayDecimals(300, 375, hADC.volt[7], 5, 4);
   
   if (ifButtonPressed(&hButtonGoBack))
     UI_Page_Change_To(&UIPage_Home1);

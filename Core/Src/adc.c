@@ -160,9 +160,18 @@ void ADC_DataRequest(void)
 	AD7606_CV_HIGH;
 }
 
-void ADC_Read(int16_t *data)
+void ADC_ReadRawData(ADCHandle* hadc)
 {
 	AD7606_CS_LOW;
-	HAL_SPI_Receive(&hspi5, (uint8_t *)data, 8, 2);
+	HAL_SPI_Receive(&hspi5, (uint8_t *)&(hadc->rawData), 8, 2);
 	AD7606_CS_HIGH;
+  ADC_GetVoltage(hadc);
+}
+
+void ADC_GetVoltage(ADCHandle* hadc)
+{
+  for (uint8_t i = 0; i < 8; i++)
+  {
+    hadc->volt[i] = ((float)hadc->rawData[i]) * 5.0f / 32767.0f;
+  }
 }
