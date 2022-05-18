@@ -2,8 +2,7 @@
 
 SPI_HandleTypeDef hspi5;
 ADCHandle         hADC;
-uint8_t           adcTx = 0x55;
-HAL_StatusTypeDef adcresult;
+
 void AD7606_Init(uint8_t AD7606_RANGE, uint8_t AD7606_OVER_SAMPLING)
 {
 	GPIO_InitTypeDef GPIO_InitStruct = {0};
@@ -18,7 +17,7 @@ void AD7606_Init(uint8_t AD7606_RANGE, uint8_t AD7606_OVER_SAMPLING)
   hspi5.Init.CLKPolarity = SPI_POLARITY_HIGH;
   hspi5.Init.CLKPhase = SPI_PHASE_1EDGE;
   hspi5.Init.NSS = SPI_NSS_SOFT;
-  hspi5.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_32;
+  hspi5.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_8;
   hspi5.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi5.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi5.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
@@ -164,6 +163,6 @@ void ADC_DataRequest(void)
 void ADC_Read(int16_t *data)
 {
 	AD7606_CS_LOW;
-	adcresult = HAL_SPI_Receive(&hspi5, (uint8_t *)data, 8, 2);
+	HAL_SPI_Receive(&hspi5, (uint8_t *)data, 8, 2);
 	AD7606_CS_HIGH;
 }

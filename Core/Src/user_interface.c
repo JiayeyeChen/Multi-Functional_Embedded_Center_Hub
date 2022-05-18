@@ -4,7 +4,8 @@
 
 PageHandle UIPage_Home1, UIPage_AK10_9_Calibration, UIPage_BNO055_Monitor, \
            UIPage_AK10_9_ManualControl, UIPage_AK10_9_ImpedanceControlDemo, \
-           UIPage_TMotor_Acceleration_Observer_Project;
+           UIPage_TMotor_Acceleration_Observer_Project, \
+           UIPage_ADC_Monitor;
 UIHandle hUI;
 
 ButtonHandle hButtonPageAK10_9KtTesting;
@@ -12,6 +13,7 @@ ButtonHandle hButtonPageAK10_9ManualControl;
 ButtonHandle hButtonPageAK10_9ImpedanceControlDemo;
 ButtonHandle hButtonPageBNO055_Monitor;
 ButtonHandle hButtonPageTMotorAccelerationObserverProject;
+ButtonHandle hButtonPageADCMonitor;
 
 ButtonHandle hButtonDataLogStart;
 ButtonHandle hButtonDataLogEnd;
@@ -210,6 +212,10 @@ void UI_Init(void)
   UIPage_TMotor_Acceleration_Observer_Project.ifPageInitialized = 0;
   UIPage_TMotor_Acceleration_Observer_Project.Page = UI_Page_TMotor_Acceleration_Observer_Project;
   UIPage_TMotor_Acceleration_Observer_Project.PageInit = UI_Page_TMotor_Acceleration_Observer_Project_Init;
+  
+  UIPage_ADC_Monitor.ifPageInitialized = 0;
+  UIPage_ADC_Monitor.Page = UI_Page_ADC_Monitor;
+  UIPage_ADC_Monitor.PageInit = UI_Page_ADC_Monitor_Init;
 }
 
 JoystickHandle Joystick_Create(uint16_t x, uint16_t y, uint16_t r, char label[])
@@ -267,11 +273,9 @@ void UI_Page_AK10_9_Kt_Testing(void)
   ButtonRefresh(&hButtonMotorProfilingEnd);
   ButtonRefresh(&hButtonMotorZeroing);
   
-  ADC_DataRequest();
   if (ifButtonPressed(&hButtonDataLogStart))
   {
     USB_DataLogStart();
-    
   }
   if (ifButtonPressed(&hButtonDataLogEnd))
   {
@@ -305,16 +309,7 @@ void UI_Page_AK10_9_Kt_Testing(void)
   LCD_DisplayString(50, 650, "Position: ");LCD_DisplayDecimals(170, 650, (double)hAKMotorLeftHip.realPosition.f, 10, 4);
   LCD_DisplayString(50, 700, "Velocity: ");LCD_DisplayDecimals(170, 700, (double)hAKMotorLeftHip.realVelocity.f, 10, 4);
   LCD_DisplayString(50, 750, "Current:  ");LCD_DisplayDecimals(170, 750, (double)hAKMotorLeftHip.realCurrent.f, 10, 4);
-  
-  LCD_DisplayNumber(260, 450, hADC.rawData[0], 5);
-  LCD_DisplayNumber(260, 475, hADC.rawData[1], 5);
-  LCD_DisplayNumber(260, 500, hADC.rawData[2], 5);
-  LCD_DisplayNumber(260, 525, hADC.rawData[3], 5);
-  LCD_DisplayNumber(260, 550, hADC.rawData[4], 5);
-  LCD_DisplayNumber(260, 575, hADC.rawData[5], 5);
-  LCD_DisplayNumber(260, 600, hADC.rawData[6], 5);
-  LCD_DisplayNumber(260, 625, hADC.rawData[7], 5);
-  
+ 
   LCD_DisplayDecimals(310, 650, (double)hAKMotorLeftHip.setPosition.f, 10, 4);
   LCD_DisplayDecimals(310, 700, (double)hAKMotorLeftHip.setVelocity.f, 10, 4);
   LCD_DisplayDecimals(310, 750, (double)hAKMotorLeftHip.setCurrent.f, 10, 4);
@@ -348,6 +343,8 @@ void UI_Page_Home1(void)
   ButtonRefresh(&hButtonPageBNO055_Monitor);
   ButtonScan(&hButtonPageTMotorAccelerationObserverProject);
   ButtonRefresh(&hButtonPageTMotorAccelerationObserverProject);
+  ButtonScan(&hButtonPageADCMonitor);
+  ButtonRefresh(&hButtonPageADCMonitor);
   
   if (ifButtonPressed(&hButtonPageAK10_9KtTesting))
     UI_Page_Change_To(&UIPage_AK10_9_Calibration);
@@ -359,6 +356,8 @@ void UI_Page_Home1(void)
     UI_Page_Change_To(&UIPage_BNO055_Monitor);
   if (ifButtonPressed(&hButtonPageTMotorAccelerationObserverProject))
     UI_Page_Change_To(&UIPage_TMotor_Acceleration_Observer_Project);
+  if (ifButtonPressed(&hButtonPageADCMonitor))
+    UI_Page_Change_To(&UIPage_ADC_Monitor);
 }
 void UI_Page_Home1_Init(void)
 {
@@ -367,6 +366,7 @@ void UI_Page_Home1_Init(void)
   hButtonPageAK10_9ImpedanceControlDemo = Button_Create(30, 300, 430, 50, "AK10-9 V2.0 Impedance Control Demo", LIGHT_MAGENTA, LCD_RED);
   hButtonPageBNO055_Monitor = Button_Create(150, 400, 200, 50, "BNO055 Monitor", LIGHT_MAGENTA, LCD_RED);
   hButtonPageTMotorAccelerationObserverProject = Button_Create(10, 500, 450, 50, "TMotor Acceleration Observer Project", LIGHT_MAGENTA, LCD_RED);
+  hButtonPageADCMonitor = Button_Create(150, 600, 200, 50, "ADC Monitor", LIGHT_MAGENTA, LCD_RED);
 }
 
 void UI_Page_AK10_9_ManualControl(void)
@@ -754,4 +754,34 @@ void UI_Page_TMotor_Acceleration_Observer_Project_Init(void)
   LCD_DisplayString(10, 695, "GyroZ:  ");
   
   ifIMUFeedbackStarted = 1;
+}
+
+void UI_Page_ADC_Monitor_Init(void)
+{
+  hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
+  LCD_DisplayString(100, 200, "Channel 1: ");
+  LCD_DisplayString(100, 225, "Channel 2: ");
+  LCD_DisplayString(100, 250, "Channel 3: ");
+  LCD_DisplayString(100, 275, "Channel 4: ");
+  LCD_DisplayString(100, 300, "Channel 5: ");
+  LCD_DisplayString(100, 325, "Channel 6: ");
+  LCD_DisplayString(100, 350, "Channel 7: ");
+  LCD_DisplayString(100, 375, "Channel 8: ");
+}
+void UI_Page_ADC_Monitor(void)
+{
+  ButtonScan(&hButtonGoBack);
+  ButtonRefresh(&hButtonGoBack);
+  
+  LCD_DisplayNumber(230, 200, hADC.rawData[0], 5);
+  LCD_DisplayNumber(230, 225, hADC.rawData[1], 5);
+  LCD_DisplayNumber(230, 250, hADC.rawData[2], 5);
+  LCD_DisplayNumber(230, 275, hADC.rawData[3], 5);
+  LCD_DisplayNumber(230, 300, hADC.rawData[4], 5);
+  LCD_DisplayNumber(230, 325, hADC.rawData[5], 5);
+  LCD_DisplayNumber(230, 350, hADC.rawData[6], 5);
+  LCD_DisplayNumber(230, 375, hADC.rawData[7], 5);
+  
+  if (ifButtonPressed(&hButtonGoBack))
+    UI_Page_Change_To(&UIPage_Home1);
 }
