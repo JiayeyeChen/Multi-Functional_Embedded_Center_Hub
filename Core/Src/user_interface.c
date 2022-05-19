@@ -27,6 +27,8 @@ ButtonHandle hButtonManualControlMode;
 ButtonHandle hButtonSpringConstantUp, hButtonSpringConstantDown, hButtonDampingConstantUp, hButtonDampingConstantDown;
 ButtonHandle hButtonIMUSetModeNDOF, hButtonIMUSetModeACCONLY, hButtonIMUSetModeGYROONLY;
 ButtonHandle hButtonMotorSelectRightHip, hButtonMotorSelectRightKnee;
+ButtonHandle hButtonKtTestingStart, hButtonKtTestingStop;
+ButtonHandle hButtonResetAD7606;
 
 
 LinearPotentialmeterHandle  hTMotorManualControlPot_pos, hTMotorManualControlPot_vel, hTMotorManualControlPot_cur;
@@ -261,58 +263,36 @@ void UI(void)
 void UI_Page_AK10_9_Kt_Testing(void)
 {
   ButtonScan(&hButtonGoBack);
-  ButtonScan(&hButtonDataLogStart);
-  ButtonScan(&hButtonDataLogEnd);
-  ButtonScan(&hButtonMotorProfilingStart);
-  ButtonScan(&hButtonMotorProfilingEnd);
-  ButtonScan(&hButtonMotorZeroing);
+  ButtonScan(&hButtonKtTestingStart);
+  ButtonScan(&hButtonKtTestingStop);
+
   ButtonRefresh(&hButtonGoBack);
-  ButtonRefresh(&hButtonDataLogEnd);
-  ButtonRefresh(&hButtonDataLogStart);
-  ButtonRefresh(&hButtonMotorProfilingStart);
-  ButtonRefresh(&hButtonMotorProfilingEnd);
-  ButtonRefresh(&hButtonMotorZeroing);
+  ButtonRefresh(&hButtonKtTestingStart);
+  ButtonRefresh(&hButtonKtTestingStop);
   
-  if (ifButtonPressed(&hButtonDataLogStart))
+  if (ifButtonPressed(&hButtonKtTestingStart))
   {
+    hStaticTorqueConstantTesting.ifTestingStarted = 1;
     USB_DataLogStart();
   }
-  if (ifButtonPressed(&hButtonDataLogEnd))
+  if (ifButtonPressed(&hButtonKtTestingStop))
   {
-    USB_DataLogEnd();
+    UI_Page_AK10_9_Kt_Testing_Init();
+    hStaticTorqueConstantTesting.ifTestingStarted = 0;
   }
-  if(ifButtonPressed(&hButtonMotorProfilingStart))
-  {
-    ifMotorProfilingStarted = 1;
-    timeDifference = HAL_GetTick();
-  }
-  if(ifButtonPressed(&hButtonMotorProfilingEnd))
-  {
-    ifMotorProfilingStarted = 0;
-    timeDifference = 0;
-  }
-  if(ifButtonPressed(&hButtonMotorZeroing))
-  {
-    AK10_9_ServoMode_Zeroing(&hAKMotorLeftHip);
-  }
-  
+
   LCD_SetLayer(1); 
   LCD_SetColor(LCD_BLACK);
-  if (hAKMotorLeftHip.status == AK10_9_Online)
+  if (hAKMotorRightHip.status == AK10_9_Online)
     LCD_DisplayString(200, 0, "Motor  Online");
   else
     LCD_DisplayString(200, 0, "Motor Offline");
-  LCD_DisplayString(20, 570, "Temperature:");
-  LCD_DisplayNumber(70, 600, hAKMotorLeftHip.temperature, 2);
-  LCD_DisplayString(230, 600, "Real");
-  LCD_DisplayString(360, 600, "Desired");
-  LCD_DisplayString(50, 650, "Position: ");LCD_DisplayDecimals(170, 650, (double)hAKMotorLeftHip.realPosition.f, 10, 4);
-  LCD_DisplayString(50, 700, "Velocity: ");LCD_DisplayDecimals(170, 700, (double)hAKMotorLeftHip.realVelocity.f, 10, 4);
-  LCD_DisplayString(50, 750, "Current:  ");LCD_DisplayDecimals(170, 750, (double)hAKMotorLeftHip.realCurrent.f, 10, 4);
- 
-  LCD_DisplayDecimals(310, 650, (double)hAKMotorLeftHip.setPosition.f, 10, 4);
-  LCD_DisplayDecimals(310, 700, (double)hAKMotorLeftHip.setVelocity.f, 10, 4);
-  LCD_DisplayDecimals(310, 750, (double)hAKMotorLeftHip.setCurrent.f, 10, 4);
+  
+  
+  LCD_DisplayNumber(100, 760, hMotorPtrManualControl->temperature, 2);
+  LCD_DisplayDecimals(150, 710, (double)hAKMotorRightHip.realCurrent.f, 6, 3);
+  LCD_DisplayDecimals(250, 710, (double)hAKMotorRightHip.setCurrent.f, 6, 3);
+  
   
   if (ifButtonPressed(&hButtonGoBack))
     UI_Page_Change_To(&UIPage_Home1);
@@ -320,12 +300,18 @@ void UI_Page_AK10_9_Kt_Testing(void)
 
 void UI_Page_AK10_9_Kt_Testing_Init(void)
 {
-  hButtonDataLogStart = Button_Create(50, 50, 200, 50, "Data Log Start", LIGHT_MAGENTA, LCD_RED);
-  hButtonDataLogEnd = Button_Create(50, 150, 200, 50, "Data Log End", LCD_GREEN, LCD_RED);
-  hButtonMotorProfilingStart = Button_Create(50, 250, 300, 50, "Motor profiling Start", LIGHT_GREY, LCD_RED);
-  hButtonMotorProfilingEnd = Button_Create(50, 350, 300, 50, "Motor profiling Stop", LCD_YELLOW, LCD_RED);
-  hButtonMotorZeroing = Button_Create(50, 450, 200, 50, "Motor Set Zero", LCD_BLUE, LCD_RED);
+  hButtonKtTestingStart = Button_Create(50, 50, 220, 50, "Kt Testing Start", LIGHT_MAGENTA, LCD_RED);
+  hButtonKtTestingStop = Button_Create(50, 150, 220, 50, "Kt Testing Stop", LCD_GREEN, LCD_RED);
+  AK10_9_StaticTorqueConstantTesting_Init();
+
   hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
+
+  LCD_DisplayString(170, 685, "mes");
+  LCD_DisplayString(270, 685, "des");
+  LCD_DisplayString(10, 710, "Current:  ");
+  LCD_DisplayString(10, 760, "Temp:");
+  
+  AK10_9_StaticTorqueConstantTesting_Init();
 }
 
 void UI_Page_Home1(void)
@@ -759,6 +745,7 @@ void UI_Page_TMotor_Acceleration_Observer_Project_Init(void)
 void UI_Page_ADC_Monitor_Init(void)
 {
   hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
+  hButtonResetAD7606 = Button_Create(100, 500, 300, 50, "Reset AD7606", LCD_GREEN, LCD_RED);
   LCD_DisplayString(100, 200, "Channel 1 (V): ");
   LCD_DisplayString(100, 225, "Channel 2 (V): ");
   LCD_DisplayString(100, 250, "Channel 3 (V): ");
@@ -772,7 +759,11 @@ void UI_Page_ADC_Monitor(void)
 {
   ButtonScan(&hButtonGoBack);
   ButtonRefresh(&hButtonGoBack);
+  ButtonScan(&hButtonResetAD7606);
+  ButtonRefresh(&hButtonResetAD7606);
   
+  LCD_SetLayer(1);
+  LCD_SetColor(LCD_BLACK);
   LCD_DisplayDecimals(300, 200, hADC.volt[0], 5, 4);
   LCD_DisplayDecimals(300, 225, hADC.volt[1], 5, 4);
   LCD_DisplayDecimals(300, 250, hADC.volt[2], 5, 4);
@@ -781,6 +772,16 @@ void UI_Page_ADC_Monitor(void)
   LCD_DisplayDecimals(300, 325, hADC.volt[5], 5, 4);
   LCD_DisplayDecimals(300, 350, hADC.volt[6], 5, 4);
   LCD_DisplayDecimals(300, 375, hADC.volt[7], 5, 4);
+  
+  if (ifButtonPressed(&hButtonResetAD7606))
+  {
+    // Reset AD7606
+	AD7606_RST_LOW;
+	HAL_Delay(1);
+	AD7606_RST_HIGH;
+	HAL_Delay(1);
+	AD7606_RST_LOW;
+  }
   
   if (ifButtonPressed(&hButtonGoBack))
     UI_Page_Change_To(&UIPage_Home1);

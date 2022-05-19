@@ -29,7 +29,7 @@ int main(void)
   MX_FATFS_Init();
   
   SystemPeriphral_Init();
-  USB_Init(sizeof(dataSlots_AK10_9_Acceleration_Observer_Testing)/4);
+  USB_Init(sizeof(dataSlots_AK10_9_TorqueConstantTesting)/4);
   
 	MX_FMC_Init();
   UI_Init();
@@ -145,11 +145,10 @@ void AK10Calibration_Task(void *argument)
   
   for(;;)
   {
-    ADC_DataRequest();
-    AK10_9_DataLog_Manager(&hAKMotorRightHip, &hIMURightThigh);
+    AK10_9_StaticTorqueConstantTestingManager(&hAKMotorRightHip, 0.5f, 20.0f, -1.0f, 100);
+//////    AK10_9_DataLog_Manager(&hAKMotorRightHip, &hIMURightThigh);
     if (ifMotorProfilingStarted)
       AK10_9_MotorProfiling_Function1_Half_Sin(&hAKMotorRightHip, tmotorProfilingSinWaveFrequency);
-      //AK10_9_MotorProfiling_Function2_CurrentControlStepResponse(&hAKMotorLeftHip);
     
     if (ifManualControlStarted)
     {
@@ -169,7 +168,7 @@ void AK10Calibration_Task(void *argument)
     
     AK10_9_MotorStatusMonitor(&hAKMotorRightKnee);
     AK10_9_MotorStatusMonitor(&hAKMotorRightHip);
-    osDelay(1);
+    osDelay(2);
   }
 }
 
@@ -185,6 +184,15 @@ void UI_Task(void *argument)
   }
 }
 
+void ADC_Task(void *argument)
+{
+  for(;;)
+  {
+    ADC_DataRequest();
+    osDelay(1);
+  }
+}
+
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   if (htim->Instance == TIM1) {
@@ -196,8 +204,10 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
   switch(GPIO_Pin)
   {
-  case AD7606_BUSY_PIN:		
+  case AD7606_BUSY_PIN:
     ADC_ReadRawData(&hADC);
+    ADC_GetVoltage(&hADC);
+    hStaticTorqueConstantTesting.torqueMeasured = 20.0f * hADC.volt[0] / 5.0f;
     break;
   
   default:

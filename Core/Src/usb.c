@@ -2,6 +2,7 @@
 
 USBHandle hUSB;
 union FloatUInt8 dataSlots_AK10_9_Acceleration_Observer_Testing[14];
+union FloatUInt8 dataSlots_AK10_9_TorqueConstantTesting[2];
 
 void USB_Init(uint8_t data_slot_len)
 {
