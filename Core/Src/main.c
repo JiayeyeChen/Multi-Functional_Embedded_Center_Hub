@@ -34,7 +34,7 @@ int main(void)
 	MX_FMC_Init();
   UI_Init();
   MotorInit();
-  AD7606_Init(AD7606_RANG_5V, AD7606_OS_RATIO_8);
+//  AD7606_Init(AD7606_RANG_5V, AD7606_OS_RATIO_0);
 
   EXOSKELETON_Init();
   CAN_ConfigureFilters();
@@ -145,7 +145,7 @@ void AK10Calibration_Task(void *argument)
   
   for(;;)
   {
-    AK10_9_StaticTorqueConstantTestingManager(&hAKMotorRightHip, 0.5f, 20.0f, -1.0f, 100);
+//    AK10_9_StaticTorqueConstantTestingManager(&hAKMotorRightHip, 0.5f, 20.0f, -1.0f, 100);
 //////    AK10_9_DataLog_Manager(&hAKMotorRightHip, &hIMURightThigh);
     if (ifMotorProfilingStarted)
       AK10_9_MotorProfiling_Function1_Half_Sin(&hAKMotorRightHip, tmotorProfilingSinWaveFrequency);
@@ -188,7 +188,7 @@ void ADC_Task(void *argument)
 {
   for(;;)
   {
-    ADC_DataRequest();
+//    ADC_DataRequest();
     osDelay(1);
   }
 }

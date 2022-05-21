@@ -273,7 +273,7 @@ void UI_Page_AK10_9_Kt_Testing(void)
   if (ifButtonPressed(&hButtonKtTestingStart))
   {
     hStaticTorqueConstantTesting.ifTestingStarted = 1;
-    USB_DataLogStart();
+    USB_DataLogStart(); 
   }
   if (ifButtonPressed(&hButtonKtTestingStop))
   {

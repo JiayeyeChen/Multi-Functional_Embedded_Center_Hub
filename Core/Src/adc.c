@@ -17,7 +17,7 @@ void AD7606_Init(uint8_t AD7606_RANGE, uint8_t AD7606_OVER_SAMPLING)
   hspi5.Init.CLKPolarity = SPI_POLARITY_HIGH;
   hspi5.Init.CLKPhase = SPI_PHASE_1EDGE;
   hspi5.Init.NSS = SPI_NSS_SOFT;
-  hspi5.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_8;
+  hspi5.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16;
   hspi5.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi5.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi5.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
@@ -46,7 +46,7 @@ void AD7606_Init(uint8_t AD7606_RANGE, uint8_t AD7606_OVER_SAMPLING)
 	
 	GPIO_InitStruct.Pin = AD7606_RST_PIN;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
   HAL_GPIO_Init(AD7606_RST_GPIO_PORT, &GPIO_InitStruct);
 	
