@@ -20,6 +20,8 @@
 
 void SystemClock_Config(void);
 
+uint32_t can2Mailboxlevel = 0;
+
 int main(void)
 {
   HAL_Init();
@@ -34,7 +36,7 @@ int main(void)
 	MX_FMC_Init();
   UI_Init();
   MotorInit();
-//  AD7606_Init(AD7606_RANG_5V, AD7606_OS_RATIO_0);
+  AD7606_Init(AD7606_RANG_5V, AD7606_OS_RATIO_0);
 
   EXOSKELETON_Init();
   CAN_ConfigureFilters();
@@ -145,7 +147,7 @@ void AK10Calibration_Task(void *argument)
   
   for(;;)
   {
-//    AK10_9_StaticTorqueConstantTestingManager(&hAKMotorRightHip, 0.5f, 20.0f, -1.0f, 100);
+    AK10_9_StaticTorqueConstantTestingManager(&hAKMotorRightHip, 0.5f, 20.0f, -1.0f, 100);
 //////    AK10_9_DataLog_Manager(&hAKMotorRightHip, &hIMURightThigh);
     if (ifMotorProfilingStarted)
       AK10_9_MotorProfiling_Function1_Half_Sin(&hAKMotorRightHip, tmotorProfilingSinWaveFrequency);
@@ -168,6 +170,8 @@ void AK10Calibration_Task(void *argument)
     
     AK10_9_MotorStatusMonitor(&hAKMotorRightKnee);
     AK10_9_MotorStatusMonitor(&hAKMotorRightHip);
+    
+    can2Mailboxlevel = HAL_CAN_GetTxMailboxesFreeLevel(&hcan2);
     osDelay(2);
   }
 }
@@ -180,7 +184,7 @@ void UI_Task(void *argument)
     Touch_Scan();
     UI();
     LED_Blink(&hLEDBlue, 2);
-    osDelay(16);
+    osDelay(50);
   }
 }
 
@@ -188,7 +192,7 @@ void ADC_Task(void *argument)
 {
   for(;;)
   {
-//    ADC_DataRequest();
+    ADC_DataRequest();
     osDelay(1);
   }
 }
