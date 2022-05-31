@@ -1491,7 +1491,7 @@ void SystemPeriphral_Init(void)
   GPIO_Init();
   DMA_Init();
   CRC_Init();
-//  CAN1_Init();
+  
   DAC_Init();
   SPI4_Init();
   SPI6_Init();
@@ -1505,6 +1505,7 @@ void SystemPeriphral_Init(void)
   TIM5_Init();
   TIM13_Init();
   TIM14_Init();
+//  CAN1_Init();
   CAN2_Init();
   SPI1_Init();
   USB_DEVICE_Init();

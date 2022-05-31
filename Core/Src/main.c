@@ -39,6 +39,7 @@ int main(void)
   AD7606_Init(AD7606_RANG_5V, AD7606_OS_RATIO_0);
 
   EXOSKELETON_Init();
+  ENCODER_Init();
   CAN_ConfigureFilters();
   
   osKernelInitialize();
@@ -147,6 +148,7 @@ void AK10Calibration_Task(void *argument)
   
   for(;;)
   {
+    
     AK10_9_StaticTorqueConstantTestingManager(&hAKMotorRightHip, 0.5f, 20.0f, -1.0f, 100);
 //////    AK10_9_DataLog_Manager(&hAKMotorRightHip, &hIMURightThigh);
     if (ifMotorProfilingStarted)
@@ -192,6 +194,7 @@ void ADC_Task(void *argument)
 {
   for(;;)
   {
+    ENCODER_ReadAngleRequest(&hEncoderLeftWheel);
     ADC_DataRequest();
     osDelay(1);
   }

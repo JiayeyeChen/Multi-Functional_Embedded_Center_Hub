@@ -5,7 +5,7 @@
 PageHandle UIPage_Home1, UIPage_AK10_9_Calibration, UIPage_BNO055_Monitor, \
            UIPage_AK10_9_ManualControl, UIPage_AK10_9_ImpedanceControlDemo, \
            UIPage_TMotor_Acceleration_Observer_Project, \
-           UIPage_ADC_Monitor;
+           UIPage_ADC_Monitor, UIPage_BriterEncoder;
 UIHandle hUI;
 
 ButtonHandle hButtonPageAK10_9KtTesting;
@@ -14,6 +14,7 @@ ButtonHandle hButtonPageAK10_9ImpedanceControlDemo;
 ButtonHandle hButtonPageBNO055_Monitor;
 ButtonHandle hButtonPageTMotorAccelerationObserverProject;
 ButtonHandle hButtonPageADCMonitor;
+ButtonHandle hButtonPageBriterEncoder;
 
 ButtonHandle hButtonDataLogStart;
 ButtonHandle hButtonDataLogEnd;
@@ -29,6 +30,9 @@ ButtonHandle hButtonIMUSetModeNDOF, hButtonIMUSetModeACCONLY, hButtonIMUSetModeG
 ButtonHandle hButtonMotorSelectRightHip, hButtonMotorSelectRightKnee;
 ButtonHandle hButtonKtTestingStart, hButtonKtTestingStop;
 ButtonHandle hButtonResetAD7606;
+
+ButtonHandle hButtonBriterEncoderZeroing, hButtonBriterEncoderSetCounterClockWiseDirection, hButtonBriterEncoderSet1MHzCanRate, \
+             hButtonBriterEncoderSetCanID;
 
 
 LinearPotentialmeterHandle  hTMotorManualControlPot_pos, hTMotorManualControlPot_vel, hTMotorManualControlPot_cur;
@@ -218,6 +222,10 @@ void UI_Init(void)
   UIPage_ADC_Monitor.ifPageInitialized = 0;
   UIPage_ADC_Monitor.Page = UI_Page_ADC_Monitor;
   UIPage_ADC_Monitor.PageInit = UI_Page_ADC_Monitor_Init;
+  
+  UIPage_BriterEncoder.ifPageInitialized = 0;
+  UIPage_BriterEncoder.Page = UI_Page_BriterEncoder;
+  UIPage_BriterEncoder.PageInit = UI_Page_BriterEncoder_Init;
 }
 
 JoystickHandle Joystick_Create(uint16_t x, uint16_t y, uint16_t r, char label[])
@@ -331,6 +339,8 @@ void UI_Page_Home1(void)
   ButtonRefresh(&hButtonPageTMotorAccelerationObserverProject);
   ButtonScan(&hButtonPageADCMonitor);
   ButtonRefresh(&hButtonPageADCMonitor);
+  ButtonScan(&hButtonPageBriterEncoder);
+  ButtonRefresh(&hButtonPageBriterEncoder);
   
   if (ifButtonPressed(&hButtonPageAK10_9KtTesting))
     UI_Page_Change_To(&UIPage_AK10_9_Calibration);
@@ -344,6 +354,8 @@ void UI_Page_Home1(void)
     UI_Page_Change_To(&UIPage_TMotor_Acceleration_Observer_Project);
   if (ifButtonPressed(&hButtonPageADCMonitor))
     UI_Page_Change_To(&UIPage_ADC_Monitor);
+  if (ifButtonPressed(&hButtonPageBriterEncoder))
+    UI_Page_Change_To(&UIPage_BriterEncoder);
 }
 void UI_Page_Home1_Init(void)
 {
@@ -353,6 +365,7 @@ void UI_Page_Home1_Init(void)
   hButtonPageBNO055_Monitor = Button_Create(150, 400, 200, 50, "BNO055 Monitor", LIGHT_MAGENTA, LCD_RED);
   hButtonPageTMotorAccelerationObserverProject = Button_Create(10, 500, 450, 50, "TMotor Acceleration Observer Project", LIGHT_MAGENTA, LCD_RED);
   hButtonPageADCMonitor = Button_Create(150, 600, 200, 50, "ADC Monitor", LIGHT_MAGENTA, LCD_RED);
+  hButtonPageBriterEncoder = Button_Create(150, 700, 200, 50, "Briter Encoder", LIGHT_MAGENTA, LCD_RED);
 }
 
 void UI_Page_AK10_9_ManualControl(void)
@@ -785,4 +798,53 @@ void UI_Page_ADC_Monitor(void)
   
   if (ifButtonPressed(&hButtonGoBack))
     UI_Page_Change_To(&UIPage_Home1);
+}
+
+void UI_Page_BriterEncoder(void)
+{
+  ButtonScan(&hButtonGoBack);
+  ButtonRefresh(&hButtonGoBack);
+  ButtonScan(&hButtonBriterEncoderZeroing);
+  ButtonRefresh(&hButtonBriterEncoderZeroing);
+  ButtonScan(&hButtonBriterEncoderSetCounterClockWiseDirection);
+  ButtonRefresh(&hButtonBriterEncoderSetCounterClockWiseDirection);
+  ButtonScan(&hButtonBriterEncoderSet1MHzCanRate);
+  ButtonRefresh(&hButtonBriterEncoderSet1MHzCanRate);
+  ButtonScan(&hButtonBriterEncoderSetCanID);
+  ButtonRefresh(&hButtonBriterEncoderSetCanID);
+  
+//  ENCODER_ReadAngleRequest(&hEncoderLeftWheel);
+  LCD_SetLayer(1);
+  LCD_SetColor(LCD_BLACK);
+  LCD_DisplayDecimals(100, 10, hEncoderLeftWheel.angleDeg.f, 10, 3);
+  LCD_DisplayDecimals(100, 40, hEncoderLeftWheel.speedCalAngleAvgPresent, 10, 3);
+  LCD_DisplayDecimals(100, 70, hEncoderLeftWheel.speedDeg.f, 10, 3);
+  
+  if (ifButtonPressed(&hButtonBriterEncoderZeroing))
+  {
+    ENCODER_SetZeroPosition(&hEncoderLeftWheel);
+  }
+  else if (ifButtonPressed(&hButtonBriterEncoderSetCounterClockWiseDirection))
+  {
+    ENCODER_SetDirection(&hEncoderLeftWheel, BRITER_ENCODER_DIRECTION_COUNTERCLOCKWISE);
+  }
+  else if (ifButtonPressed(&hButtonBriterEncoderSet1MHzCanRate))
+  {
+    ENCODER_Set1MHzCanBaudrate(&hEncoderLeftWheel);
+  }
+  else if (ifButtonPressed(&hButtonBriterEncoderSetCanID))
+  {
+    ENCODER_SetCanID(&hEncoderLeftWheel, 0x06);
+  }
+  
+  if (ifButtonPressed(&hButtonGoBack))
+    UI_Page_Change_To(&UIPage_Home1);
+}
+void UI_Page_BriterEncoder_Init(void)
+{
+  hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
+  hButtonBriterEncoderSetCounterClockWiseDirection = Button_Create(100, 200, 300, 40, "Set counterclockwise", LCD_GREEN, LCD_RED);
+  hButtonBriterEncoderZeroing = Button_Create(100, 250, 300, 40, "Zeroing", LCD_GREEN, LCD_RED);
+  hButtonBriterEncoderSet1MHzCanRate = Button_Create(100, 300, 300, 40, "Set 1MHz", LCD_GREEN, LCD_RED);
+  hButtonBriterEncoderSetCanID = Button_Create(100, 350, 300, 40, "Set CAN ID", LCD_GREEN, LCD_RED);
 }

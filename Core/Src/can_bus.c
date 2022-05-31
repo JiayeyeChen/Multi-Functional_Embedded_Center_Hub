@@ -2,6 +2,7 @@
 #include "ak10-9_v2_testing.h"
 #include "usb.h"
 #include "exoskeleton.h"
+#include "encoder.h"
 
 //for testing//
 uint8_t rxfifo0detected = 0;
@@ -89,6 +90,22 @@ void CAN_ConfigureFilters(void)
 	hIMURightThigh.rxFilter.FilterIdHigh = CAN_ID_IMU_MAG_EXOSKELETON_RIGHT_THIGH << 5;
 	hIMURightThigh.rxFilter.FilterActivation = ENABLE;
 	HAL_CAN_ConfigFilter(hIMURightThigh.hcan, &hIMURightThigh.rxFilter);
+  //Filter bank 7
+  hEncoderRightWheel.canRxFilter.FilterMode = CAN_FILTERMODE_IDLIST;
+  hEncoderRightWheel.canRxFilter.FilterScale = CAN_FILTERSCALE_16BIT;
+  hEncoderRightWheel.canRxFilter.FilterFIFOAssignment = CAN_FILTER_FIFO0;
+  hEncoderRightWheel.canRxFilter.FilterBank = 7;
+  hEncoderRightWheel.canRxFilter.FilterIdHigh = CAN_ID_ENCODER_RIGHT_WHEEL << 5;
+  hEncoderRightWheel.canRxFilter.FilterActivation = ENABLE;
+  HAL_CAN_ConfigFilter(hEncoderRightWheel.hcan, &hEncoderRightWheel.canRxFilter);
+  //Filter bank 8
+  hEncoderLeftWheel.canRxFilter.FilterMode = CAN_FILTERMODE_IDLIST;
+  hEncoderLeftWheel.canRxFilter.FilterScale = CAN_FILTERSCALE_16BIT;
+  hEncoderLeftWheel.canRxFilter.FilterFIFOAssignment = CAN_FILTER_FIFO0;
+  hEncoderLeftWheel.canRxFilter.FilterBank = 8;
+  hEncoderLeftWheel.canRxFilter.FilterIdHigh = CAN_ID_ENCODER_LEFT_WHEEL << 5;
+  hEncoderLeftWheel.canRxFilter.FilterActivation = ENABLE;
+  HAL_CAN_ConfigFilter(hEncoderLeftWheel.hcan, &hEncoderLeftWheel.canRxFilter);
 }
 
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
@@ -112,6 +129,16 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
     EXOSKELETON_GetIMUFeedbackAcc(&hIMURightThigh, temRxData);
   else if (temRxHeader.StdId == CAN_ID_IMU_MAG_EXOSKELETON_RIGHT_THIGH)
     EXOSKELETON_GetIMUFeedbackMag(&hIMURightThigh, temRxData);
+  else if (temRxHeader.StdId == CAN_ID_ENCODER_RIGHT_WHEEL)
+  {
+    ENCODER_GetAngle(&hEncoderRightWheel, temRxData);
+    ENCODER_CalculateSpeed(&hEncoderRightWheel, 0.001f);
+  }
+  else if (temRxHeader.StdId == CAN_ID_ENCODER_LEFT_WHEEL)
+  {
+    ENCODER_GetAngle(&hEncoderLeftWheel, temRxData);
+    ENCODER_CalculateSpeed(&hEncoderLeftWheel, 0.001f);
+  }
   //End
   rxfifo0detected++;
 }

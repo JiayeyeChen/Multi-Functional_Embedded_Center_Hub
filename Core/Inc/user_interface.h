@@ -10,6 +10,7 @@
 #include "ak10-9_v2_testing.h"
 #include "exoskeleton.h"
 #include "adc.h"
+#include "encoder.h"
 
 typedef struct
 {
@@ -109,6 +110,8 @@ void         UI_Page_TMotor_Acceleration_Observer_Project(void);
 void         UI_Page_TMotor_Acceleration_Observer_Project_Init(void);
 void         UI_Page_ADC_Monitor_Init(void);
 void         UI_Page_ADC_Monitor(void);
+void         UI_Page_BriterEncoder(void);
+void         UI_Page_BriterEncoder_Init(void);
 
 JoystickHandle Joystick_Create(uint16_t x, uint16_t y, uint16_t r, char label[]);
 
