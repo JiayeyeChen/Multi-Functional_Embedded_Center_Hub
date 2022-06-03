@@ -6,6 +6,9 @@
 
 #define CAN_ID_ENCODER_RIGHT_WHEEL                     0x05
 #define CAN_ID_ENCODER_LEFT_WHEEL                      0x06
+#define CAN_ID_AK10_9_DMFW_M1_RX                       0x0A
+#define CAN_ID_AK10_9_DMFW_M2_RX                       0x0B
+#define CAN_ID_AK10_9_DMFW_M3_RX                       0x0C
 
 #define CAN_ID_IMU_LIACC_EXOSKELETON_RIGHT_THIGH       21U
 #define CAN_ID_IMU_GYRO_EXOSKELETON_RIGHT_THIGH        22U
@@ -28,7 +31,7 @@
 #define CAN_ID_IMU_GET_DATA_ACCONLY_RIGHT_SHANK        39U
 
 #define CAN_ID_TMOTOR_EXOSKELETON_LEFT_HIP           0x2904
-#define CAN_ID_TMOTOR_EXOSKELETON_RIGHT_HIP          0x2901
+#define CAN_ID_TMOTOR_EXOSKELETON_RIGHT_HIP          0x2902//0x2901
 #define CAN_ID_TMOTOR_EXOSKELETON_RIGHT_KNEE         0x2902
 
 CAN_FilterTypeDef ConfigCANFilter_EXT_ID_32BitIDListMode(CAN_HandleTypeDef* hcan, uint32_t FilterBank, uint32_t FilterFIFOAssignment, uint8_t IDE, uint32_t ID1, uint32_t ID2);

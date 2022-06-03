@@ -156,12 +156,26 @@ void AK10Calibration_Task(void *argument)
     
     if (ifManualControlStarted)
     {
-      if (controlMode == AK10_9_MODE_POSITION)
-        AK10_9_ServoMode_PositionControl(hMotorPtrManualControl, manualControlValue_pos);
-      else if (controlMode == AK10_9_MODE_CURRENT)
-        AK10_9_ServoMode_CurrentControl(hMotorPtrManualControl, manualControlValue_cur);
-      else if (controlMode == AK10_9_MODE_VELOCITY)
-        AK10_9_ServoMode_VelocityControl(hMotorPtrManualControl, manualControlValue_vel);
+      if (hUI.curPage == &UIPage_AK10_9_ManualControl)
+      {
+        if (controlModeCubeMarsFW == AK10_9_CUBEMARS_FW_MODE_POSITION)
+          AK10_9_ServoMode_PositionControl(hMotorPtrManualControl, manualControlValue_pos);
+        else if (controlModeCubeMarsFW == AK10_9_CUBEMARS_FW_MODE_CURRENT)
+          AK10_9_ServoMode_CurrentControl(hMotorPtrManualControl, manualControlValue_cur);
+        else if (controlModeCubeMarsFW == AK10_9_CUBEMARS_FW_MODE_VELOCITY)
+          AK10_9_ServoMode_VelocityControl(hMotorPtrManualControl, manualControlValue_vel);
+      }
+      else if (hUI.curPage == &UIPage_AK10_9_ManualControlDMFW)
+      {
+        if (hAKMotorDMFW1.controlMode == AK10_9_DM_FW_MODE_MIT)
+          AK10_9_DMFW_MITModeControl(&hAKMotorDMFW1, manualControlValue_pos, \
+                                     manualControlValue_vel, manualControlValue_kp, \
+                                     manualControlValue_kd, manualControlValue_cur);
+        else if (hAKMotorDMFW1.controlMode == AK10_9_DM_FW_MODE_VELOCITY)
+          AK10_9_DMFW_VelocityControl(&hAKMotorDMFW1, manualControlValue_vel);
+        else if (hAKMotorDMFW1.controlMode == AK10_9_DM_FW_MODE_POSITION)
+          AK10_9_DMFW_PositionVelocityControl(&hAKMotorDMFW1, manualControlValue_pos, manualControlValue_vel);
+      }
     }
     
     if (ifImpedanceControlStarted)
@@ -194,7 +208,6 @@ void ADC_Task(void *argument)
 {
   for(;;)
   {
-    ENCODER_ReadAngleRequest(&hEncoderLeftWheel);
     ADC_DataRequest();
     osDelay(1);
   }

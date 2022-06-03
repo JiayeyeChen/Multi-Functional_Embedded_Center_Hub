@@ -1,10 +1,11 @@
 #include "tmotor_ak10-9_v2.h"
 
-const uint8_t can_special_msg_enable_motor[8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFC};
-const uint8_t can_special_msg_disable_motor[8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFD};
-const uint8_t can_special_msg_seroing[8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFE};
-
-//__fp16 halfFloatTest1;
+const float p_min = -50.0f, p_max = 50.0f, \
+        v_min = -50.0f, v_max = 50.0f, \
+        i_min = -60.0f, i_max = 60.0f;
+  
+const float kp_min = 0.0f, kp_max = 500.0f,\
+        kd_min = 0.0f, kd_max = 5.0f;
 
 enum ServoMotorMode_CAN_PACKET_ID
 {
@@ -18,7 +19,7 @@ enum ServoMotorMode_CAN_PACKET_ID
 };
 
 //float current: -60A~60A
-void AK10_9_ServoMode_CurrentControl(AK10_9Handle* hmotor, float current)
+void AK10_9_ServoMode_CurrentControl(AK10_9HandleCubaMarsFW* hmotor, float current)
 {
   hmotor->setCurrent.f = current;
   hmotor->txHeader.IDE = CAN_ID_EXT;
@@ -35,7 +36,7 @@ void AK10_9_ServoMode_CurrentControl(AK10_9Handle* hmotor, float current)
 }
 
 //float speed: -10000epm~10000epm
-void AK10_9_ServoMode_VelocityControl(AK10_9Handle* hmotor, float speed)
+void AK10_9_ServoMode_VelocityControl(AK10_9HandleCubaMarsFW* hmotor, float speed)
 {
   hmotor->setVelocity.f = speed;
   hmotor->txHeader.IDE = CAN_ID_EXT;
@@ -53,7 +54,7 @@ void AK10_9_ServoMode_VelocityControl(AK10_9Handle* hmotor, float speed)
 }
 
 //float position: -3600deg~3600deg
-void AK10_9_ServoMode_PositionControl(AK10_9Handle* hmotor, float position)
+void AK10_9_ServoMode_PositionControl(AK10_9HandleCubaMarsFW* hmotor, float position)
 {
   hmotor->setPosition.f = position;
   hmotor->txHeader.IDE = CAN_ID_EXT;
@@ -70,7 +71,7 @@ void AK10_9_ServoMode_PositionControl(AK10_9Handle* hmotor, float position)
   HAL_CAN_AddTxMessage(hmotor->hcan, &hmotor->txHeader, hmotor->txBuf, hmotor->pTxMailbox);
 }
 
-void AK10_9_ServoMode_PositionSpeedControl(AK10_9Handle* hmotor, float position, float speed, int16_t acceleration)
+void AK10_9_ServoMode_PositionSpeedControl(AK10_9HandleCubaMarsFW* hmotor, float position, float speed, int16_t acceleration)
 {
   hmotor->setPosition.f = position;
   hmotor->txHeader.IDE = CAN_ID_EXT;
@@ -95,7 +96,7 @@ void AK10_9_ServoMode_PositionSpeedControl(AK10_9Handle* hmotor, float position,
   HAL_CAN_AddTxMessage(hmotor->hcan, &hmotor->txHeader, hmotor->txBuf, hmotor->pTxMailbox);
 }
 
-void AK10_9_ServoMode_GetFeedbackMsg(CAN_RxHeaderTypeDef* rxheader, AK10_9Handle* hmotor, uint8_t rxbuf[])
+void AK10_9_ServoMode_GetFeedbackMsg(CAN_RxHeaderTypeDef* rxheader, AK10_9HandleCubaMarsFW* hmotor, uint8_t rxbuf[])
 {
   hmotor->lastReceivedTime = HAL_GetTick();
   if (rxheader->ExtId == hmotor->canID)
@@ -111,7 +112,7 @@ void AK10_9_ServoMode_GetFeedbackMsg(CAN_RxHeaderTypeDef* rxheader, AK10_9Handle
   hmotor->errorCode = hmotor->rxBuf[7];
 }
 
-void AK10_9_ServoMode_Zeroing(AK10_9Handle* hmotor)
+void AK10_9_ServoMode_Zeroing(AK10_9HandleCubaMarsFW* hmotor)
 {
   hmotor->txHeader.IDE = CAN_ID_EXT;
   hmotor->txHeader.DLC = 1;
@@ -122,22 +123,171 @@ void AK10_9_ServoMode_Zeroing(AK10_9Handle* hmotor)
   HAL_CAN_AddTxMessage(hmotor->hcan, &hmotor->txHeader, hmotor->txBuf, hmotor->pTxMailbox);
 }
 
-void AK10_9_SpecialCommand(AK10_9Handle* hmotor, uint8_t specialCmd)
-{
-  hmotor->txHeader.DLC = 8;
-  hmotor->txHeader.IDE = CAN_ID_STD;
-  if (specialCmd == AK10_9_SPECIAL_COMMAND_ENABLE_MOTOR)
-    HAL_CAN_AddTxMessage(hmotor->hcan, &hmotor->txHeader, (uint8_t*)can_special_msg_enable_motor, hmotor->pTxMailbox);
-  else if (specialCmd == AK10_9_SPECIAL_COMMAND_DISABLE_MOTOR)
-    HAL_CAN_AddTxMessage(hmotor->hcan, &hmotor->txHeader, (uint8_t*)can_special_msg_disable_motor, hmotor->pTxMailbox);
-  else if (specialCmd == AK10_9_SPECIAL_COMMAND_ZEROING_MOTOR)
-    HAL_CAN_AddTxMessage(hmotor->hcan, &hmotor->txHeader, (uint8_t*)can_special_msg_seroing, hmotor->pTxMailbox);
-}
-
-void AK10_9_MotorStatusMonitor(AK10_9Handle* hmotor)
+void AK10_9_MotorStatusMonitor(AK10_9HandleCubaMarsFW* hmotor)
 {
   if ((HAL_GetTick() - hmotor->lastReceivedTime) > 100)
     hmotor->status = AK10_9_Offline;
   else
     hmotor->status = AK10_9_Online;
+}
+
+void AK10_9_DMFW_EnableMotor(AK10_9HandleDMFW* hmotor)
+{
+  hmotor->txHeader.DLC = 8;
+  hmotor->txHeader.IDE = 0;
+  hmotor->txHeader.RTR = 0;
+  if (hmotor->controlMode == AK10_9_DM_FW_MODE_MIT)
+    hmotor->txHeader.StdId = hmotor->canID;
+  else if (hmotor->controlMode == AK10_9_DM_FW_MODE_VELOCITY)
+    hmotor->txHeader.StdId = 0x200 + hmotor->canID;
+  else if (hmotor->controlMode == AK10_9_DM_FW_MODE_POSITION)
+    hmotor->txHeader.StdId = 0x100 + hmotor->canID;
+  hmotor->txBuf[0] = 0xFF;
+  hmotor->txBuf[1] = 0xFF;
+  hmotor->txBuf[2] = 0xFF;
+  hmotor->txBuf[3] = 0xFF;
+  hmotor->txBuf[4] = 0xFF;
+  hmotor->txBuf[5] = 0xFF;
+  hmotor->txBuf[6] = 0xFF;
+  hmotor->txBuf[7] = 0xFC;
+  HAL_CAN_AddTxMessage(hmotor->hcan, &(hmotor->txHeader), hmotor->txBuf, hmotor->pTxMailbox);
+}
+void AK10_9_DMFW_DisableMotor(AK10_9HandleDMFW* hmotor)
+{
+  hmotor->txHeader.DLC = 8;
+  hmotor->txHeader.IDE = 0;
+  hmotor->txHeader.RTR = 0;
+  if (hmotor->controlMode == AK10_9_DM_FW_MODE_MIT)
+    hmotor->txHeader.StdId = hmotor->canID;
+  else if (hmotor->controlMode == AK10_9_DM_FW_MODE_VELOCITY)
+    hmotor->txHeader.StdId = 0x200 + hmotor->canID;
+  else if (hmotor->controlMode == AK10_9_DM_FW_MODE_POSITION)
+    hmotor->txHeader.StdId = 0x100 + hmotor->canID;
+  hmotor->txBuf[0] = 0xFF;
+  hmotor->txBuf[1] = 0xFF;
+  hmotor->txBuf[2] = 0xFF;
+  hmotor->txBuf[3] = 0xFF;
+  hmotor->txBuf[4] = 0xFF;
+  hmotor->txBuf[5] = 0xFF;
+  hmotor->txBuf[6] = 0xFF;
+  hmotor->txBuf[7] = 0xFD;
+  HAL_CAN_AddTxMessage(hmotor->hcan, &(hmotor->txHeader), hmotor->txBuf, hmotor->pTxMailbox);
+}
+
+void AK10_9_DMFW_Zeroing(AK10_9HandleDMFW* hmotor)
+{
+  hmotor->txHeader.DLC = 8;
+  hmotor->txHeader.IDE = 0;
+  hmotor->txHeader.RTR = 0;
+  hmotor->txHeader.StdId = hmotor->canID;
+  hmotor->txBuf[0] = 0xFF;
+  hmotor->txBuf[1] = 0xFF;
+  hmotor->txBuf[2] = 0xFF;
+  hmotor->txBuf[3] = 0xFF;
+  hmotor->txBuf[4] = 0xFF;
+  hmotor->txBuf[5] = 0xFF;
+  hmotor->txBuf[6] = 0xFF;
+  hmotor->txBuf[7] = 0xFE;
+  HAL_CAN_AddTxMessage(hmotor->hcan, &(hmotor->txHeader), hmotor->txBuf, hmotor->pTxMailbox);
+}
+
+void AK10_9_DMFW_MITModeControl(AK10_9HandleDMFW* hmotor, float pos, float vel, float kp, float kd, float iq)
+{
+  hmotor->setPosition.f = pos;
+  hmotor->setVelocity.f = vel;
+  hmotor->setCurrent.f = iq;
+  hmotor->kp.f = kp;
+  hmotor->kd.f = kd;
+  
+  pos = MIN(MAX(pos, p_min), p_max);
+  vel = MIN(MAX(vel, v_min), v_max);
+  kp = MIN(MAX(kp, kp_min), kp_max);
+  kd = MIN(MAX(kd, kd_min), kd_max);
+  iq = MIN(MAX(iq, i_min), i_max);
+  
+  uint16_t pInt = FloatToUint(pos, p_min, p_max, 16);
+  uint16_t vInt = FloatToUint(vel, v_min, v_max, 12);
+  uint16_t kpInt = FloatToUint(kp, kp_min, kp_max, 12);
+  uint16_t kdInt = FloatToUint(kd, kd_min, kd_max, 12);
+  uint16_t iInt = FloatToUint(iq, i_min, i_max, 12);
+  
+  hmotor->txBuf[0] = pInt >> 8;
+  hmotor->txBuf[1] = pInt & 0xFF;
+  hmotor->txBuf[2] = vInt >> 4;
+  hmotor->txBuf[3] = ((vInt & 0x0F) << 4) | (kpInt >> 8);
+  hmotor->txBuf[4] = kpInt & 0xFF;
+  hmotor->txBuf[5] = kdInt >> 4;
+  hmotor->txBuf[6] = ((kdInt & 0x0F) << 4) | (iInt >> 8);
+  hmotor->txBuf[7] = iInt & 0xFF;
+  HAL_CAN_AddTxMessage(hmotor->hcan, &(hmotor->txHeader), hmotor->txBuf, hmotor->pTxMailbox);
+}
+
+uint16_t FloatToUint(float x, float x_min, float x_max, uint16_t bits)
+{
+  float span = x_max - x_min;
+  if (x < x_min)
+    x = x_min;
+  else if (x > x_max)
+    x = x_max;
+  return (uint16_t)((x - x_min) * ((float)((1<<bits)/span)));
+}
+
+float UintToFloat(uint16_t x_int, float x_min, float x_max, uint16_t bits)
+{
+  float span = x_max - x_min;
+	float offset = x_min;
+	return ((float)x_int)*span/((float)((1<<bits)-1)) + offset;
+}
+
+void AK10_9_DMFW_PositionVelocityControl(AK10_9HandleDMFW* hmotor, float pos, float vel)
+{
+  hmotor->setPosition.f = pos;
+  hmotor->setVelocity.f = vel;
+  hmotor->txHeader.IDE = CAN_ID_STD;
+  hmotor->txHeader.DLC = 8;
+  hmotor->txHeader.StdId = 0x100 + hmotor->canID;
+  hmotor->txHeader.RTR = CAN_RTR_DATA;
+  
+  union FloatUInt8 temVEL, temPOS;
+  temPOS.f = pos;
+  hmotor->txBuf[0] = temPOS.b8[0];
+  hmotor->txBuf[1] = temPOS.b8[1];
+  hmotor->txBuf[2] = temPOS.b8[2];
+  hmotor->txBuf[3] = temPOS.b8[3];
+  temVEL.f = vel;
+  hmotor->txBuf[4] = temVEL.b8[0];
+  hmotor->txBuf[5] = temVEL.b8[1];
+  hmotor->txBuf[6] = temVEL.b8[2];
+  hmotor->txBuf[7] = temVEL.b8[3];
+  HAL_CAN_AddTxMessage(hmotor->hcan, &hmotor->txHeader, hmotor->txBuf, hmotor->pTxMailbox);
+}
+void AK10_9_DMFW_VelocityControl(AK10_9HandleDMFW* hmotor, float vel)
+{
+  hmotor->setVelocity.f = vel;
+  hmotor->txHeader.IDE = CAN_ID_STD;
+  hmotor->txHeader.DLC = 4;
+  hmotor->txHeader.StdId = 0x200 + hmotor->canID;
+  hmotor->txHeader.RTR = CAN_RTR_DATA;
+  
+  union FloatUInt8 temVEL;
+  temVEL.f = vel;
+  hmotor->txBuf[0] = temVEL.b8[0];
+  hmotor->txBuf[1] = temVEL.b8[1];
+  hmotor->txBuf[2] = temVEL.b8[2];
+  hmotor->txBuf[3] = temVEL.b8[3];
+  HAL_CAN_AddTxMessage(hmotor->hcan, &hmotor->txHeader, hmotor->txBuf, hmotor->pTxMailbox);
+}
+
+void AK10_9_DMFW_GetFeedbackMsg(CAN_RxHeaderTypeDef* rxheader, AK10_9HandleDMFW* hmotor, uint8_t rxbuf[])
+{
+  uint16_t pUint, vUint, iUint;
+  pUint=(rxbuf[1] << 8) | rxbuf[2];
+  vUint=(rxbuf[3] << 4) | (rxbuf[4] >> 4);
+  iUint=((rxbuf[4] & 0xF) << 8) | rxbuf[5];
+  
+  hmotor->realPositionRad.f = UintToFloat(pUint, p_min,p_max, 16);
+  hmotor->realPositionDeg.f = hmotor->realPositionRad.f * 180.0f / pi;
+  hmotor->realVelocityRad.f = UintToFloat(vUint, v_min, v_max, 12);
+  hmotor->realVelocityDeg.f = hmotor->realVelocityRad.f * 180.0f / pi;
+  hmotor->realCurrent.f  = UintToFloat(iUint, i_min, i_max, 12);
 }

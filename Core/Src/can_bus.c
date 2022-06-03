@@ -106,6 +106,14 @@ void CAN_ConfigureFilters(void)
   hEncoderLeftWheel.canRxFilter.FilterIdHigh = CAN_ID_ENCODER_LEFT_WHEEL << 5;
   hEncoderLeftWheel.canRxFilter.FilterActivation = ENABLE;
   HAL_CAN_ConfigFilter(hEncoderLeftWheel.hcan, &hEncoderLeftWheel.canRxFilter);
+  //Filter bank 9
+  hAKMotorDMFW1.rxFilter.FilterMode = CAN_FILTERMODE_IDLIST;
+  hAKMotorDMFW1.rxFilter.FilterScale = CAN_FILTERSCALE_16BIT;
+  hAKMotorDMFW1.rxFilter.FilterFIFOAssignment = CAN_FILTER_FIFO1;
+  hAKMotorDMFW1.rxFilter.FilterBank = 9;
+  hAKMotorDMFW1.rxFilter.FilterIdHigh = CAN_ID_AK10_9_DMFW_M1_RX << 5;
+  hAKMotorDMFW1.rxFilter.FilterActivation = ENABLE;
+  HAL_CAN_ConfigFilter(hAKMotorDMFW1.hcan, &hAKMotorDMFW1.rxFilter);
 }
 
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
@@ -162,5 +170,7 @@ void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
     AK10_9_ServoMode_GetFeedbackMsg(&temRxHeader, &hAKMotorRightKnee, temRxData);
     AK10_9_Calculate_velocity_current_AVG(&hAKMotorRightKnee);
   }
+  else if (temRxHeader.StdId == CAN_ID_AK10_9_DMFW_M1_RX)
+    AK10_9_DMFW_GetFeedbackMsg(&temRxHeader, &hAKMotorDMFW1, temRxData);
   rxfifo1detected++;
 }

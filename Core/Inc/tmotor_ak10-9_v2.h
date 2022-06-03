@@ -16,6 +16,13 @@ enum AK10_9_Status
   AK10_9_Offline
 };
 
+enum ControlModeDMFW
+{
+  AK10_9_DM_FW_MODE_MIT,
+  AK10_9_DM_FW_MODE_POSITION,
+  AK10_9_DM_FW_MODE_VELOCITY,
+};
+
 typedef struct
 {
   CAN_HandleTypeDef*    hcan;
@@ -43,18 +50,58 @@ typedef struct
   uint32_t              rxFifo;
   CAN_FilterTypeDef     rxFilter;
   uint32_t              lastReceivedTime;
-}AK10_9Handle;
+}AK10_9HandleCubaMarsFW;
+
+typedef struct
+{
+  CAN_HandleTypeDef*    hcan;
+  uint8_t               canID;
+  enum AK10_9_Status    status;
+  enum ControlModeDMFW  controlMode;
+  
+  float                 kt;
+  union FloatUInt8      setCurrent;
+  union FloatUInt8      setPosition;
+  union FloatUInt8      setVelocity;
+  union FloatUInt8      realCurrent;
+  union FloatUInt8      realPositionRad;
+  union FloatUInt8      realPositionDeg;
+  union FloatUInt8      realVelocityRad;
+  union FloatUInt8      realVelocityDeg;
+  union FloatUInt8      realTorque;
+  union FloatUInt8      setAcceleration;
+  union FloatUInt8      estimateAcceleration;
+  union FloatUInt8      kp, kd;
+  //CAN BUS transmit
+  uint8_t               txBuf[8];
+  uint32_t*             pTxMailbox;
+  CAN_TxHeaderTypeDef   txHeader;
+  //CAN BUS receive
+  uint8_t               rxBuf[8];
+  uint32_t              rxFifo;
+  CAN_FilterTypeDef     rxFilter;
+  uint32_t              lastReceivedTime;
+}AK10_9HandleDMFW;
 
 void AK10_9_V2_Init(void);
 
-void AK10_9_ServoMode_CurrentControl(AK10_9Handle* hmotor, float current);
-void AK10_9_ServoMode_VelocityControl(AK10_9Handle* hmotor, float speed);
-void AK10_9_ServoMode_PositionControl(AK10_9Handle* hmotor, float position);
-void AK10_9_ServoMode_PositionSpeedControl(AK10_9Handle* hmotor, float position, float speed, int16_t acceleration);
-void AK10_9_ServoMode_GetFeedbackMsg(CAN_RxHeaderTypeDef* rxheader, AK10_9Handle* hmotor, uint8_t rxbuf[]);
-void AK10_9_ServoMode_Zeroing(AK10_9Handle* hmotor);
-void AK10_9_SpecialCommand(AK10_9Handle* hmotor, uint8_t specialCmd);
-void AK10_9_MotorStatusMonitor(AK10_9Handle* hmotor);
+void AK10_9_ServoMode_CurrentControl(AK10_9HandleCubaMarsFW* hmotor, float current);
+void AK10_9_ServoMode_VelocityControl(AK10_9HandleCubaMarsFW* hmotor, float speed);
+void AK10_9_ServoMode_PositionControl(AK10_9HandleCubaMarsFW* hmotor, float position);
+void AK10_9_ServoMode_PositionSpeedControl(AK10_9HandleCubaMarsFW* hmotor, float position, float speed, int16_t acceleration);
+void AK10_9_ServoMode_GetFeedbackMsg(CAN_RxHeaderTypeDef* rxheader, AK10_9HandleCubaMarsFW* hmotor, uint8_t rxbuf[]);
+void AK10_9_ServoMode_Zeroing(AK10_9HandleCubaMarsFW* hmotor);
+void AK10_9_MotorStatusMonitor(AK10_9HandleCubaMarsFW* hmotor);
+
+void AK10_9_DMFW_EnableMotor(AK10_9HandleDMFW* hmotor);
+void AK10_9_DMFW_DisableMotor(AK10_9HandleDMFW* hmotor);
+void AK10_9_DMFW_Zeroing(AK10_9HandleDMFW* hmotor);
+void AK10_9_DMFW_MITModeControl(AK10_9HandleDMFW* hmotor, float pos, float vel, float kp, float kd, float iq);
+void AK10_9_DMFW_PositionVelocityControl(AK10_9HandleDMFW* hmotor, float pos, float vel);
+void AK10_9_DMFW_VelocityControl(AK10_9HandleDMFW* hmotor, float vel);
+void AK10_9_DMFW_GetFeedbackMsg(CAN_RxHeaderTypeDef* rxheader, AK10_9HandleDMFW* hmotor, uint8_t rxbuf[]);
+uint16_t FloatToUint(float x, float x_min, float x_max, uint16_t bits);
+float    UintToFloat(uint16_t x_int, float x_min, float x_max, uint16_t bits);
 
 
 
