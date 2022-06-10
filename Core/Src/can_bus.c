@@ -41,7 +41,7 @@ void CAN_ConfigureFilters(void)
 {
   //Filter bank 0
   hAKMotorRightKnee.rxFilter = ConfigCANFilter_EXT_ID_32BitIDListMode(&hcan2, 0, CAN_FILTER_FIFO1, CAN_ID_EXT, CAN_ID_TMOTOR_EXOSKELETON_RIGHT_KNEE, 0);
-  hAKMotorRightHip.rxFilter = ConfigCANFilter_EXT_ID_32BitIDListMode(&hcan2, 7, CAN_FILTER_FIFO1, CAN_ID_EXT, CAN_ID_TMOTOR_EXOSKELETON_RIGHT_HIP, 0);
+//  hAKMotorRightHip.rxFilter = ConfigCANFilter_EXT_ID_32BitIDListMode(&hcan2, 7, CAN_FILTER_FIFO1, CAN_ID_EXT, CAN_ID_TMOTOR_EXOSKELETON_RIGHT_HIP, 0);
   //Filter bank 1
   hIMURightThigh.rxFilter.FilterMode = CAN_FILTERMODE_IDLIST;
 	hIMURightThigh.rxFilter.FilterScale = CAN_FILTERSCALE_16BIT;
@@ -103,17 +103,18 @@ void CAN_ConfigureFilters(void)
   hEncoderLeftWheel.canRxFilter.FilterScale = CAN_FILTERSCALE_16BIT;
   hEncoderLeftWheel.canRxFilter.FilterFIFOAssignment = CAN_FILTER_FIFO0;
   hEncoderLeftWheel.canRxFilter.FilterBank = 8;
-  hEncoderLeftWheel.canRxFilter.FilterIdHigh = CAN_ID_ENCODER_LEFT_WHEEL << 5;
+  hEncoderLeftWheel.canRxFilter.FilterIdHigh = CAN_ID_ENCODER_LEFT_WHEEL << 5;//
   hEncoderLeftWheel.canRxFilter.FilterActivation = ENABLE;
   HAL_CAN_ConfigFilter(hEncoderLeftWheel.hcan, &hEncoderLeftWheel.canRxFilter);
   //Filter bank 9
-  hAKMotorDMFW1.rxFilter.FilterMode = CAN_FILTERMODE_IDLIST;
-  hAKMotorDMFW1.rxFilter.FilterScale = CAN_FILTERSCALE_16BIT;
-  hAKMotorDMFW1.rxFilter.FilterFIFOAssignment = CAN_FILTER_FIFO1;
-  hAKMotorDMFW1.rxFilter.FilterBank = 9;
-  hAKMotorDMFW1.rxFilter.FilterIdHigh = CAN_ID_AK10_9_DMFW_M1_RX << 5;
-  hAKMotorDMFW1.rxFilter.FilterActivation = ENABLE;
-  HAL_CAN_ConfigFilter(hAKMotorDMFW1.hcan, &hAKMotorDMFW1.rxFilter);
+  CAN_FilterTypeDef hArmEncodersFilter;
+  hArmEncodersFilter.FilterMode = CAN_FILTERMODE_IDLIST;
+  hArmEncodersFilter.FilterScale = CAN_FILTERSCALE_16BIT;
+  hArmEncodersFilter.FilterFIFOAssignment = CAN_FILTER_FIFO0;
+  hArmEncodersFilter.FilterBank = 9;
+  hArmEncodersFilter.FilterIdHigh = CAN_ID_ENCODER_RX_DATA << 5;
+  hArmEncodersFilter.FilterActivation = ENABLE;
+  HAL_CAN_ConfigFilter(&hcan2, &hArmEncodersFilter);
 }
 
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
@@ -124,7 +125,6 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
   HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &temRxHeader, temRxData);
   
   //Application specific codes
-  //BNO055
   if (temRxHeader.StdId == CAN_ID_IMU_LIACC_EXOSKELETON_RIGHT_THIGH)
     EXOSKELETON_GetIMUFeedbackLiAcc(&hIMURightThigh, temRxData);
   else if (temRxHeader.StdId == CAN_ID_IMU_GYRO_EXOSKELETON_RIGHT_THIGH)
@@ -146,6 +146,12 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
   {
     ENCODER_GetAngle(&hEncoderLeftWheel, temRxData);
     ENCODER_CalculateSpeed(&hEncoderLeftWheel, 0.001f);
+  }
+  
+  if (temRxHeader.StdId == CAN_ID_ENCODER_RX_DATA)
+  {
+    ENCODER_GetAngle(&hEncoderLeftPull, temRxData);
+    ENCODER_CalculateSpeed(&hEncoderLeftPull, 0.001f);
   }
   //End
   rxfifo0detected++;
@@ -172,5 +178,11 @@ void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
   }
   else if (temRxHeader.StdId == CAN_ID_AK10_9_DMFW_M1_RX)
     AK10_9_DMFW_GetFeedbackMsg(&temRxHeader, &hAKMotorDMFW1, temRxData);
+  
+  if (temRxHeader.StdId == CAN_ID_ENCODER_RX_DATA)
+  {
+    ENCODER_GetAngle(&hEncoderLeftPull, temRxData);
+    ENCODER_CalculateSpeed(&hEncoderLeftPull, 0.001f);
+  }
   rxfifo1detected++;
 }

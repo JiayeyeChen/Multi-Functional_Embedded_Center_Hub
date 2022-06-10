@@ -62,6 +62,12 @@ void ENCODER_TimeoutDetect(EncoderHandle* hencoder, uint32_t ms);
 
 void ENCODER_SetDirection(EncoderHandle* hencoder, uint8_t briter_encoder_direction);
 
-extern EncoderHandle hEncoderRightWheel, hEncoderLeftWheel;
+void ENCODER_SetAutoFeedbackMode(EncoderHandle* hencoder);
+
+void ENCODER_SetManualFeedbackMode(EncoderHandle* hencoder);
+
+void ENCODER_SetAutoFeedbackRate(EncoderHandle* hencoder, uint16_t us);
+
+extern EncoderHandle hEncoderRightWheel, hEncoderLeftWheel, hEncoderLeftPull;
 
 #endif

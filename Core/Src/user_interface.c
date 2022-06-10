@@ -972,15 +972,15 @@ void UI_Page_BriterEncoder(void)
   }
   else if (ifButtonPressed(&hButtonBriterEncoderSetCounterClockWiseDirection))
   {
-    ENCODER_SetDirection(&hEncoderLeftWheel, BRITER_ENCODER_DIRECTION_COUNTERCLOCKWISE);
+//    ENCODER_SetDirection(&hEncoderRightWheel, BRITER_ENCODER_DIRECTION_COUNTERCLOCKWISE);
   }
   else if (ifButtonPressed(&hButtonBriterEncoderSet1MHzCanRate))
   {
-    ENCODER_Set1MHzCanBaudrate(&hEncoderLeftWheel);
+    ENCODER_SetAutoFeedbackRate(&hEncoderRightWheel, 1000);
   }
   else if (ifButtonPressed(&hButtonBriterEncoderSetCanID))
   {
-    ENCODER_SetCanID(&hEncoderLeftWheel, 0x06);
+    ENCODER_SetManualFeedbackMode(&hEncoderLeftWheel);
   }
   
   if (ifButtonPressed(&hButtonGoBack))

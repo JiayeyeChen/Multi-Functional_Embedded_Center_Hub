@@ -4,8 +4,13 @@
 #include "system_periphrals.h"
 #include "tmotor_ak10-9_v2.h"
 
-#define CAN_ID_ENCODER_RIGHT_WHEEL                     0x05
-#define CAN_ID_ENCODER_LEFT_WHEEL                      0x06
+#define CAN_ID_ENCODER_RX_DATA            0x01
+#define CAN_ID_ENCODER_RIGHT_TURN 	      0x01
+#define CAN_ID_ENCODER_LEFT_TURN		      0x02
+#define CAN_ID_ENCODER_RIGHT_PULL		      0x03
+#define CAN_ID_ENCODER_LEFT_PULL		      0x04
+#define CAN_ID_ENCODER_RIGHT_WHEEL        0x05
+#define CAN_ID_ENCODER_LEFT_WHEEL         0x06
 #define CAN_ID_AK10_9_DMFW_M1_RX                       0x0A
 #define CAN_ID_AK10_9_DMFW_M2_RX                       0x0B
 #define CAN_ID_AK10_9_DMFW_M3_RX                       0x0C

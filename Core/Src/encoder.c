@@ -6,15 +6,22 @@
 #include "encoder.h"
 #include "system_periphrals.h"
 
-EncoderHandle hEncoderRightWheel, hEncoderLeftWheel;
+EncoderHandle hEncoderRightWheel, hEncoderLeftWheel, hEncoderLeftPull;
 
 void ENCODER_Init(void)
 {
+  hEncoderLeftPull.lastLegitRxTimestamp = HAL_GetTick();
+  hEncoderLeftPull.hcan = &hcan2;
+  hEncoderLeftPull.canAddress = CAN_ID_ENCODER_LEFT_PULL;
+  hEncoderLeftPull.speedCalAngleBufPtr = 0;
+  memset(hEncoderLeftPull.speedCalAngleBuf, 0, SIZE_OF_ANGLE_AVG_BUF);
+  hEncoderLeftPull.speedRatio = 1.0f;
+  
   hEncoderRightWheel.lastLegitRxTimestamp = HAL_GetTick();
   hEncoderRightWheel.hcan = &hcan2;
   hEncoderRightWheel.canAddress = CAN_ID_ENCODER_RIGHT_WHEEL;
   hEncoderRightWheel.speedCalAngleBufPtr = 0;
-  memset(hEncoderRightWheel.speedCalAngleBuf, 0, sizeof(hEncoderRightWheel.speedCalAngleBuf));
+  memset(hEncoderRightWheel.speedCalAngleBuf, 0, SIZE_OF_ANGLE_AVG_BUF);
   hEncoderRightWheel.speedRatio = 1.0f;
   
   hEncoderLeftWheel.lastLegitRxTimestamp = HAL_GetTick();
@@ -127,6 +134,51 @@ void ENCODER_SetDirection(EncoderHandle* hencoder, uint8_t briter_encoder_direct
 	hencoder->txBuf[1] = hencoder->canTxHeader.StdId;
 	hencoder->txBuf[2] = BRITER_ENCODER_CAN_COMMAND_SET_DIRECTION;
 	hencoder->txBuf[3] = briter_encoder_direction;
+	
+	HAL_CAN_AddTxMessage(hencoder->hcan, &(hencoder->canTxHeader), hencoder->txBuf, &(hencoder->canMailbox));
+}
+
+void ENCODER_SetAutoFeedbackMode(EncoderHandle* hencoder)
+{
+  hencoder->canTxHeader.DLC = 4;
+  hencoder->canTxHeader.IDE = 0;
+  hencoder->canTxHeader.RTR = 0;
+  hencoder->canTxHeader.StdId = hencoder->canAddress;
+  
+	hencoder->txBuf[0] = hencoder->canTxHeader.DLC;
+	hencoder->txBuf[1] = hencoder->canTxHeader.StdId;
+	hencoder->txBuf[2] = BRITER_ENCODER_CAN_COMMAND_SET_MODE;
+	hencoder->txBuf[3] = 0xAA;
+	
+	HAL_CAN_AddTxMessage(hencoder->hcan, &(hencoder->canTxHeader), hencoder->txBuf, &(hencoder->canMailbox));
+}
+void ENCODER_SetAutoFeedbackRate(EncoderHandle* hencoder, uint16_t us)
+{
+  hencoder->canTxHeader.DLC = 5;
+  hencoder->canTxHeader.IDE = 0;
+  hencoder->canTxHeader.RTR = 0;
+  hencoder->canTxHeader.StdId = hencoder->canAddress;
+  
+	hencoder->txBuf[0] = hencoder->canTxHeader.DLC;
+	hencoder->txBuf[1] = hencoder->canTxHeader.StdId;
+	hencoder->txBuf[2] = BRITER_ENCODER_CAN_COMMAND_SET_AUTO_FEEDBACK_TIME;
+	hencoder->txBuf[3] = us & 0x0F;
+  hencoder->txBuf[4] = (us >> 8) & 0x0F;
+	
+	HAL_CAN_AddTxMessage(hencoder->hcan, &(hencoder->canTxHeader), hencoder->txBuf, &(hencoder->canMailbox));
+}
+
+void ENCODER_SetManualFeedbackMode(EncoderHandle* hencoder)
+{
+  hencoder->canTxHeader.DLC = 4;
+  hencoder->canTxHeader.IDE = 0;
+  hencoder->canTxHeader.RTR = 0;
+  hencoder->canTxHeader.StdId = hencoder->canAddress;
+  
+	hencoder->txBuf[0] = hencoder->canTxHeader.DLC;
+	hencoder->txBuf[1] = hencoder->canTxHeader.StdId;
+	hencoder->txBuf[2] = BRITER_ENCODER_CAN_COMMAND_SET_MODE;
+	hencoder->txBuf[3] = 0x00;
 	
 	HAL_CAN_AddTxMessage(hencoder->hcan, &(hencoder->canTxHeader), hencoder->txBuf, &(hencoder->canMailbox));
 }
