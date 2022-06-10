@@ -150,8 +150,8 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
   
   if (temRxHeader.StdId == CAN_ID_ENCODER_RX_DATA)
   {
-    ENCODER_GetAngle(&hEncoderLeftPull, temRxData);
-    ENCODER_CalculateSpeed(&hEncoderLeftPull, 0.001f);
+    ENCODER_GetAngle(hEncoderPtr, temRxData);
+    ENCODER_CalculateSpeed(hEncoderPtr, 0.001f);
   }
   //End
   rxfifo0detected++;

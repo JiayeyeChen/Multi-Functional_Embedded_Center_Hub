@@ -34,6 +34,7 @@ ButtonHandle hButtonResetAD7606;
 
 ButtonHandle hButtonBriterEncoderZeroing, hButtonBriterEncoderSetCounterClockWiseDirection, hButtonBriterEncoderSet1MHzCanRate, \
              hButtonBriterEncoderSetCanID;
+ButtonHandle hButtonBriterEncoderSelectEncoder, hButtonBriterEncoderIfRead;
              
 ButtonHandle hButtonAK10_9_ManualControlCubeMarsFW, hButtonAK10_9_ManualControlDMFW;
 
@@ -958,30 +959,75 @@ void UI_Page_BriterEncoder(void)
   ButtonRefresh(&hButtonBriterEncoderSet1MHzCanRate);
   ButtonScan(&hButtonBriterEncoderSetCanID);
   ButtonRefresh(&hButtonBriterEncoderSetCanID);
+  ButtonScan(&hButtonBriterEncoderSelectEncoder);
+  ButtonRefresh(&hButtonBriterEncoderSelectEncoder);
+  ButtonScan(&hButtonBriterEncoderIfRead);
+  ButtonRefresh(&hButtonBriterEncoderIfRead);
   
-//  ENCODER_ReadAngleRequest(&hEncoderLeftWheel);
+  if (ifRequestRead)
+    ENCODER_ReadAngleRequest(hEncoderPtr);
+  
   LCD_SetLayer(1);
   LCD_SetColor(LCD_BLACK);
-  LCD_DisplayDecimals(100, 10, hEncoderLeftWheel.angleDeg.f, 10, 3);
-  LCD_DisplayDecimals(100, 40, hEncoderLeftWheel.speedCalAngleAvgPresent, 10, 3);
-  LCD_DisplayDecimals(100, 70, hEncoderLeftWheel.speedDeg.f, 10, 3);
+  LCD_DisplayDecimals(100, 10, hEncoderPtr->angleDeg.f, 10, 3);
+  LCD_DisplayDecimals(100, 40, hEncoderPtr->speedCalAngleAvgPresent, 10, 3);
+  LCD_DisplayDecimals(100, 70, hEncoderPtr->speedDeg.f, 10, 3);
   
   if (ifButtonPressed(&hButtonBriterEncoderZeroing))
   {
-    ENCODER_SetZeroPosition(&hEncoderLeftWheel);
+    ENCODER_SetZeroPosition(hEncoderPtr);
   }
   else if (ifButtonPressed(&hButtonBriterEncoderSetCounterClockWiseDirection))
   {
-//    ENCODER_SetDirection(&hEncoderRightWheel, BRITER_ENCODER_DIRECTION_COUNTERCLOCKWISE);
+//    ENCODER_SetDirection(hEncoderPtr, BRITER_ENCODER_DIRECTION_COUNTERCLOCKWISE);
   }
   else if (ifButtonPressed(&hButtonBriterEncoderSet1MHzCanRate))
   {
-    ENCODER_SetAutoFeedbackRate(&hEncoderRightWheel, 1000);
+//    ENCODER_SetAutoFeedbackRate(hEncoderPtr, 1000);
+    ENCODER_Set500kHzCanBaudrate(hEncoderPtr);
   }
   else if (ifButtonPressed(&hButtonBriterEncoderSetCanID))
   {
-    ENCODER_SetManualFeedbackMode(&hEncoderLeftWheel);
+    ENCODER_SetAutoFeedbackMode(hEncoderPtr);
   }
+  else if (ifButtonPressed(&hButtonBriterEncoderSelectEncoder))
+  {
+    encoderSelectPtr++;
+    if (encoderSelectPtr > 5)
+      encoderSelectPtr = 0;
+    if (encoderSelectPtr == 0)
+    {
+      hEncoderPtr = &hEncoderLeftPull;
+      LCD_DisplayString(10, 500, "LP");
+    }
+    else if (encoderSelectPtr == 1)
+    {
+      hEncoderPtr = &hEncoderLeftTurn;
+      LCD_DisplayString(10, 500, "LT");
+    }
+    else if (encoderSelectPtr == 2)
+    {
+      hEncoderPtr = &hEncoderRightPull;
+      LCD_DisplayString(10, 500, "RP");
+    }
+    else if (encoderSelectPtr == 3)
+    {
+      hEncoderPtr = &hEncoderRightTurn;
+      LCD_DisplayString(10, 500, "RT");
+    }
+    else if (encoderSelectPtr == 4)
+    {
+      hEncoderPtr = &hEncoderLeftWheel;
+      LCD_DisplayString(10, 500, "LW");
+    }
+    else if (encoderSelectPtr == 5)
+    {
+      hEncoderPtr = &hEncoderRightWheel;
+      LCD_DisplayString(10, 500, "RW");
+    }
+  }
+  else if (ifButtonPressed(&hButtonBriterEncoderIfRead))
+    ifRequestRead = !ifRequestRead;
   
   if (ifButtonPressed(&hButtonGoBack))
     UI_Page_Change_To(&UIPage_Home1);
@@ -993,4 +1039,6 @@ void UI_Page_BriterEncoder_Init(void)
   hButtonBriterEncoderZeroing = Button_Create(100, 250, 300, 40, "Zeroing", LCD_GREEN, LCD_RED);
   hButtonBriterEncoderSet1MHzCanRate = Button_Create(100, 300, 300, 40, "Set 1MHz", LCD_GREEN, LCD_RED);
   hButtonBriterEncoderSetCanID = Button_Create(100, 350, 300, 40, "Set CAN ID", LCD_GREEN, LCD_RED);
+  hButtonBriterEncoderSelectEncoder = Button_Create(10, 600, 300, 40, "Change Encoder", LCD_GREEN, LCD_RED);
+  hButtonBriterEncoderIfRead = Button_Create(10, 650, 300, 40, "Read/Not Read", LCD_GREEN, LCD_RED);
 }

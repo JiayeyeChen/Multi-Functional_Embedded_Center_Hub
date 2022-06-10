@@ -6,7 +6,10 @@
 #include "encoder.h"
 #include "system_periphrals.h"
 
-EncoderHandle hEncoderRightWheel, hEncoderLeftWheel, hEncoderLeftPull;
+EncoderHandle hEncoderRightWheel, hEncoderLeftWheel, hEncoderLeftPull, hEncoderLeftTurn, hEncoderRightPull, hEncoderRightTurn;
+EncoderHandle* hEncoderPtr;
+uint8_t encoderSelectPtr = 0;
+uint8_t ifRequestRead = 0;
 
 void ENCODER_Init(void)
 {
@@ -17,6 +20,35 @@ void ENCODER_Init(void)
   memset(hEncoderLeftPull.speedCalAngleBuf, 0, SIZE_OF_ANGLE_AVG_BUF);
   hEncoderLeftPull.speedRatio = 1.0f;
   
+  hEncoderLeftTurn.lastLegitRxTimestamp = HAL_GetTick();
+  hEncoderLeftTurn.hcan = &hcan2;
+  hEncoderLeftTurn.canAddress = CAN_ID_ENCODER_LEFT_TURN;
+  hEncoderLeftTurn.speedCalAngleBufPtr = 0;
+  memset(hEncoderLeftTurn.speedCalAngleBuf, 0, SIZE_OF_ANGLE_AVG_BUF);
+  hEncoderLeftTurn.speedRatio = 1.0f;
+  /////////////////////////////////////////////////////////
+  hEncoderRightPull.lastLegitRxTimestamp = HAL_GetTick();
+  hEncoderRightPull.hcan = &hcan2;
+  hEncoderRightPull.canAddress = CAN_ID_ENCODER_RIGHT_PULL;
+  hEncoderRightPull.speedCalAngleBufPtr = 0;
+  memset(hEncoderRightPull.speedCalAngleBuf, 0, SIZE_OF_ANGLE_AVG_BUF);
+  hEncoderRightPull.speedRatio = 1.0f;
+  
+  hEncoderRightTurn.lastLegitRxTimestamp = HAL_GetTick();
+  hEncoderRightTurn.hcan = &hcan2;
+  hEncoderRightTurn.canAddress = CAN_ID_ENCODER_RIGHT_TURN;
+  hEncoderRightTurn.speedCalAngleBufPtr = 0;
+  memset(hEncoderRightTurn.speedCalAngleBuf, 0, SIZE_OF_ANGLE_AVG_BUF);
+  hEncoderRightTurn.speedRatio = 1.0f;
+  
+  
+  hEncoderLeftWheel.lastLegitRxTimestamp = HAL_GetTick();
+  hEncoderLeftWheel.hcan = &hcan2;
+  hEncoderLeftWheel.canAddress = CAN_ID_ENCODER_LEFT_WHEEL;
+  hEncoderLeftWheel.speedCalAngleBufPtr = 0;
+  memset(hEncoderLeftWheel.speedCalAngleBuf, 0, SIZE_OF_ANGLE_AVG_BUF);
+  hEncoderLeftWheel.speedRatio = 1.0f;
+  
   hEncoderRightWheel.lastLegitRxTimestamp = HAL_GetTick();
   hEncoderRightWheel.hcan = &hcan2;
   hEncoderRightWheel.canAddress = CAN_ID_ENCODER_RIGHT_WHEEL;
@@ -24,12 +56,8 @@ void ENCODER_Init(void)
   memset(hEncoderRightWheel.speedCalAngleBuf, 0, SIZE_OF_ANGLE_AVG_BUF);
   hEncoderRightWheel.speedRatio = 1.0f;
   
-  hEncoderLeftWheel.lastLegitRxTimestamp = HAL_GetTick();
-  hEncoderLeftWheel.hcan = &hcan2;
-  hEncoderLeftWheel.canAddress = CAN_ID_ENCODER_LEFT_WHEEL;
-  hEncoderLeftWheel.speedCalAngleBufPtr = 0;
-  memset(hEncoderLeftWheel.speedCalAngleBuf, 0, sizeof(hEncoderLeftWheel.speedCalAngleBuf));
-  hEncoderLeftWheel.speedRatio = 1.0f;
+  encoderSelectPtr = 0;
+  hEncoderPtr = &hEncoderLeftPull;
 }
 
 
@@ -100,6 +128,21 @@ void ENCODER_Set1MHzCanBaudrate(EncoderHandle* hencoder)
 	hencoder->txBuf[1] = hencoder->canTxHeader.StdId;
 	hencoder->txBuf[2] = BRITER_ENCODER_CAN_COMMAND_SET_CAN_BAUDRATE;
 	hencoder->txBuf[3] = 0x01;
+	
+	HAL_CAN_AddTxMessage(hencoder->hcan, &(hencoder->canTxHeader), hencoder->txBuf, &(hencoder->canMailbox));
+}
+
+void ENCODER_Set500kHzCanBaudrate(EncoderHandle* hencoder)
+{
+  hencoder->canTxHeader.DLC = 4;
+  hencoder->canTxHeader.IDE = 0;
+  hencoder->canTxHeader.RTR = 0;
+  hencoder->canTxHeader.StdId = hencoder->canAddress;
+  
+	hencoder->txBuf[0] = hencoder->canTxHeader.DLC;
+	hencoder->txBuf[1] = hencoder->canTxHeader.StdId;
+	hencoder->txBuf[2] = BRITER_ENCODER_CAN_COMMAND_SET_CAN_BAUDRATE;
+	hencoder->txBuf[3] = 0x00;
 	
 	HAL_CAN_AddTxMessage(hencoder->hcan, &(hencoder->canTxHeader), hencoder->txBuf, &(hencoder->canMailbox));
 }
