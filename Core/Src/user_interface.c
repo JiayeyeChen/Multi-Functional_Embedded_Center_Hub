@@ -485,7 +485,7 @@ void UI_Page_AK10_9_ManualControl(void)
   LCD_DisplayDecimals(400, 735, (double)hMotorPtrManualControl->realTorque.f, 3, 2);
   LCD_DisplayNumber(400, 760, hMotorPtrManualControl->temperature, 2);
   LCD_DisplayDecimals(150, 710, (double)hMotorPtrManualControl->realPosition.f, 6, 3);
-  LCD_DisplayDecimals(150, 735, (double)hMotorPtrManualControl->realVelocity.f, 6, 3);
+  LCD_DisplayDecimals(150, 735, (double)hMotorPtrManualControl->realVelocityPresent.f, 6, 3);
   LCD_DisplayDecimals(150, 760, (double)hMotorPtrManualControl->realCurrent.f, 6, 3);
   LCD_DisplayDecimals(250, 710, (double)hMotorPtrManualControl->setPosition.f, 6, 3);
   LCD_DisplayDecimals(250, 735, (double)hMotorPtrManualControl->setVelocity.f, 6, 3);
@@ -494,7 +494,7 @@ void UI_Page_AK10_9_ManualControl(void)
   if (ifButtonPressed(&hButtonGoBack))
   {
     UI_Page_Change_To(&UIPage_Home1);
-    ifManualControlStarted = 0;
+//    ifManualControlStarted = 0;
   }
 }
 void UI_Page_AK10_9_ManualControl_Init(void)
@@ -707,7 +707,7 @@ void UI_Page_AK10_9_ImpedanceControlDemo(void)
   LCD_DisplayString(230, 600, "Real");
   LCD_DisplayString(360, 600, "Desired");
   LCD_DisplayString(50, 650, "Position: ");LCD_DisplayDecimals(170, 650, (double)hAKMotorLeftHip.realPosition.f, 10, 4);
-  LCD_DisplayString(50, 700, "Velocity: ");LCD_DisplayDecimals(170, 700, (double)hAKMotorLeftHip.realVelocity.f, 10, 4);
+  LCD_DisplayString(50, 700, "Velocity: ");LCD_DisplayDecimals(170, 700, (double)hAKMotorLeftHip.realVelocityPresent.f, 10, 4);
   LCD_DisplayString(50, 750, "Current:  ");LCD_DisplayDecimals(170, 750, (double)hAKMotorLeftHip.realCurrent.f, 10, 4);
   
   LCD_DisplayDecimals(310, 650, (double)hAKMotorLeftHip.setPosition.f, 10, 4);
@@ -850,7 +850,7 @@ void UI_Page_TMotor_Acceleration_Observer_Project(void)
   
   LCD_DisplayDecimals(140, 720, (double)hAKMotorRightHip.realPosition.f, 10, 4);
   LCD_DisplayDecimals(140, 745, (double)hAKMotorRightHip.setPosition.f, 10, 4);
-  LCD_DisplayDecimals(140, 770, (double)hAKMotorRightHip.realVelocity.f, 10, 4);
+  LCD_DisplayDecimals(140, 770, (double)hAKMotorRightHip.realVelocityPresent.f, 10, 4);
   LCD_SetColor(DARK_RED);
   LCD_DisplayDecimals(90, 495, (double)hIMURightThigh.rawData.liaccX.b16, 7, 1);
   LCD_DisplayDecimals(90, 520, (double)hIMURightThigh.rawData.liaccY.b16, 7, 1);
@@ -983,12 +983,12 @@ void UI_Page_BriterEncoder(void)
   }
   else if (ifButtonPressed(&hButtonBriterEncoderSet1MHzCanRate))
   {
-//    ENCODER_SetAutoFeedbackRate(hEncoderPtr, 1000);
-    ENCODER_Set500kHzCanBaudrate(hEncoderPtr);
+    ENCODER_SetAutoFeedbackRate(hEncoderPtr, 5000);
+//    ENCODER_Set1MHzCanBaudrate(hEncoderPtr);
   }
   else if (ifButtonPressed(&hButtonBriterEncoderSetCanID))
   {
-    ENCODER_SetAutoFeedbackMode(hEncoderPtr);
+    ENCODER_Set1MHzCanBaudrate(hEncoderPtr);
   }
   else if (ifButtonPressed(&hButtonBriterEncoderSelectEncoder))
   {

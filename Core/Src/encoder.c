@@ -205,8 +205,12 @@ void ENCODER_SetAutoFeedbackRate(EncoderHandle* hencoder, uint16_t us)
 	hencoder->txBuf[0] = hencoder->canTxHeader.DLC;
 	hencoder->txBuf[1] = hencoder->canTxHeader.StdId;
 	hencoder->txBuf[2] = BRITER_ENCODER_CAN_COMMAND_SET_AUTO_FEEDBACK_TIME;
-	hencoder->txBuf[3] = us & 0x0F;
-  hencoder->txBuf[4] = (us >> 8) & 0x0F;
+  //for wheels//
+//	hencoder->txBuf[4] = us & 0x00FF;
+//  hencoder->txBuf[3] = (us >> 8) & 0x00FF;
+  //for arms//
+  hencoder->txBuf[3] = us & 0x00FF;
+  hencoder->txBuf[4] = (us >> 8) & 0x00FF;
 	
 	HAL_CAN_AddTxMessage(hencoder->hcan, &(hencoder->canTxHeader), hencoder->txBuf, &(hencoder->canMailbox));
 }

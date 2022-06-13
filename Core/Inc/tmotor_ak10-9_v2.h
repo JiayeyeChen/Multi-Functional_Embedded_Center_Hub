@@ -6,10 +6,11 @@
 #include "can_bus.h"
 #include "my_math.h"
 
-#define AK10_9_SPECIAL_COMMAND_ENABLE_MOTOR 0U
+#define AK10_9_SPECIAL_COMMAND_ENABLE_MOTOR  0U
 #define AK10_9_SPECIAL_COMMAND_DISABLE_MOTOR 1U
 #define AK10_9_SPECIAL_COMMAND_ZEROING_MOTOR 2U
 
+#define SIZE_OF_MOVING_ACC_AVG_BUFFER        25U
 enum AK10_9_Status
 {
   AK10_9_Online,
@@ -37,10 +38,25 @@ typedef struct
   union FloatUInt8      setVelocity;
   union FloatUInt8      realCurrent;
   union FloatUInt8      realPosition;
-  union FloatUInt8      realVelocity;
+  union FloatUInt8      realVelocityPresent;
+  union FloatUInt8      realVelocityPrevious[2];
   union FloatUInt8      realTorque;
   union FloatUInt8      setAcceleration;
-  union FloatUInt8      estimateAcceleration;
+  union FloatUInt8      setAcceleration_ByRealPosition;
+  union FloatUInt8      realAccelerationRaw;
+  union FloatUInt8      realAccelerationFiltered;
+  //For acceleration estimation//
+  //Moving average value method//
+  float                 accAverage;
+  float                 accAverageBuf[SIZE_OF_MOVING_ACC_AVG_BUFFER];
+  uint8_t               accAvgPtr;
+  ///////////////////////////////
+  //Low pass filter method//
+  float                 realAccelerationFilteredPrevious;
+  float                 cutOffFrequency;
+  float                 alpha;
+  float                 timeDuration;
+  //////////////////////////
   //CAN BUS transmit
   uint8_t               txBuf[8];
   uint32_t*             pTxMailbox;

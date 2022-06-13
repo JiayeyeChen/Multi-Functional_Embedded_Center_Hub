@@ -31,7 +31,7 @@ int main(void)
   MX_FATFS_Init();
   
   SystemPeriphral_Init();
-  USB_Init(sizeof(dataSlots_AK10_9_TorqueConstantTesting)/4);
+  USB_Init(sizeof(dataSlots_AK10_9_Acceleration_Observer_Testing)/4);
   
 	MX_FMC_Init();
   UI_Init();
@@ -148,34 +148,38 @@ void AK10Calibration_Task(void *argument)
   
   for(;;)
   {
-    
-    AK10_9_StaticTorqueConstantTestingManager(&hAKMotorRightHip, 0.5f, 20.0f, -1.0f, 100);
-//////    AK10_9_DataLog_Manager(&hAKMotorRightHip, &hIMURightThigh);
+    AK10_9_DataLog_Manager(&hAKMotorRightHip, &hIMURightThigh);
     if (ifMotorProfilingStarted)
       AK10_9_MotorProfiling_Function1_Half_Sin(&hAKMotorRightHip, tmotorProfilingSinWaveFrequency);
     
     if (ifManualControlStarted)
     {
-      if (hUI.curPage == &UIPage_AK10_9_ManualControl)
-      {
-        if (controlModeCubeMarsFW == AK10_9_CUBEMARS_FW_MODE_POSITION)
-          AK10_9_ServoMode_PositionControl(hMotorPtrManualControl, manualControlValue_pos);
-        else if (controlModeCubeMarsFW == AK10_9_CUBEMARS_FW_MODE_CURRENT)
-          AK10_9_ServoMode_CurrentControl(hMotorPtrManualControl, manualControlValue_cur);
-        else if (controlModeCubeMarsFW == AK10_9_CUBEMARS_FW_MODE_VELOCITY)
-          AK10_9_ServoMode_VelocityControl(hMotorPtrManualControl, manualControlValue_vel);
-      }
-      else if (hUI.curPage == &UIPage_AK10_9_ManualControlDMFW)
-      {
-        if (hAKMotorDMFW1.controlMode == AK10_9_DM_FW_MODE_MIT)
-          AK10_9_DMFW_MITModeControl(&hAKMotorDMFW1, manualControlValue_pos, \
-                                     manualControlValue_vel, manualControlValue_kp, \
-                                     manualControlValue_kd, manualControlValue_cur);
-        else if (hAKMotorDMFW1.controlMode == AK10_9_DM_FW_MODE_VELOCITY)
-          AK10_9_DMFW_VelocityControl(&hAKMotorDMFW1, manualControlValue_vel);
-        else if (hAKMotorDMFW1.controlMode == AK10_9_DM_FW_MODE_POSITION)
-          AK10_9_DMFW_PositionVelocityControl(&hAKMotorDMFW1, manualControlValue_pos, manualControlValue_vel);
-      }
+      if (controlModeCubeMarsFW == AK10_9_CUBEMARS_FW_MODE_POSITION)
+        AK10_9_ServoMode_PositionControl(hMotorPtrManualControl, manualControlValue_pos);
+      else if (controlModeCubeMarsFW == AK10_9_CUBEMARS_FW_MODE_CURRENT)
+        AK10_9_ServoMode_CurrentControl(hMotorPtrManualControl, manualControlValue_cur);
+      else if (controlModeCubeMarsFW == AK10_9_CUBEMARS_FW_MODE_VELOCITY)
+        AK10_9_ServoMode_VelocityControl(hMotorPtrManualControl, manualControlValue_vel);
+//      if (hUI.curPage == &UIPage_AK10_9_ManualControl)
+//      {
+//        if (controlModeCubeMarsFW == AK10_9_CUBEMARS_FW_MODE_POSITION)
+//          AK10_9_ServoMode_PositionControl(hMotorPtrManualControl, manualControlValue_pos);
+//        else if (controlModeCubeMarsFW == AK10_9_CUBEMARS_FW_MODE_CURRENT)
+//          AK10_9_ServoMode_CurrentControl(hMotorPtrManualControl, manualControlValue_cur);
+//        else if (controlModeCubeMarsFW == AK10_9_CUBEMARS_FW_MODE_VELOCITY)
+//          AK10_9_ServoMode_VelocityControl(hMotorPtrManualControl, manualControlValue_vel);
+//      }
+//      else if (hUI.curPage == &UIPage_AK10_9_ManualControlDMFW)
+//      {
+//        if (hAKMotorDMFW1.controlMode == AK10_9_DM_FW_MODE_MIT)
+//          AK10_9_DMFW_MITModeControl(&hAKMotorDMFW1, manualControlValue_pos, \
+//                                     manualControlValue_vel, manualControlValue_kp, \
+//                                     manualControlValue_kd, manualControlValue_cur);
+//        else if (hAKMotorDMFW1.controlMode == AK10_9_DM_FW_MODE_VELOCITY)
+//          AK10_9_DMFW_VelocityControl(&hAKMotorDMFW1, manualControlValue_vel);
+//        else if (hAKMotorDMFW1.controlMode == AK10_9_DM_FW_MODE_POSITION)
+//          AK10_9_DMFW_PositionVelocityControl(&hAKMotorDMFW1, manualControlValue_pos, manualControlValue_vel);
+//      }
     }
     
     if (ifImpedanceControlStarted)

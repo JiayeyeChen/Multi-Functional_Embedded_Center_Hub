@@ -7,7 +7,9 @@
 //for testing//
 uint8_t rxfifo0detected = 0;
 uint8_t rxfifo1detected = 0;
-
+uint32_t wheelcount_left = 0, wheelcountsec_left = 0;
+uint32_t wheelcount_right = 0, wheelcountsec_right = 0;
+uint32_t armcount = 0, armcountsec = 0;
 ///////////////
 CAN_FilterTypeDef ConfigCANFilter_EXT_ID_32BitIDListMode(CAN_HandleTypeDef* hcan, uint32_t FilterBank, uint32_t FilterFIFOAssignment, uint8_t IDE, uint32_t ID1, uint32_t ID2)
 {
@@ -141,17 +143,35 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
   {
     ENCODER_GetAngle(&hEncoderRightWheel, temRxData);
     ENCODER_CalculateSpeed(&hEncoderRightWheel, 0.001f);
+    wheelcount_right++;
+    if (wheelcount_right >= 199)
+    {
+      wheelcount_right = 0;
+      wheelcountsec_right++;
+    }
   }
   else if (temRxHeader.StdId == CAN_ID_ENCODER_LEFT_WHEEL)
   {
     ENCODER_GetAngle(&hEncoderLeftWheel, temRxData);
-    ENCODER_CalculateSpeed(&hEncoderLeftWheel, 0.001f);
+//    ENCODER_CalculateSpeed(&hEncoderLeftWheel, 0.001f);
+    wheelcount_left++;
+    if (wheelcount_left >= 199)
+    {
+      wheelcount_left = 0;
+      wheelcountsec_left++;
+    }
   }
   
   if (temRxHeader.StdId == CAN_ID_ENCODER_RX_DATA)
   {
     ENCODER_GetAngle(hEncoderPtr, temRxData);
     ENCODER_CalculateSpeed(hEncoderPtr, 0.001f);
+    armcount++;
+    if (armcount >= 199)
+    {
+      armcount = 0;
+      armcountsec++;
+    }
   }
   //End
   rxfifo0detected++;
@@ -169,12 +189,10 @@ void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
   if (temRxHeader.ExtId == CAN_ID_TMOTOR_EXOSKELETON_RIGHT_HIP)
   {
     AK10_9_ServoMode_GetFeedbackMsg(&temRxHeader, &hAKMotorRightHip, temRxData);
-    AK10_9_Calculate_velocity_current_AVG(&hAKMotorRightHip);
   }
   else if (temRxHeader.ExtId == CAN_ID_TMOTOR_EXOSKELETON_RIGHT_KNEE)
   {
     AK10_9_ServoMode_GetFeedbackMsg(&temRxHeader, &hAKMotorRightKnee, temRxData);
-    AK10_9_Calculate_velocity_current_AVG(&hAKMotorRightKnee);
   }
   else if (temRxHeader.StdId == CAN_ID_AK10_9_DMFW_M1_RX)
     AK10_9_DMFW_GetFeedbackMsg(&temRxHeader, &hAKMotorDMFW1, temRxData);
@@ -183,6 +201,12 @@ void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
   {
     ENCODER_GetAngle(&hEncoderLeftPull, temRxData);
     ENCODER_CalculateSpeed(&hEncoderLeftPull, 0.001f);
+    armcount++;
+    if (armcount >= 999)
+    {
+      armcount = 0;
+      armcountsec++;
+    }
   }
   rxfifo1detected++;
 }
