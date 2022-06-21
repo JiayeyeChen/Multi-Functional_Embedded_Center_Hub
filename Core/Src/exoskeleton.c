@@ -10,6 +10,9 @@ void EXOSKELETON_Init(void)
   hIMURightThigh.CANID_SET_MODE_NDOF = CAN_ID_IMU_GET_DATA_NDOF_RIGHT_THIGH;
   hIMURightThigh.CANID_SET_MODE_GYROONLY = CAN_ID_IMU_GET_DATA_GYROONLY_RIGHT_THIGH;
   hIMURightThigh.CANID_SET_MODE_ACCONLY = CAN_ID_IMU_GET_DATA_ACCONLY_RIGHT_THIGH;
+  hIMURightThigh.lpfCutOffFrequency = 10.0f;
+  hIMURightThigh.lpfDuration = 0.002f;
+  hIMURightThigh.lpfAlpha = 2.0f * pi * hIMURightThigh.lpfCutOffFrequency * hIMURightThigh.lpfDuration / (1.0f + 2.0f * pi * hIMURightThigh.lpfCutOffFrequency * hIMURightThigh.lpfDuration);
 }
 
 void EXOSKELETON_GetIMUFeedbackLiAcc(BNO055Handle* himu, uint8_t data[])
@@ -77,6 +80,12 @@ void EXOSKELETON_GetIMUFeedbackAcc(BNO055Handle* himu, uint8_t data[])
   himu->rawData.AccY.b8[1] = data[3];
   himu->rawData.AccZ.b8[0] = data[4];
   himu->rawData.AccZ.b8[1] = data[5];
+  himu->parsedData.AccX.f = (1.0f - himu->lpfAlpha) * himu->lpfAccXFilteredPrevious + himu->lpfAlpha * ((float)himu->rawData.AccX.b16) / 100.0f;
+  himu->parsedData.AccY.f = (1.0f - himu->lpfAlpha) * himu->lpfAccYFilteredPrevious + himu->lpfAlpha * ((float)himu->rawData.AccY.b16) / 100.0f;
+  himu->parsedData.AccZ.f = (1.0f - himu->lpfAlpha) * himu->lpfAccZFilteredPrevious + himu->lpfAlpha * ((float)himu->rawData.AccZ.b16) / 100.0f;
+  himu->lpfAccXFilteredPrevious = himu->parsedData.AccX.f;
+  himu->lpfAccYFilteredPrevious = himu->parsedData.AccY.f;
+  himu->lpfAccZFilteredPrevious = himu->parsedData.AccZ.f;
 }
 void EXOSKELETON_GetIMUFeedbackMag(BNO055Handle* himu, uint8_t data[])
 {

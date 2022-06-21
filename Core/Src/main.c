@@ -186,7 +186,7 @@ void AK10Calibration_Task(void *argument)
       AK10_9_ImpedanceControl(hMotorPtrManualControl, impedance_control_spring_constant, impedance_control_damping_constant, 0.0f);
     
     if (ifIMUFeedbackStarted)
-      EXOSKELETON_SetIMUMode_9_DOF(&hIMURightThigh);
+      EXOSKELETON_SetIMUMode_ACC_Only(&hIMURightThigh);
     
     AK10_9_MotorStatusMonitor(&hAKMotorRightKnee);
     AK10_9_MotorStatusMonitor(&hAKMotorRightHip);

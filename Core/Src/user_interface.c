@@ -865,6 +865,7 @@ void UI_Page_TMotor_Acceleration_Observer_Project(void)
   LCD_DisplayDecimals(230, 445, (double)(hAKMotorRightHip.realPosition.f - hAKMotorRightHip.setPosition.f), 3, 4);
   LCD_SetColor(LCD_BLACK);
   
+  ifIMUFeedbackStarted = 1;
   if (ifButtonPressed(&hButtonGoBack))
   {
     UI_Page_Change_To(&UIPage_Home1);
@@ -899,7 +900,6 @@ void UI_Page_TMotor_Acceleration_Observer_Project_Init(void)
   LCD_DisplayString(10, 670, "GyroY:  ");
   LCD_DisplayString(10, 695, "GyroZ:  ");
   
-  ifIMUFeedbackStarted = 1;
 }
 
 void UI_Page_ADC_Monitor_Init(void)

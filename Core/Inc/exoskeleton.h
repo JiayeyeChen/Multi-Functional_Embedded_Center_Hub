@@ -68,6 +68,13 @@ typedef struct
   uint32_t              CANID_SET_MODE_NDOF;
   uint32_t              CANID_SET_MODE_GYROONLY;
   uint32_t              CANID_SET_MODE_ACCONLY;
+  //Low pass filter
+  float                 lpfCutOffFrequency;
+  float                 lpfDuration;
+  float                 lpfAlpha;
+  float                 lpfAccXFilteredPrevious;
+  float                 lpfAccYFilteredPrevious;
+  float                 lpfAccZFilteredPrevious;
 }BNO055Handle;
 
 void EXOSKELETON_Init(void);

@@ -103,7 +103,9 @@ void AK10_9_ServoMode_GetFeedbackMsg(CAN_RxHeaderTypeDef* rxheader, AK10_9Handle
     memcpy(hmotor->rxBuf, rxbuf, 8);
   hmotor->realPosition.f = (float)((int16_t)(hmotor->rxBuf[0] << 8 | hmotor->rxBuf[1]));
   hmotor->realPosition.f /= 10.0f;
-  hmotor->realVelocityPresent.f = -(float)((int16_t)(hmotor->rxBuf[2] << 8 | hmotor->rxBuf[3]));
+  hmotor->realPosition.f -= hmotor->posOffset;
+  hmotor->realPosition.f *= hmotor->posDirectionCorrection;
+  hmotor->realVelocityPresent.f = (float)((int16_t)(hmotor->rxBuf[2] << 8 | hmotor->rxBuf[3]));
   hmotor->realVelocityPresent.f = (hmotor->realVelocityPresent.f * 3600.0f / 60.0f)  / (21.0f * 9.0f);
   hmotor->realAccelerationRaw.f = (hmotor->realVelocityPresent.f - hmotor->realVelocityPrevious[0].f) / 0.004f;
   hmotor->realVelocityPrevious[0].f = hmotor->realVelocityPrevious[1].f;
@@ -125,9 +127,20 @@ void AK10_9_ServoMode_GetFeedbackMsg(CAN_RxHeaderTypeDef* rxheader, AK10_9Handle
 //  hmotor->realAccelerationFiltered.f = hmotor->accAverage;
   ///////////////////////////////////////////////////
   //Low pass filter method to estimate acceleration//
-  hmotor->realAccelerationFiltered.f = (1.0f - hmotor->alpha) * hmotor->realAccelerationFilteredPrevious + hmotor->alpha * hmotor->realAccelerationRaw.f;
-  hmotor->realAccelerationFilteredPrevious = hmotor->realAccelerationFiltered.f;
+//  hmotor->realAccelerationFiltered.f = (1.0f - hmotor->alpha) * hmotor->realAccelerationFilteredPrevious + hmotor->alpha * hmotor->realAccelerationRaw.f;
+//  hmotor->realAccelerationFilteredPrevious = hmotor->realAccelerationFiltered.f;
   ///////////////////////////////////////////////////
+  //Butterworth filter method to estimate acceleration//
+  hmotor->realAccelerationFiltered.f = hmotor->b1Butter * hmotor->realAccelerationRaw.f + \
+                                       hmotor->b2Butter * hmotor->realAccelerationRawPreviousButter[0] + \
+                                       hmotor->b3Butter * hmotor->realAccelerationRawPreviousButter[1] - \
+                                       hmotor->a2Butter * hmotor->realAccelerationFilteredPreviousButter[0] - \
+                                       hmotor->a3Butter * hmotor->realAccelerationFilteredPreviousButter[1];
+  hmotor->realAccelerationRawPreviousButter[1] = hmotor->realAccelerationRawPreviousButter[0];
+  hmotor->realAccelerationRawPreviousButter[0] = hmotor->realAccelerationRaw.f;
+  hmotor->realAccelerationFilteredPreviousButter[1] = hmotor->realAccelerationFilteredPreviousButter[0];
+  hmotor->realAccelerationFilteredPreviousButter[0] = hmotor->realAccelerationFiltered.f;
+  //////////////////////////////////////////////////////
 }
 
 void AK10_9_ServoMode_Zeroing(AK10_9HandleCubaMarsFW* hmotor)

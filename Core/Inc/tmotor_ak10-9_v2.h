@@ -33,6 +33,8 @@ typedef struct
   enum AK10_9_Status    status;
   
   float                 kt;
+  float                 posOffset;
+  float                 posDirectionCorrection;
   union FloatUInt8      setCurrent;
   union FloatUInt8      setPosition;
   union FloatUInt8      setVelocity;
@@ -57,6 +59,11 @@ typedef struct
   float                 alpha;
   float                 timeDuration;
   //////////////////////////
+  //Butterworth filter method//
+  float                 a2Butter, a3Butter, b1Butter, b2Butter, b3Butter;
+  float                 realAccelerationFilteredPreviousButter[2];
+  float                 realAccelerationRawPreviousButter[2];
+  /////////////////////////////
   //CAN BUS transmit
   uint8_t               txBuf[8];
   uint32_t*             pTxMailbox;
