@@ -71,6 +71,38 @@ void AK10_9_ServoMode_PositionControl(AK10_9HandleCubaMarsFW* hmotor, float posi
   HAL_CAN_AddTxMessage(hmotor->hcan, &hmotor->txHeader, hmotor->txBuf, hmotor->pTxMailbox);
 }
 
+void AK10_9_ServoMode_PositionSpeenControlCustomized(AK10_9HandleCubaMarsFW* hmotor, float position, float speed, float loop_duration)
+{
+  if (hmotor->ifCustomizedPositionSpeedControlFinished)
+  {
+    hmotor->setPosition.f = hmotor->realPosition.f;
+    hmotor->ifCustomizedPositionSpeedControlFinished = 0;
+  }
+  float setPosIncrement = speed * loop_duration;
+  if (fabs((double)(hmotor->setPosition.f - position)) >= 1.0f)
+  {
+    if (position > hmotor->setPosition.f)
+      AK10_9_ServoMode_PositionControl(hmotor, hmotor->setPosition.f + setPosIncrement);
+    else
+      AK10_9_ServoMode_PositionControl(hmotor, hmotor->setPosition.f - setPosIncrement);
+  }
+  else
+  {
+    AK10_9_ServoMode_PositionControl(hmotor, position);
+    hmotor->ifCustomizedPositionSpeedControlFinished = 1;
+  }
+}
+
+void AK10_9_ServoMode_PositionControlWithOffset(AK10_9HandleCubaMarsFW* hmotor, float position)
+{
+  AK10_9_ServoMode_PositionControl(hmotor, position * hmotor->posDirectionCorrection + hmotor->posOffset);
+}
+void AK10_9_ServoMode_PositionSpeenControlCustomizedWithOffset(AK10_9HandleCubaMarsFW* hmotor, float position, float speed, float loop_duration)
+{
+  AK10_9_ServoMode_PositionSpeenControlCustomized(hmotor, position * hmotor->posDirectionCorrection + hmotor->posOffset, \
+                                                  speed, loop_duration);
+}
+
 void AK10_9_ServoMode_PositionSpeedControl(AK10_9HandleCubaMarsFW* hmotor, float position, float speed, int16_t acceleration)
 {
   hmotor->setPosition.f = position;
@@ -103,8 +135,8 @@ void AK10_9_ServoMode_GetFeedbackMsg(CAN_RxHeaderTypeDef* rxheader, AK10_9Handle
     memcpy(hmotor->rxBuf, rxbuf, 8);
   hmotor->realPosition.f = (float)((int16_t)(hmotor->rxBuf[0] << 8 | hmotor->rxBuf[1]));
   hmotor->realPosition.f /= 10.0f;
-  hmotor->realPosition.f -= hmotor->posOffset;
-  hmotor->realPosition.f *= hmotor->posDirectionCorrection;
+  hmotor->realPositionOffseted.f = hmotor->realPosition.f - hmotor->posOffset;
+  hmotor->realPositionOffseted.f *= hmotor->posDirectionCorrection;
   hmotor->realVelocityPresent.f = (float)((int16_t)(hmotor->rxBuf[2] << 8 | hmotor->rxBuf[3]));
   hmotor->realVelocityPresent.f = (hmotor->realVelocityPresent.f * 3600.0f / 60.0f)  / (21.0f * 9.0f);
   hmotor->realAccelerationRaw.f = (hmotor->realVelocityPresent.f - hmotor->realVelocityPrevious[0].f) / 0.004f;

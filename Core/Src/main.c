@@ -20,8 +20,6 @@
 
 void SystemClock_Config(void);
 
-uint32_t can2Mailboxlevel = 0;
-
 int main(void)
 {
   HAL_Init();
@@ -148,14 +146,15 @@ void AK10Calibration_Task(void *argument)
   
   for(;;)
   {
-    AK10_9_DataLog_Manager(&hAKMotorRightHip, &hIMURightThigh);
+    EXOSKELETON_SystemIDManager();
+//    AK10_9_DataLog_Manager(&hAKMotorRightHip, &hIMURightThigh);
     if (ifMotorProfilingStarted)
       AK10_9_MotorProfiling_Function1_Half_Sin(&hAKMotorRightHip, tmotorProfilingSinWaveFrequency);
     
     if (ifManualControlStarted)
     {
       if (controlModeCubeMarsFW == AK10_9_CUBEMARS_FW_MODE_POSITION)
-        AK10_9_ServoMode_PositionControl(hMotorPtrManualControl, manualControlValue_pos);
+        AK10_9_ServoMode_PositionSpeenControlCustomized(hMotorPtrManualControl, manualControlValue_pos, 36.0f, 0.002);
       else if (controlModeCubeMarsFW == AK10_9_CUBEMARS_FW_MODE_CURRENT)
         AK10_9_ServoMode_CurrentControl(hMotorPtrManualControl, manualControlValue_cur);
       else if (controlModeCubeMarsFW == AK10_9_CUBEMARS_FW_MODE_VELOCITY)
@@ -191,7 +190,6 @@ void AK10Calibration_Task(void *argument)
     AK10_9_MotorStatusMonitor(&hAKMotorRightKnee);
     AK10_9_MotorStatusMonitor(&hAKMotorRightHip);
     
-    can2Mailboxlevel = HAL_CAN_GetTxMailboxesFreeLevel(&hcan2);
     osDelay(2);
   }
 }
@@ -231,7 +229,6 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
   case AD7606_BUSY_PIN:
     ADC_ReadRawData(&hADC);
     ADC_GetVoltage(&hADC);
-    hStaticTorqueConstantTesting.torqueMeasured = 20.0f * hADC.volt[0] / 5.0f;
     break;
   
   default:

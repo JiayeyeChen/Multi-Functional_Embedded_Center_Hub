@@ -2,46 +2,58 @@
 #include "main.h"
 #include <math.h>
 
-PageHandle UIPage_Home1, UIPage_AK10_9_Calibration, UIPage_BNO055_Monitor, \
-           UIPage_AK10_9_ManualControl, UIPage_AK10_9_ManualControlFirmwareSelection, UIPage_AK10_9_ManualControlDMFW, \
-           UIPage_AK10_9_ImpedanceControlDemo, \
-           UIPage_TMotor_Acceleration_Observer_Project, \
-           UIPage_ADC_Monitor, UIPage_BriterEncoder;
 UIHandle hUI;
 
-ButtonHandle hButtonPageAK10_9KtTesting;
-ButtonHandle hButtonPageAK10_9ManualControl;
-ButtonHandle hButtonPageAK10_9ImpedanceControlDemo;
-ButtonHandle hButtonPageBNO055_Monitor;
-ButtonHandle hButtonPageTMotorAccelerationObserverProject;
-ButtonHandle hButtonPageADCMonitor;
-ButtonHandle hButtonPageBriterEncoder;
-
-ButtonHandle hButtonDataLogStart;
-ButtonHandle hButtonDataLogEnd;
-ButtonHandle hButtonMotorProfilingStart;
-ButtonHandle hButtonMotorProfilingEnd;
-ButtonHandle hButtonMotorZeroing;
-ButtonHandle hButtonMotorStart;
-ButtonHandle hButtonMotorStop;
-ButtonHandle hButtonGoBack;
-ButtonHandle hButtonManualControlMode;
-ButtonHandle hButtonSpringConstantUp, hButtonSpringConstantDown, hButtonDampingConstantUp, hButtonDampingConstantDown;
-ButtonHandle hButtonIMUSetModeNDOF, hButtonIMUSetModeACCONLY, hButtonIMUSetModeGYROONLY;
-ButtonHandle hButtonMotorSelectRightHip, hButtonMotorSelectRightKnee;
-ButtonHandle hButtonKtTestingStart, hButtonKtTestingStop;
-ButtonHandle hButtonResetAD7606;
-
-ButtonHandle hButtonBriterEncoderZeroing, hButtonBriterEncoderSetCounterClockWiseDirection, hButtonBriterEncoderSet1MHzCanRate, \
-             hButtonBriterEncoderSetCanID;
-ButtonHandle hButtonBriterEncoderSelectEncoder, hButtonBriterEncoderIfRead;
+PageHandle UIPage_Home1;
+/* Common Stuff */
+ButtonHandle hButtonGoBack, hButtonDataLogStart, hButtonDataLogEnd, \
+             hButtonMotorProfilingStart, hButtonMotorProfilingEnd, \
+             hButtonMotorZeroing, hButtonMotorStart, hButtonMotorStop, \
+             hButtonStart, hButtonStop;
+//////////////////
+/* Exoskeleton User Interface */
+PageHandle UIPage_LowerLimb_Exoskeleton, UIPage_LowerLimb_SystemID;
+ButtonHandle hButtonPageExoskeletonInterface, hButtonSystemID, hButtonSystemIDJointMovementStart, \
+             hButtonHipMotorZeroing, hButtonKneeMotorZeroing, hButtonProfilingTimeIncrease, hButtonProfilingTimeDecrease;
              
-ButtonHandle hButtonAK10_9_ManualControlCubeMarsFW, hButtonAK10_9_ManualControlDMFW;
-
-
-LinearPotentialmeterHandle  hTMotorManualControlPot_pos, hTMotorManualControlPot_vel, hTMotorManualControlPot_cur;
-LinearPotentialmeterHandle  hTMotorManualControlPot_kp, hTMotorManualControlPot_kd;
+LinearPotentialmeterHandle hPotKneeProfilingFreq, hPotKneeProfilingAmp, hPotHipProfilingFreq, hPotHipProfilingAmp;
+////////////////////////////////
+/* AK10-9 Manual Control */
+PageHandle UIPage_AK10_9_ManualControl, UIPage_AK10_9_ManualControlFirmwareSelection, UIPage_AK10_9_ManualControlDMFW;
+ButtonHandle hButtonPageAK10_9ManualControl, hButtonManualControlMode, hButtonMotorSelectRightHip, \
+                                             hButtonMotorSelectRightKnee, \
+                                             hButtonAK10_9_ManualControlCubeMarsFW, \
+                                             hButtonAK10_9_ManualControlDMFW;
+LinearPotentialmeterHandle  hTMotorManualControlPot_pos, hTMotorManualControlPot_vel, \
+                            hTMotorManualControlPot_cur, hTMotorManualControlPot_kp, \
+                            hTMotorManualControlPot_kd;
+///////////////////////////
+/* AK10-9 Impedance Control Demo*/
+PageHandle UIPage_AK10_9_ImpedanceControlDemo;
+ButtonHandle hButtonPageAK10_9ImpedanceControlDemo, hButtonSpringConstantUp, \
+             hButtonSpringConstantDown, hButtonDampingConstantUp, hButtonDampingConstantDown;
+//////////////////////////////////
+/* BNO055 Monitor */
+PageHandle UIPage_BNO055_Monitor;
+ButtonHandle hButtonPageBNO055_Monitor, hButtonIMUSetModeNDOF, \
+             hButtonIMUSetModeACCONLY, hButtonIMUSetModeGYROONLY;
+////////////////////
+/* Acceleration Observer Development*/
+PageHandle UIPage_TMotor_Acceleration_Observer_Project;
+ButtonHandle hButtonPageTMotorAccelerationObserverProject;
 LinearPotentialmeterHandle  hPotTMotorProfilingFrequency;
+//////////////////////////////////////
+/* Briter Encoder Monitor */
+PageHandle UIPage_BriterEncoder;
+ButtonHandle hButtonPageBriterEncoder, hButtonBriterEncoderZeroing, \
+             hButtonBriterEncoderSetCounterClockWiseDirection, hButtonBriterEncoderSetCanID, \
+             hButtonBriterEncoderSet1MHzCanRate, hButtonBriterEncoderSelectEncoder, \
+             hButtonBriterEncoderIfRead;
+////////////////////////////
+/* AD7606 Monitor */
+PageHandle UIPage_ADC_Monitor;
+ButtonHandle hButtonPageADCMonitor, hButtonResetAD7606;
+////////////////////
 
 ButtonHandle Button_Create(uint16_t x, uint16_t y, uint16_t xLen, uint16_t yLen, char label[],\
                            uint32_t colorUnpressed, uint32_t colorPressed)
@@ -204,9 +216,13 @@ void UI_Init(void)
   UIPage_Home1.Page = UI_Page_Home1;
   UIPage_Home1.PageInit = UI_Page_Home1_Init;
   
-  UIPage_AK10_9_Calibration.ifPageInitialized = 0;
-  UIPage_AK10_9_Calibration.Page = UI_Page_AK10_9_Kt_Testing;
-  UIPage_AK10_9_Calibration.PageInit = UI_Page_AK10_9_Kt_Testing_Init;
+  UIPage_LowerLimb_Exoskeleton.ifPageInitialized = 0;
+  UIPage_LowerLimb_Exoskeleton.Page = UI_Page_LowerLimb_Exoskeleton;
+  UIPage_LowerLimb_Exoskeleton.PageInit = UI_Page_LowerLimb_Exoskeleton_Init;
+  
+  UIPage_LowerLimb_SystemID.ifPageInitialized = 0;
+  UIPage_LowerLimb_SystemID.Page = UI_Page_LowerLimb_Exoskeleton_SystemID;
+  UIPage_LowerLimb_SystemID.PageInit = UI_Page_LowerLimb_Exoskeleton_SystemID_Init;
   
   UIPage_AK10_9_ManualControl.ifPageInitialized = 0;
   UIPage_AK10_9_ManualControl.Page = UI_Page_AK10_9_ManualControl;
@@ -281,58 +297,198 @@ void UI(void)
   hUI.curPage->Page();
 }
 
-void UI_Page_AK10_9_Kt_Testing(void)
+void UI_Page_LowerLimb_Exoskeleton(void)
 {
   ButtonScan(&hButtonGoBack);
-  ButtonScan(&hButtonKtTestingStart);
-  ButtonScan(&hButtonKtTestingStop);
-
   ButtonRefresh(&hButtonGoBack);
-  ButtonRefresh(&hButtonKtTestingStart);
-  ButtonRefresh(&hButtonKtTestingStop);
+  ButtonScan(&hButtonSystemID);
+  ButtonRefresh(&hButtonSystemID);
+  ButtonScan(&hButtonHipMotorZeroing);
+  ButtonRefresh(&hButtonHipMotorZeroing);
+  ButtonScan(&hButtonKneeMotorZeroing);
+  ButtonRefresh(&hButtonKneeMotorZeroing);
   
-  if (ifButtonPressed(&hButtonKtTestingStart))
-  {
-    hStaticTorqueConstantTesting.ifTestingStarted = 1;
-    USB_DataLogStart(); 
-  }
-  if (ifButtonPressed(&hButtonKtTestingStop))
-  {
-    UI_Page_AK10_9_Kt_Testing_Init();
-    hStaticTorqueConstantTesting.ifTestingStarted = 0;
-  }
-
   LCD_SetLayer(1); 
   LCD_SetColor(LCD_BLACK);
+  LCD_DisplayDecimals(350, 100, hAKMotorRightHip.realPositionOffseted.f, 5, 1);
+  LCD_DisplayDecimals(350, 125, hAKMotorRightKnee.realPositionOffseted.f, 5, 1);
   if (hAKMotorRightHip.status == AK10_9_Online)
-    LCD_DisplayString(200, 0, "Motor  Online");
+    LCD_DisplayString(150, 100, "Online");
   else
-    LCD_DisplayString(200, 0, "Motor Offline");
+    LCD_DisplayString(150, 100, "Offline");
+  if (hAKMotorRightKnee.status == AK10_9_Online)
+    LCD_DisplayString(150, 125, "Online");
+  else
+    LCD_DisplayString(150, 125, "Offline");
   
   
-  LCD_DisplayNumber(100, 760, hMotorPtrManualControl->temperature, 2);
-  LCD_DisplayDecimals(150, 710, (double)hAKMotorRightHip.realCurrent.f, 6, 3);
-  LCD_DisplayDecimals(250, 710, (double)hAKMotorRightHip.setCurrent.f, 6, 3);
-  
+  if (ifButtonPressed(&hButtonSystemID))
+  {
+    UI_Page_Change_To(&UIPage_LowerLimb_SystemID);
+    EXOSKELETON_SystemID_Init();
+  }
+  else if(ifButtonPressed(&hButtonHipMotorZeroing))
+    AK10_9_ServoMode_Zeroing(&hAKMotorRightHip);
+  else if(ifButtonPressed(&hButtonKneeMotorZeroing))
+    AK10_9_ServoMode_Zeroing(&hAKMotorRightKnee);
   
   if (ifButtonPressed(&hButtonGoBack))
     UI_Page_Change_To(&UIPage_Home1);
 }
 
-void UI_Page_AK10_9_Kt_Testing_Init(void)
+void UI_Page_LowerLimb_Exoskeleton_Init(void)
 {
-  hButtonKtTestingStart = Button_Create(50, 50, 220, 50, "Kt Testing Start", LIGHT_MAGENTA, LCD_RED);
-  hButtonKtTestingStop = Button_Create(50, 150, 220, 50, "Kt Testing Stop", LCD_GREEN, LCD_RED);
-  AK10_9_StaticTorqueConstantTesting_Init();
-
   hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
-
-  LCD_DisplayString(170, 685, "mes");
-  LCD_DisplayString(270, 685, "des");
-  LCD_DisplayString(10, 710, "Current:  ");
-  LCD_DisplayString(10, 760, "Temp:");
+  hButtonSystemID = Button_Create(100, 50, 280, 40, "System Identification", LCD_WHITE, LCD_RED);
+  hButtonHipMotorZeroing = Button_Create(100, 150, 280, 40, "Hip Joint Zeroing", LCD_WHITE, LCD_RED);
+  hButtonKneeMotorZeroing = Button_Create(100, 200, 280, 40, "Knee Joint Zeroing", LCD_WHITE, LCD_RED);
+  LCD_DisplayString(0, 100, "Hip  Joint:");
+  LCD_DisplayString(250, 100, "Angle:");
+  LCD_DisplayString(0, 125, "Knee Joint:");
+  LCD_DisplayString(250, 125, "Angle:");
   
-  AK10_9_StaticTorqueConstantTesting_Init();
+}
+
+void UI_Page_LowerLimb_Exoskeleton_SystemID(void)
+{
+  ButtonScan(&hButtonGoBack);
+  ButtonRefresh(&hButtonGoBack);
+  ButtonScan(&hButtonStart);
+  ButtonRefresh(&hButtonStart);
+  ButtonScan(&hButtonSystemIDJointMovementStart);
+  ButtonRefresh(&hButtonSystemIDJointMovementStart);
+  ButtonScan(&hButtonStop);
+  ButtonRefresh(&hButtonStop);
+  ButtonScan(&hButtonProfilingTimeIncrease);
+  ButtonRefresh(&hButtonProfilingTimeIncrease);
+  ButtonScan(&hButtonProfilingTimeDecrease);
+  ButtonRefresh(&hButtonProfilingTimeDecrease);
+  
+  
+  PotentialmeterUpdate(&hPotKneeProfilingFreq);
+  PotentialmeterUpdate(&hPotKneeProfilingAmp);
+  PotentialmeterUpdate(&hPotHipProfilingFreq);
+  PotentialmeterUpdate(&hPotHipProfilingAmp);
+  
+  LCD_SetLayer(1); 
+  LCD_SetColor(LCD_BLACK);
+  if (hSystemID.curTask == EXOSKELETON_SYSTEMID_TASK_FREE)
+    LCD_DisplayString(0, 70, "Pls start            ");
+  else if (hSystemID.curTask == EXOSKELETON_SYSTEMID_TASK_START)
+    LCD_DisplayString(0, 70, "Starting...          ");
+  else if (hSystemID.curTask == EXOSKELETON_SYSTEMID_TASK_KNEE_JOINT_MOVEMENT_WAIT_FOR_START)
+    LCD_DisplayString(0, 70, "Wait for knee task   ");
+  else if (hSystemID.curTask == EXOSKELETON_SYSTEMID_TASK_KNEE_JOINT_MOVEMENT_POSITIONING)
+    LCD_DisplayString(0, 70, "Joints positioning...");
+  else if (hSystemID.curTask == EXOSKELETON_SYSTEMID_TASK_KNEE_JOINT_MOVEMENT_ONGOING)
+    LCD_DisplayString(0, 70, "Knee learning...     ");
+  else if (hSystemID.curTask == EXOSKELETON_SYSTEMID_TASK_HIP_JOINT_MOVEMENT_WAIT_FOR_START)
+    LCD_DisplayString(0, 70, "Wait for hip task    ");
+  else if (hSystemID.curTask == EXOSKELETON_SYSTEMID_TASK_HIP_JOINT_MOVEMENT_POSITIONING)
+    LCD_DisplayString(0, 70, "Joints positioning...");
+  else if (hSystemID.curTask == EXOSKELETON_SYSTEMID_TASK_HIP_JOINT_MOVEMENT_ONGOING)
+    LCD_DisplayString(0, 70, "Hip learning...      ");
+  else if (hSystemID.curTask == EXOSKELETON_SYSTEMID_TASK_RELEASING_JOINTS)
+    LCD_DisplayString(0, 70, "Releasing...         ");
+  else if (hSystemID.curTask == EXOSKELETON_SYSTEMID_TASK_RECEIVING_RESULTS)
+    LCD_DisplayString(0, 70, "Wait for results     ");
+  else if (hSystemID.curTask == EXOSKELETON_SYSTEMID_TASK_END)
+    LCD_DisplayString(0, 70, "Ending...            ");
+  
+  LCD_DisplayDecimals(350, 700, hAKMotorRightHip.realPositionOffseted.f, 5, 1);
+  LCD_DisplayDecimals(350, 725, hAKMotorRightKnee.realPositionOffseted.f, 5, 1);
+  if (hAKMotorRightHip.status == AK10_9_Online)
+    LCD_DisplayString(150, 700, "Online");
+  else
+    LCD_DisplayString(150, 700, "Offline");
+  if (hAKMotorRightKnee.status == AK10_9_Online)
+    LCD_DisplayString(150, 725, "Online");
+  else
+    LCD_DisplayString(150, 725, "Offline");
+  
+  LCD_DisplayString(50, 250, "F_K:");
+  LCD_DisplayDecimals(50, 275, hSystemID.kneeProfilingFreq, 2, 1);
+  LCD_DisplayString(150, 250, "A_K:");
+  LCD_DisplayDecimals(150, 275, hSystemID.kneeProfilingAmp, 2, 1);
+  LCD_DisplayString(250, 250, "F_H:");
+  LCD_DisplayDecimals(250, 275, hSystemID.hipProfilingFreq, 2, 1);
+  LCD_DisplayString(350, 250, "A_H:");
+  LCD_DisplayDecimals(350, 275, hSystemID.hipProfilingAmp, 2, 1);
+  
+  if (hUSB.datalogTask == DATALOG_TASK_DATALOG)
+    LCD_DisplayString(200, 0, "Datalog   ready");
+  else
+    LCD_DisplayString(200, 0, "Datalog unready");
+  
+  if (ifButtonPressed(&hButtonStart))
+  {
+    if (hSystemID.curTask == EXOSKELETON_SYSTEMID_TASK_FREE)
+      hSystemID.curTask = EXOSKELETON_SYSTEMID_TASK_START;
+  }
+  if (ifButtonPressed(&hButtonSystemIDJointMovementStart))
+  {
+    if (hUSB.datalogTask == DATALOG_TASK_DATALOG)
+    {
+      if (hSystemID.curTask == EXOSKELETON_SYSTEMID_TASK_KNEE_JOINT_MOVEMENT_WAIT_FOR_START)
+        hSystemID.curTask = EXOSKELETON_SYSTEMID_TASK_KNEE_JOINT_MOVEMENT_POSITIONING;
+      else if (hSystemID.curTask == EXOSKELETON_SYSTEMID_TASK_HIP_JOINT_MOVEMENT_WAIT_FOR_START)
+        hSystemID.curTask = EXOSKELETON_SYSTEMID_TASK_HIP_JOINT_MOVEMENT_POSITIONING;
+    }
+  }
+  if (ifButtonPressed(&hButtonStop))
+  {
+  }
+  if (ifButtonPressed(&hButtonProfilingTimeIncrease))
+  {
+    if (hSystemID.curTask == EXOSKELETON_SYSTEMID_TASK_KNEE_JOINT_MOVEMENT_WAIT_FOR_START)
+      hSystemID.kneeProfilingTime += 10000;
+    else if (hSystemID.curTask == EXOSKELETON_SYSTEMID_TASK_HIP_JOINT_MOVEMENT_WAIT_FOR_START)
+      hSystemID.hipProfilingTime += 10000;
+    LIMIT_MIN_MAX(hSystemID.kneeProfilingTime, 0, 600000);
+    LIMIT_MIN_MAX(hSystemID.hipProfilingTime, 0, 600000);
+  }
+  else if (ifButtonPressed(&hButtonProfilingTimeDecrease))
+  {
+    if (hSystemID.curTask == EXOSKELETON_SYSTEMID_TASK_KNEE_JOINT_MOVEMENT_WAIT_FOR_START)
+      hSystemID.kneeProfilingTime -= 10000;
+    else if (hSystemID.curTask == EXOSKELETON_SYSTEMID_TASK_HIP_JOINT_MOVEMENT_WAIT_FOR_START)
+      hSystemID.hipProfilingTime -= 10000;
+    LIMIT_MIN_MAX(hSystemID.kneeProfilingTime, 0, 600000);
+    LIMIT_MIN_MAX(hSystemID.hipProfilingTime, 0, 600000);
+  }
+  
+  if (hSystemID.curTask == EXOSKELETON_SYSTEMID_TASK_KNEE_JOINT_MOVEMENT_WAIT_FOR_START)
+    LCD_DisplayDecimals(350, 570, (float)hSystemID.kneeProfilingTime/1000.0f, 3, 0);
+  else if (hSystemID.curTask == EXOSKELETON_SYSTEMID_TASK_HIP_JOINT_MOVEMENT_WAIT_FOR_START)
+    LCD_DisplayDecimals(350, 570, (float)hSystemID.hipProfilingTime/1000.0f, 3, 0);
+  else
+    LCD_DisplayString(350, 570, "NA          ");
+    
+  if (ifButtonPressed(&hButtonGoBack))
+    UI_Page_Change_To(&UIPage_Home1);
+}
+void UI_Page_LowerLimb_Exoskeleton_SystemID_Init(void)
+{
+  hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
+  hButtonStart = Button_Create(0, 100, 110, 40, "Start", LCD_WHITE, LCD_RED);
+  hButtonSystemIDJointMovementStart = Button_Create(150, 100, 300, 40, "Start Joint Motion", LCD_WHITE, LCD_RED);
+  hButtonStop = Button_Create(0, 150, 110, 50, "Stop", LCD_WHITE, LCD_RED);
+  hButtonProfilingTimeIncrease = Button_Create(50, 570, 250, 40, "Duration +10s", LCD_WHITE, LCD_RED);
+  hButtonProfilingTimeDecrease = Button_Create(50, 620, 250, 40, "Duration -10s", LCD_WHITE, LCD_RED);
+  
+  hPotKneeProfilingFreq = Potentialmeter_Create(50, 250, 30, 300, 130, 70, \
+                          LCD_MAGENTA, LCD_RED, LIGHT_GREY, 0.0f, 1.0f, 0.0f, &hSystemID.kneeProfilingFreq);
+  hPotKneeProfilingAmp = Potentialmeter_Create(150, 250, 30, 300, 130, 70, \
+                          LCD_MAGENTA, LCD_RED, LIGHT_GREY, 0.0f, 45.0f, 0.0f, &hSystemID.kneeProfilingAmp);
+  hPotHipProfilingFreq = Potentialmeter_Create(250, 250, 30, 300, 130, 70, \
+                          LCD_MAGENTA, LCD_RED, LIGHT_GREY, 0.0f, 1.0f, 0.0f, &hSystemID.hipProfilingFreq);
+  hPotHipProfilingAmp = Potentialmeter_Create(350, 250, 30, 300, 130, 70, \
+                          LCD_MAGENTA, LCD_RED, LIGHT_GREY, 0.0f, 90.0f, 0.0f, &hSystemID.hipProfilingAmp);
+  
+  LCD_DisplayString(0, 700, "Hip  Joint:");
+  LCD_DisplayString(250, 700, "Angle:");
+  LCD_DisplayString(0, 725, "Knee Joint:");
+  LCD_DisplayString(250, 725, "Angle:");
 }
 
 void UI_Page_Home1(void)
@@ -340,8 +496,8 @@ void UI_Page_Home1(void)
   LCD_SetFont(&Font32); 
   LCD_DisplayString(140, 30, "Welcome Jiaye");
   LCD_SetFont(&Font24);
-  ButtonScan(&hButtonPageAK10_9KtTesting);
-  ButtonRefresh(&hButtonPageAK10_9KtTesting);
+  ButtonScan(&hButtonPageExoskeletonInterface);
+  ButtonRefresh(&hButtonPageExoskeletonInterface);
   ButtonScan(&hButtonPageAK10_9ManualControl);
   ButtonRefresh(&hButtonPageAK10_9ManualControl);
   ButtonScan(&hButtonPageAK10_9ImpedanceControlDemo);
@@ -355,8 +511,8 @@ void UI_Page_Home1(void)
   ButtonScan(&hButtonPageBriterEncoder);
   ButtonRefresh(&hButtonPageBriterEncoder);
   
-  if (ifButtonPressed(&hButtonPageAK10_9KtTesting))
-    UI_Page_Change_To(&UIPage_AK10_9_Calibration);
+  if (ifButtonPressed(&hButtonPageExoskeletonInterface))
+    UI_Page_Change_To(&UIPage_LowerLimb_Exoskeleton);
   if (ifButtonPressed(&hButtonPageAK10_9ManualControl))
     UI_Page_Change_To(&UIPage_AK10_9_ManualControlFirmwareSelection);
   if (ifButtonPressed(&hButtonPageAK10_9ImpedanceControlDemo))
@@ -372,13 +528,13 @@ void UI_Page_Home1(void)
 }
 void UI_Page_Home1_Init(void)
 {
-  hButtonPageAK10_9KtTesting = Button_Create(100, 100, 300, 50, "AK10-9 V2.0 Kt Testing", LIGHT_MAGENTA, LCD_RED);
-  hButtonPageAK10_9ManualControl = Button_Create(80, 200, 360, 50, "AK10-9 V2.0 Manual Control", LIGHT_MAGENTA, LCD_RED);
-  hButtonPageAK10_9ImpedanceControlDemo = Button_Create(30, 300, 430, 50, "AK10-9 V2.0 Impedance Control Demo", LIGHT_MAGENTA, LCD_RED);
-  hButtonPageBNO055_Monitor = Button_Create(150, 400, 200, 50, "BNO055 Monitor", LIGHT_MAGENTA, LCD_RED);
-  hButtonPageTMotorAccelerationObserverProject = Button_Create(10, 500, 450, 50, "TMotor Acceleration Observer Project", LIGHT_MAGENTA, LCD_RED);
-  hButtonPageADCMonitor = Button_Create(150, 600, 200, 50, "ADC Monitor", LIGHT_MAGENTA, LCD_RED);
-  hButtonPageBriterEncoder = Button_Create(150, 700, 200, 50, "Briter Encoder", LIGHT_MAGENTA, LCD_RED);
+  hButtonPageExoskeletonInterface = Button_Create(100, 100, 300, 40, "Lower Limb Exoskeleton", LIGHT_MAGENTA, LCD_RED);
+  hButtonPageAK10_9ManualControl = Button_Create(80, 150, 360, 40, "AK10-9 V2.0 Manual Control", LIGHT_MAGENTA, LCD_RED);
+  hButtonPageAK10_9ImpedanceControlDemo = Button_Create(30, 200, 430, 40, "AK10-9 V2.0 Impedance Control Demo", LIGHT_MAGENTA, LCD_RED);
+  hButtonPageBNO055_Monitor = Button_Create(150, 250, 200, 40, "BNO055 Monitor", LIGHT_MAGENTA, LCD_RED);
+  hButtonPageTMotorAccelerationObserverProject = Button_Create(10, 300, 450, 40, "TMotor Acceleration Observer Project", LIGHT_MAGENTA, LCD_RED);
+  hButtonPageADCMonitor = Button_Create(150, 350, 200, 40, "ADC Monitor", LIGHT_MAGENTA, LCD_RED);
+  hButtonPageBriterEncoder = Button_Create(150, 400, 200, 40, "Briter Encoder", LIGHT_MAGENTA, LCD_RED);
 }
 
 void UI_Page_AK10_9_ManualControl(void)
@@ -494,7 +650,7 @@ void UI_Page_AK10_9_ManualControl(void)
   if (ifButtonPressed(&hButtonGoBack))
   {
     UI_Page_Change_To(&UIPage_Home1);
-//    ifManualControlStarted = 0;
+    ifManualControlStarted = 0;
   }
 }
 void UI_Page_AK10_9_ManualControl_Init(void)

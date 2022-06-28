@@ -5,6 +5,7 @@
 #include "system_periphrals.h"
 #include "can_bus.h"
 #include "my_math.h"
+#include <math.h>
 
 #define AK10_9_SPECIAL_COMMAND_ENABLE_MOTOR  0U
 #define AK10_9_SPECIAL_COMMAND_DISABLE_MOTOR 1U
@@ -40,6 +41,7 @@ typedef struct
   union FloatUInt8      setVelocity;
   union FloatUInt8      realCurrent;
   union FloatUInt8      realPosition;
+  union FloatUInt8      realPositionOffseted;
   union FloatUInt8      realVelocityPresent;
   union FloatUInt8      realVelocityPrevious[2];
   union FloatUInt8      realTorque;
@@ -47,6 +49,7 @@ typedef struct
   union FloatUInt8      setAcceleration_ByRealPosition;
   union FloatUInt8      realAccelerationRaw;
   union FloatUInt8      realAccelerationFiltered;
+  uint8_t               ifCustomizedPositionSpeedControlFinished;
   //For acceleration estimation//
   //Moving average value method//
   float                 accAverage;
@@ -111,6 +114,9 @@ void AK10_9_V2_Init(void);
 void AK10_9_ServoMode_CurrentControl(AK10_9HandleCubaMarsFW* hmotor, float current);
 void AK10_9_ServoMode_VelocityControl(AK10_9HandleCubaMarsFW* hmotor, float speed);
 void AK10_9_ServoMode_PositionControl(AK10_9HandleCubaMarsFW* hmotor, float position);
+void AK10_9_ServoMode_PositionSpeenControlCustomized(AK10_9HandleCubaMarsFW* hmotor, float position, float speed, float loop_duration);
+void AK10_9_ServoMode_PositionControlWithOffset(AK10_9HandleCubaMarsFW* hmotor, float position);
+void AK10_9_ServoMode_PositionSpeenControlCustomizedWithOffset(AK10_9HandleCubaMarsFW* hmotor, float position, float speed, float loop_duration);
 void AK10_9_ServoMode_PositionSpeedControl(AK10_9HandleCubaMarsFW* hmotor, float position, float speed, int16_t acceleration);
 void AK10_9_ServoMode_GetFeedbackMsg(CAN_RxHeaderTypeDef* rxheader, AK10_9HandleCubaMarsFW* hmotor, uint8_t rxbuf[]);
 void AK10_9_ServoMode_Zeroing(AK10_9HandleCubaMarsFW* hmotor);

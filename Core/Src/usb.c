@@ -3,6 +3,7 @@
 USBHandle hUSB;
 union FloatUInt8 dataSlots_AK10_9_Acceleration_Observer_Testing[11];
 union FloatUInt8 dataSlots_AK10_9_TorqueConstantTesting[2];
+union FloatUInt8 dataSlots_Exoskeleton_SystemID[9];
 
 void USB_Init(uint8_t data_slot_len)
 {
@@ -12,6 +13,11 @@ void USB_Init(uint8_t data_slot_len)
   hUSB.ifNewDataLogPiece2Send = 0;
   hUSB.index.b32 = 0;
   hUSB.datalogTask = DATALOG_TASK_FREE;
+  hUSB.dataSlotLen = data_slot_len;
+}
+
+void USB_SetNewDataSlotLen(uint8_t data_slot_len)
+{
   hUSB.dataSlotLen = data_slot_len;
 }
 
@@ -70,13 +76,13 @@ void USB_ReceiveCargo(void)
       crcReceive.b8[2] = hUSB.rxMsgRaw[*hUSB.len - 3];
       crcReceive.b8[3] = hUSB.rxMsgRaw[*hUSB.len - 2];
       
-//      memcpy(hUSB.rxMessageCfrm, &hUSB.rxMsgRaw[3], hUSB.rxMessageLen);
-//      hUSB.ifNewCargo = 1;
-      if (crcCalculatedResult == crcReceive.b32)
-      {
-        memcpy(hUSB.rxMessageCfrm, &hUSB.rxMsgRaw[3], hUSB.rxMessageLen);
-        hUSB.ifNewCargo = 1;
-      }
+      memcpy(hUSB.rxMessageCfrm, &hUSB.rxMsgRaw[3], hUSB.rxMessageLen);
+      hUSB.ifNewCargo = 1;
+////////      if (crcCalculatedResult == crcReceive.b32)
+////////      {
+////////        memcpy(hUSB.rxMessageCfrm, &hUSB.rxMsgRaw[3], hUSB.rxMessageLen);
+////////        hUSB.ifNewCargo = 1;
+////////      }
     }
     else
     {
@@ -91,7 +97,7 @@ void USB_ReceiveCargo(void)
   }
 }
 
-void USB_CargoReceiveManager(void (*LabelSetFunc)(void))
+void USB_DatalogCargoReceiveManager(void (*LabelSetFunc)(void))
 {
   if (hUSB.ifNewCargo)
   {
@@ -103,6 +109,7 @@ void USB_CargoReceiveManager(void (*LabelSetFunc)(void))
       {
         hUSB.datalogTask = DATALOG_TASK_SEND_DATA_SLOT_LEN;
         USB_SendDataSlotLen();
+        hUSB.ifNewCargo = 0;
       }
     }
     else if (hUSB.datalogTask == DATALOG_TASK_START)
@@ -111,6 +118,7 @@ void USB_CargoReceiveManager(void (*LabelSetFunc)(void))
       {
         hUSB.datalogTask = DATALOG_TASK_SEND_DATA_SLOT_LEN;
         USB_SendDataSlotLen();
+        hUSB.ifNewCargo = 0;
       }
     }
     else if (hUSB.datalogTask == DATALOG_TASK_SEND_DATA_SLOT_LEN)
@@ -119,6 +127,7 @@ void USB_CargoReceiveManager(void (*LabelSetFunc)(void))
       {
         hUSB.datalogTask = DATALOG_TASK_SEND_DATA_SLOT_MSG;
         (*LabelSetFunc)();
+        hUSB.ifNewCargo = 0;
       }
     }
     else if (hUSB.datalogTask == DATALOG_TASK_SEND_DATA_SLOT_MSG)
@@ -126,27 +135,33 @@ void USB_CargoReceiveManager(void (*LabelSetFunc)(void))
       if (!strcmp(msg, "Roger that"))
       {
         hUSB.datalogTask = DATALOG_TASK_DATALOG;
+        hUSB.ifNewCargo = 0;
       }
     }
     else if (hUSB.datalogTask == DATALOG_TASK_DATALOG)
     {
       if (!strcmp(msg, "Datalog end"))
+      {
         hUSB.datalogTask = DATALOG_TASK_FREE;
-      USB_SendText("Roger that");
+        USB_SendText("Roger that");
+        hUSB.ifNewCargo = 0;
+      }
     }
     else if (hUSB.datalogTask == DATALOG_TASK_END)
     {
       if (!strcmp(msg, "Roger that"))
+      {
         hUSB.datalogTask = DATALOG_TASK_FREE;
+        hUSB.ifNewCargo = 0;
+      }
     }
-    
-    hUSB.ifNewCargo = 0;
+
   }
 }
 
 void USB_DataLogManager(void (*LabelSetFunc)(void), union FloatUInt8 dala_slots[])
 {
-  USB_CargoReceiveManager(LabelSetFunc);
+  USB_DatalogCargoReceiveManager(LabelSetFunc);
   if (hUSB.datalogTask == DATALOG_TASK_DATALOG)
   {
     if (hUSB.ifNewDataLogPiece2Send)
@@ -217,12 +232,31 @@ void USB_SendDataSlotLabel(char* label_1, ...)
   va_start(label_ptr, label_1);
  
   uint8_t numOfLabels = atoi(label_1);
+  uint32_t  startSendingTimeStamp = HAL_GetTick();
   for (uint8_t i = 0; i < numOfLabels; i++)
   {
     char buf[50];
     strcpy(buf, va_arg(label_ptr, char*));
+    hUSB.ifCurDataSlotLabelSent = 0;
     USB_TransmitCargo((uint8_t*)buf, strlen(buf));
-    osDelay(10);
+    while(!hUSB.ifCurDataSlotLabelSent)
+    {
+      if (HAL_GetTick() - startSendingTimeStamp > 100)
+        return;
+    }
   }
   va_end(label_ptr);
 }
+
+uint8_t USB_CompareRxCfmMsgWithStr(char str[], uint8_t size_of_str)
+{
+  char msg[hUSB.rxMessageLen];
+  memcpy(msg, hUSB.rxMessageCfrm, hUSB.rxMessageLen);
+  if (hUSB.rxMessageLen != size_of_str)
+    return 0;
+  if (!strncmp(msg, str, size_of_str))
+    return 1;
+  else
+    return 0;
+}
+

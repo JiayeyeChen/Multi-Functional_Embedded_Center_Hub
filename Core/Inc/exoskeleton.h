@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "system_periphrals.h"
+#include "usb.h"
 
 enum IMU_Operation_Mode
 {
@@ -10,6 +11,32 @@ enum IMU_Operation_Mode
   IMU_MODE_GYROONLY,
   IMU_MODE_ACCONLY
 };
+
+enum EXOSKELETON_SystemID_Tasks
+{
+  EXOSKELETON_SYSTEMID_TASK_FREE,
+  EXOSKELETON_SYSTEMID_TASK_START,
+  EXOSKELETON_SYSTEMID_TASK_KNEE_JOINT_MOVEMENT_WAIT_FOR_START,
+  EXOSKELETON_SYSTEMID_TASK_KNEE_JOINT_MOVEMENT_POSITIONING,
+  EXOSKELETON_SYSTEMID_TASK_KNEE_JOINT_MOVEMENT_ONGOING,
+  EXOSKELETON_SYSTEMID_TASK_HIP_JOINT_MOVEMENT_WAIT_FOR_START,
+  EXOSKELETON_SYSTEMID_TASK_HIP_JOINT_MOVEMENT_POSITIONING,
+  EXOSKELETON_SYSTEMID_TASK_HIP_JOINT_MOVEMENT_ONGOING,
+  EXOSKELETON_SYSTEMID_TASK_RELEASING_JOINTS,
+  EXOSKELETON_SYSTEMID_TASK_RECEIVING_RESULTS,
+  EXOSKELETON_SYSTEMID_TASK_END
+};
+
+typedef struct
+{
+  enum EXOSKELETON_SystemID_Tasks curTask;
+  float kneeProfilingFreq;
+  float kneeProfilingAmp;
+  float hipProfilingFreq;
+  float hipProfilingAmp;
+  uint32_t kneeProfilingTime;
+  uint32_t hipProfilingTime;
+}Exoskeleton_SystemIDHandle;
 
 typedef struct
 {
@@ -87,6 +114,13 @@ void EXOSKELETON_SetIMUMode_GYRO_Only(BNO055Handle* himu);
 void EXOSKELETON_SetIMUMode_ACC_Only(BNO055Handle* himu);
 void EXOSKELETON_GetIMUFeedbackAcc(BNO055Handle* himu, uint8_t data[]);
 void EXOSKELETON_GetIMUFeedbackMag(BNO055Handle* himu, uint8_t data[]);
+void EXOSKELETON_SystemIDManager(void);
+void EXOSKELETON_SystemID_Init(void);
+void EXOSKELETON_SystemID_KneeJoint_MotorProfilingSinWave(AK10_9HandleCubaMarsFW* hmotor, float amplitude, float fre, uint32_t time_stamp_shift);
+void EXOSKELETON_SystemID_HipJoint_MotorProfilingSinWave(AK10_9HandleCubaMarsFW* hmotor, float amplitude, float fre, uint32_t time_stamp_shift);
+void EXOSKELETON_SystemID_Set_Datalog_Label(void);
+void EXOSKELETON_SystemID_UpdateDataSlot(void);
 
 extern BNO055Handle hIMURightThigh, hIMURightKnee;
+extern Exoskeleton_SystemIDHandle hSystemID;
 #endif
