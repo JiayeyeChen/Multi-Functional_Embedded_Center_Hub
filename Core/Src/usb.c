@@ -237,13 +237,8 @@ void USB_SendDataSlotLabel(char* label_1, ...)
   {
     char buf[50];
     strcpy(buf, va_arg(label_ptr, char*));
-    hUSB.ifCurDataSlotLabelSent = 0;
     USB_TransmitCargo((uint8_t*)buf, strlen(buf));
-    while(!hUSB.ifCurDataSlotLabelSent)
-    {
-      if (HAL_GetTick() - startSendingTimeStamp > 100)
-        return;
-    }
+    osDelay(10);
   }
   va_end(label_ptr);
 }

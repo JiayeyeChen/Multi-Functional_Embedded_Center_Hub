@@ -41,7 +41,6 @@ typedef struct
   uint8_t               ifNewCargo;
   /*Data log*/
   uint8_t               ifNewDataLogPiece2Send;
-  uint8_t               ifCurDataSlotLabelSent;
   uint8_t               ifDataLogInitialized;
   union UInt32UInt8     index;
   uint8_t               dataSlotLen;

@@ -422,8 +422,7 @@ void UI_Page_LowerLimb_Exoskeleton_SystemID(void)
   
   if (ifButtonPressed(&hButtonStart))
   {
-    if (hSystemID.curTask == EXOSKELETON_SYSTEMID_TASK_FREE)
-      hSystemID.curTask = EXOSKELETON_SYSTEMID_TASK_START;
+    hSystemID.curTask = EXOSKELETON_SYSTEMID_TASK_START;
   }
   if (ifButtonPressed(&hButtonSystemIDJointMovementStart))
   {
@@ -437,6 +436,9 @@ void UI_Page_LowerLimb_Exoskeleton_SystemID(void)
   }
   if (ifButtonPressed(&hButtonStop))
   {
+    USB_SendText("STOP");
+    hSystemID.curTask = EXOSKELETON_SYSTEMID_TASK_FREE;
+    hUSB.datalogTask = DATALOG_TASK_FREE;
   }
   if (ifButtonPressed(&hButtonProfilingTimeIncrease))
   {

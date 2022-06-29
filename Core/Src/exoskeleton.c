@@ -139,6 +139,10 @@ void EXOSKELETON_SystemIDManager(void)
     case EXOSKELETON_SYSTEMID_TASK_KNEE_JOINT_MOVEMENT_POSITIONING:
       AK10_9_ServoMode_PositionSpeenControlCustomizedWithOffset(&hAKMotorRightHip, 180.0f, 36.0f, 0.002f);
       AK10_9_ServoMode_PositionSpeenControlCustomizedWithOffset(&hAKMotorRightKnee, 90.0f, 36.0f, 0.002f);
+    /* for debug */
+    hAKMotorRightHip.ifCustomizedPositionSpeedControlFinished = 1;
+    hAKMotorRightKnee.ifCustomizedPositionSpeedControlFinished = 1;
+    ///////////////
       if (hAKMotorRightHip.ifCustomizedPositionSpeedControlFinished && hAKMotorRightKnee.ifCustomizedPositionSpeedControlFinished)
       {
         hSystemID.curTask = EXOSKELETON_SYSTEMID_TASK_KNEE_JOINT_MOVEMENT_ONGOING;
@@ -172,11 +176,20 @@ void EXOSKELETON_SystemIDManager(void)
     case EXOSKELETON_SYSTEMID_TASK_HIP_JOINT_MOVEMENT_WAIT_FOR_START:
       AK10_9_ServoMode_PositionControlWithOffset(&hAKMotorRightHip, 180.0f);
       AK10_9_ServoMode_PositionControlWithOffset(&hAKMotorRightKnee, temJointPosition);
-      USB_DataLogStart();
+      if (hUSB.datalogTask == DATALOG_TASK_END)
+        USB_DataLogEnd();
+      if (hUSB.datalogTask == DATALOG_TASK_FREE)
+        USB_DataLogStart();
+      if (hUSB.datalogTask == DATALOG_TASK_START)
+        USB_DataLogStart();
       break;
     case EXOSKELETON_SYSTEMID_TASK_HIP_JOINT_MOVEMENT_POSITIONING:
       AK10_9_ServoMode_PositionSpeenControlCustomizedWithOffset(&hAKMotorRightHip, 180.0f, 36.0f, 0.002f);
       AK10_9_ServoMode_PositionSpeenControlCustomizedWithOffset(&hAKMotorRightKnee, 90.0f, 36.0f, 0.002f);
+      /* for debug */
+      hAKMotorRightHip.ifCustomizedPositionSpeedControlFinished = 1;
+      hAKMotorRightKnee.ifCustomizedPositionSpeedControlFinished = 1;
+      ///////////////
       if (hAKMotorRightHip.ifCustomizedPositionSpeedControlFinished && hAKMotorRightKnee.ifCustomizedPositionSpeedControlFinished)
       {
         hSystemID.curTask = EXOSKELETON_SYSTEMID_TASK_HIP_JOINT_MOVEMENT_ONGOING;
@@ -209,12 +222,32 @@ void EXOSKELETON_SystemIDManager(void)
     case EXOSKELETON_SYSTEMID_TASK_RELEASING_JOINTS:
       AK10_9_ServoMode_PositionSpeenControlCustomizedWithOffset(&hAKMotorRightHip, 180.0f, 36.0f, 0.002f);
       AK10_9_ServoMode_PositionSpeenControlCustomizedWithOffset(&hAKMotorRightKnee, 5.0f, 36.0f, 0.002f);
+      /* for debug */
+      hAKMotorRightHip.ifCustomizedPositionSpeedControlFinished = 1;
+      hAKMotorRightKnee.ifCustomizedPositionSpeedControlFinished = 1;
+      ///////////////
       if (hAKMotorRightHip.ifCustomizedPositionSpeedControlFinished && hAKMotorRightKnee.ifCustomizedPositionSpeedControlFinished)
         hSystemID.curTask = EXOSKELETON_SYSTEMID_TASK_RECEIVING_RESULTS;
       break;
     case EXOSKELETON_SYSTEMID_TASK_RECEIVING_RESULTS:
+      USB_SendText("Pls calculate results");
+      if(hUSB.ifNewCargo)
+      {
+        char rplyMsg[] = "m1:";
+        if (USB_CompareRxCfmMsgWithStr(rplyMsg, sizeof(rplyMsg) - 1))
+          hSystemID.curTask = EXOSKELETON_SYSTEMID_TASK_END;
+        hUSB.ifNewCargo = 0;
+      }
       break;
     case EXOSKELETON_SYSTEMID_TASK_END:
+      USB_SendText("System ID end");
+      if(hUSB.ifNewCargo)
+      {
+        char rplyMsg[] = "Roger that";
+        if (USB_CompareRxCfmMsgWithStr(rplyMsg, sizeof(rplyMsg) - 1))
+          hSystemID.curTask = EXOSKELETON_SYSTEMID_TASK_FREE;
+        hUSB.ifNewCargo = 0;
+      }
       break;
   	default:
   		break;
@@ -231,7 +264,9 @@ void EXOSKELETON_SystemID_KneeJoint_MotorProfilingSinWave\
 void EXOSKELETON_SystemID_HipJoint_MotorProfilingSinWave\
      (AK10_9HandleCubaMarsFW* hmotor, float amplitude, float fre, uint32_t time_stamp_shift)
      {
-       
+       float t = (float)(HAL_GetTick() - time_stamp_shift) / 1000.0f;
+       float motor_profiling_trajectory = 180.0f + (amplitude / 2.0f) * (float)sin(fre * 2.0f * pi * t);
+       AK10_9_ServoMode_PositionControlWithOffset(hmotor, motor_profiling_trajectory);
      }
 
 void EXOSKELETON_SystemID_Set_Datalog_Label(void)
