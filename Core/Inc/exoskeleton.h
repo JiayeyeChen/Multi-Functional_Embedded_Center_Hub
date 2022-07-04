@@ -36,6 +36,12 @@ typedef struct
   float hipProfilingAmp;
   uint32_t kneeProfilingTime;
   uint32_t hipProfilingTime;
+  
+  uint8_t ifIdentified;
+  union FloatUInt8 sysIDResults_a1;
+  union FloatUInt8 sysIDResults_m1;
+  union FloatUInt8 sysIDResults_a2;
+  union FloatUInt8 sysIDResults_m2;
 }Exoskeleton_SystemIDHandle;
 
 typedef struct

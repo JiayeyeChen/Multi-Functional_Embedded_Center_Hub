@@ -321,6 +321,10 @@ void UI_Page_LowerLimb_Exoskeleton(void)
   else
     LCD_DisplayString(150, 125, "Offline");
   
+  LCD_DisplayDecimals(70, 250, hSystemID.sysIDResults_a1.f, 5, 3);
+  LCD_DisplayDecimals(70, 275, hSystemID.sysIDResults_m1.f, 5, 3);
+  LCD_DisplayDecimals(70, 300, hSystemID.sysIDResults_a2.f, 5, 3);
+  LCD_DisplayDecimals(70, 325, hSystemID.sysIDResults_m2.f, 5, 3);
   
   if (ifButtonPressed(&hButtonSystemID))
   {
@@ -347,6 +351,10 @@ void UI_Page_LowerLimb_Exoskeleton_Init(void)
   LCD_DisplayString(0, 125, "Knee Joint:");
   LCD_DisplayString(250, 125, "Angle:");
   
+  LCD_DisplayString(0, 250, "a1 = ");
+  LCD_DisplayString(0, 275, "m1 = ");
+  LCD_DisplayString(0, 300, "a2 = ");
+  LCD_DisplayString(0, 325, "m2 = ");
 }
 
 void UI_Page_LowerLimb_Exoskeleton_SystemID(void)
@@ -405,6 +413,11 @@ void UI_Page_LowerLimb_Exoskeleton_SystemID(void)
     LCD_DisplayString(150, 725, "Online");
   else
     LCD_DisplayString(150, 725, "Offline");
+  
+  if(hSystemID.ifIdentified)
+    LCD_DisplayString(150, 200, "Identified    ");
+  else
+    LCD_DisplayString(150, 200, "Not identified");
   
   LCD_DisplayString(50, 250, "F_K:");
   LCD_DisplayDecimals(50, 275, hSystemID.kneeProfilingFreq, 2, 1);

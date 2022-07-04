@@ -137,8 +137,10 @@ void AK10_9_ServoMode_GetFeedbackMsg(CAN_RxHeaderTypeDef* rxheader, AK10_9Handle
   hmotor->realPosition.f /= 10.0f;
   hmotor->realPositionOffseted.f = hmotor->realPosition.f - hmotor->posOffset;
   hmotor->realPositionOffseted.f *= hmotor->posDirectionCorrection;
+  hmotor->realPositionOffsetedRad.f = hmotor->realPositionOffseted.f * deg2rad;
   hmotor->realVelocityPresent.f = (float)((int16_t)(hmotor->rxBuf[2] << 8 | hmotor->rxBuf[3]));
   hmotor->realVelocityPresent.f = (hmotor->realVelocityPresent.f * 3600.0f / 60.0f)  / (21.0f * 9.0f);
+  hmotor->realVelocityPresentRad.f = hmotor->realVelocityPresent.f * deg2rad;
   hmotor->realAccelerationRaw.f = (hmotor->realVelocityPresent.f - hmotor->realVelocityPrevious[0].f) / 0.004f;
   hmotor->realVelocityPrevious[0].f = hmotor->realVelocityPrevious[1].f;
   hmotor->realVelocityPrevious[1].f = hmotor->realVelocityPresent.f;
@@ -172,6 +174,8 @@ void AK10_9_ServoMode_GetFeedbackMsg(CAN_RxHeaderTypeDef* rxheader, AK10_9Handle
   hmotor->realAccelerationRawPreviousButter[0] = hmotor->realAccelerationRaw.f;
   hmotor->realAccelerationFilteredPreviousButter[1] = hmotor->realAccelerationFilteredPreviousButter[0];
   hmotor->realAccelerationFilteredPreviousButter[0] = hmotor->realAccelerationFiltered.f;
+  
+  hmotor->realAccelerationFilteredRad.f = hmotor->realAccelerationFiltered.f * deg2rad;
   //////////////////////////////////////////////////////
 }
 

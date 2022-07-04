@@ -42,13 +42,16 @@ typedef struct
   union FloatUInt8      realCurrent;
   union FloatUInt8      realPosition;
   union FloatUInt8      realPositionOffseted;
+  union FloatUInt8      realPositionOffsetedRad;
   union FloatUInt8      realVelocityPresent;
+  union FloatUInt8      realVelocityPresentRad;
   union FloatUInt8      realVelocityPrevious[2];
   union FloatUInt8      realTorque;
   union FloatUInt8      setAcceleration;
   union FloatUInt8      setAcceleration_ByRealPosition;
   union FloatUInt8      realAccelerationRaw;
   union FloatUInt8      realAccelerationFiltered;
+  union FloatUInt8      realAccelerationFilteredRad;
   uint8_t               ifCustomizedPositionSpeedControlFinished;
   //For acceleration estimation//
   //Moving average value method//
