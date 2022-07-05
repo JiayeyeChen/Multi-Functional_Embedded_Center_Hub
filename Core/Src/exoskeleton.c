@@ -142,7 +142,13 @@ void EXOSKELETON_SystemIDManager(void)
         USB_DataLogStart();
       break;
     case EXOSKELETON_SYSTEMID_TASK_KNEE_JOINT_MOVEMENT_POSITIONING:
-      AK10_9_ServoMode_PositionSpeenControlCustomizedWithOffset(&hAKMotorRightHip, 180.0f, 36.0f, 0.002f);
+      
+      /* for hip position control*/
+        AK10_9_ServoMode_PositionSpeenControlCustomizedWithOffset(&hAKMotorRightHip, 180.0f, 36.0f, 0.002f);
+      /* for hip current control*/
+//      AK10_9_ServoMode_CurrentControl(&hAKMotorRightHip, 0.0f);
+      ////////////////////////////
+      
       AK10_9_ServoMode_PositionSpeenControlCustomizedWithOffset(&hAKMotorRightKnee, 90.0f, 36.0f, 0.002f);
 //////////    /* for debug */
 //////////    hAKMotorRightHip.ifCustomizedPositionSpeedControlFinished = 1;
@@ -157,7 +163,11 @@ void EXOSKELETON_SystemIDManager(void)
     case EXOSKELETON_SYSTEMID_TASK_KNEE_JOINT_MOVEMENT_ONGOING:
       if (HAL_GetTick() - enterProfilingTimeStamp <= 3000)
       {
+        /* for hip position control*/
         AK10_9_ServoMode_PositionControlWithOffset(&hAKMotorRightHip, 180.0f);
+        /* for hip current control*/
+//        AK10_9_ServoMode_CurrentControl(&hAKMotorRightHip, 0.0f);
+        ////////////////////////////
         AK10_9_ServoMode_PositionControlWithOffset(&hAKMotorRightKnee, 90.0f);
       }
       else
@@ -166,7 +176,11 @@ void EXOSKELETON_SystemIDManager(void)
         {
           EXOSKELETON_SystemID_UpdateDataSlot();
           USB_DataLogSingleCargoTransmit(dataSlots_Exoskeleton_SystemID);
+          /* for hip position control*/
           AK10_9_ServoMode_PositionControlWithOffset(&hAKMotorRightHip, 180.0f);
+          /* for hip current control */
+//          AK10_9_ServoMode_CurrentControl(&hAKMotorRightHip, 0.0f);
+          /////////////////////////////
           EXOSKELETON_SystemID_KneeJoint_MotorProfilingSinWave(&hAKMotorRightKnee, hSystemID.kneeProfilingAmp, \
                                                                hSystemID.kneeProfilingFreq, enterProfilingTimeStamp + 3000);
         }
@@ -179,7 +193,11 @@ void EXOSKELETON_SystemIDManager(void)
       }
       break;
     case EXOSKELETON_SYSTEMID_TASK_HIP_JOINT_MOVEMENT_WAIT_FOR_START:
+      /* for hip position control*/
       AK10_9_ServoMode_PositionControlWithOffset(&hAKMotorRightHip, 180.0f);
+      /* for hip current control*/
+//      AK10_9_ServoMode_CurrentControl(&hAKMotorRightHip, 0.0f);
+      ////////////////////////////
       AK10_9_ServoMode_PositionControlWithOffset(&hAKMotorRightKnee, temJointPosition);
       if (hUSB.datalogTask == DATALOG_TASK_END)
         USB_DataLogEnd();
@@ -189,22 +207,40 @@ void EXOSKELETON_SystemIDManager(void)
         USB_DataLogStart();
       break;
     case EXOSKELETON_SYSTEMID_TASK_HIP_JOINT_MOVEMENT_POSITIONING:
+      /* for hip position control*/
       AK10_9_ServoMode_PositionSpeenControlCustomizedWithOffset(&hAKMotorRightHip, 180.0f, 36.0f, 0.002f);
+      /* for hip current control*/
+//      AK10_9_ServoMode_CurrentControl(&hAKMotorRightHip, 0.0f);
+      ////////////////////////////
       AK10_9_ServoMode_PositionSpeenControlCustomizedWithOffset(&hAKMotorRightKnee, 90.0f, 36.0f, 0.002f);
+    
+    
 //////////      /* for debug */
 //////////      hAKMotorRightHip.ifCustomizedPositionSpeedControlFinished = 1;
 //////////      hAKMotorRightKnee.ifCustomizedPositionSpeedControlFinished = 1;
 //////////      ///////////////
+      
+      /* for hip position control*/
       if (hAKMotorRightHip.ifCustomizedPositionSpeedControlFinished && hAKMotorRightKnee.ifCustomizedPositionSpeedControlFinished)
       {
         hSystemID.curTask = EXOSKELETON_SYSTEMID_TASK_HIP_JOINT_MOVEMENT_ONGOING;
         enterProfilingTimeStamp = HAL_GetTick();
       }
+      /* for hip current control*/
+////      if (hAKMotorRightKnee.ifCustomizedPositionSpeedControlFinished)
+////      {
+////        hSystemID.curTask = EXOSKELETON_SYSTEMID_TASK_HIP_JOINT_MOVEMENT_ONGOING;
+////        enterProfilingTimeStamp = HAL_GetTick();
+////      }
       break;
     case EXOSKELETON_SYSTEMID_TASK_HIP_JOINT_MOVEMENT_ONGOING:
       if (HAL_GetTick() - enterProfilingTimeStamp <= 3000)
       {
+        /* for hip position control*/
         AK10_9_ServoMode_PositionControlWithOffset(&hAKMotorRightHip, 180.0f);
+        /* for hip current control*/
+//        AK10_9_ServoMode_CurrentControl(&hAKMotorRightHip, 0.0f);
+        ////////////////////////////
         AK10_9_ServoMode_PositionControlWithOffset(&hAKMotorRightKnee, 90.0f);
       }
       else
@@ -214,8 +250,12 @@ void EXOSKELETON_SystemIDManager(void)
           EXOSKELETON_SystemID_UpdateDataSlot();
           USB_DataLogSingleCargoTransmit(dataSlots_Exoskeleton_SystemID);
           AK10_9_ServoMode_PositionControlWithOffset(&hAKMotorRightKnee, 90.0f);
-          EXOSKELETON_SystemID_HipJoint_MotorProfilingSinWave(&hAKMotorRightHip, hSystemID.hipProfilingAmp, \
+          /* for hip position control*/
+          EXOSKELETON_SystemID_HipJoint_MotorProfilingSinWave_PositionControl(&hAKMotorRightHip, hSystemID.hipProfilingAmp, \
                                                                hSystemID.hipProfilingFreq, enterProfilingTimeStamp + 3000);
+          /* for hip current control*/
+//          EXOSKELETON_SystemID_HipJoint_MotorProfilingSinWave_CurrentControl(&hAKMotorRightHip, hSystemID.hipProfilingAmp, \
+//                                                       hSystemID.hipProfilingFreq, enterProfilingTimeStamp + 3000);
         }
         else
         {
@@ -225,7 +265,11 @@ void EXOSKELETON_SystemIDManager(void)
       }
       break;
     case EXOSKELETON_SYSTEMID_TASK_RELEASING_JOINTS:
+      /* for hip position control*/
       AK10_9_ServoMode_PositionSpeenControlCustomizedWithOffset(&hAKMotorRightHip, 180.0f, 36.0f, 0.002f);
+      /* for hip current control*/
+//      AK10_9_ServoMode_CurrentControl(&hAKMotorRightHip, 0.0f);
+      ////////////////////////////
       AK10_9_ServoMode_PositionSpeenControlCustomizedWithOffset(&hAKMotorRightKnee, 5.0f, 36.0f, 0.002f);
 //////////      /* for debug */
 //////////      hAKMotorRightHip.ifCustomizedPositionSpeedControlFinished = 1;
@@ -286,12 +330,19 @@ void EXOSKELETON_SystemID_KneeJoint_MotorProfilingSinWave\
        float motor_profiling_trajectory = 90.0f - amplitude / 2.0f + (amplitude / 2.0f) * (float)cos(fre * 2.0f * pi * t);
        AK10_9_ServoMode_PositionControlWithOffset(hmotor, motor_profiling_trajectory);
      }
-void EXOSKELETON_SystemID_HipJoint_MotorProfilingSinWave\
+void EXOSKELETON_SystemID_HipJoint_MotorProfilingSinWave_PositionControl\
      (AK10_9HandleCubaMarsFW* hmotor, float amplitude, float fre, uint32_t time_stamp_shift)
      {
        float t = (float)(HAL_GetTick() - time_stamp_shift) / 1000.0f;
        float motor_profiling_trajectory = 180.0f + (amplitude / 2.0f) * (float)sin(fre * 2.0f * pi * t);
        AK10_9_ServoMode_PositionControlWithOffset(hmotor, motor_profiling_trajectory);
+     }
+void EXOSKELETON_SystemID_HipJoint_MotorProfilingSinWave_CurrentControl \
+     (AK10_9HandleCubaMarsFW* hmotor, float amplitude, float fre, uint32_t time_stamp_shift)
+     {
+       float t = (float)(HAL_GetTick() - time_stamp_shift) / 1000.0f;
+       float motor_profiling_trajectory = (amplitude / 2.0f) * (float)sin(fre * 2.0f * pi * t);
+       AK10_9_ServoMode_CurrentControl(&hAKMotorRightHip, motor_profiling_trajectory);
      }
 
 void EXOSKELETON_SystemID_Set_Datalog_Label(void)
@@ -303,7 +354,7 @@ void EXOSKELETON_SystemID_Set_Datalog_Label(void)
 void EXOSKELETON_SystemID_UpdateDataSlot(void)
 {
   uint8_t ptr = 0;
-  dataSlots_Exoskeleton_SystemID[ptr++].f = 0.0f;
+  dataSlots_Exoskeleton_SystemID[ptr++].f = pi/12.0f;
   dataSlots_Exoskeleton_SystemID[ptr++].f = hAKMotorRightHip.realPositionOffsetedRad.f;
   dataSlots_Exoskeleton_SystemID[ptr++].f = hAKMotorRightHip.realVelocityPresentRad.f;
   dataSlots_Exoskeleton_SystemID[ptr++].f = hAKMotorRightHip.realAccelerationFilteredRad.f;
