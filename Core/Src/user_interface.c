@@ -19,10 +19,11 @@ ButtonHandle hButtonPageExoskeletonInterface, hButtonSystemID, hButtonSystemIDJo
 LinearPotentialmeterHandle hPotKneeProfilingFreq, hPotKneeProfilingAmp, hPotHipProfilingFreq, hPotHipProfilingAmp;
 ////////////////////////////////
 /* AK10-9 Manual Control */
-PageHandle UIPage_AK10_9_ManualControl, UIPage_AK10_9_ManualControlFirmwareSelection, UIPage_AK10_9_ManualControlDMFW;
+PageHandle UIPage_AK10_9_ManualControlCubeMarsFWServoMode, UIPage_AK10_9_ManualControlCubeMarsFWMITMode, UIPage_AK10_9_ManualControlFirmwareSelection, UIPage_AK10_9_ManualControlDMFW;
 ButtonHandle hButtonPageAK10_9ManualControl, hButtonManualControlMode, hButtonMotorSelectRightHip, \
                                              hButtonMotorSelectRightKnee, \
-                                             hButtonAK10_9_ManualControlCubeMarsFW, \
+                                             hButtonAK10_9_ManualControlCubeMarsFWServoMode, \
+                                             hButtonAK10_9_ManualControlCubeMarsFWServoModeMITMode,\
                                              hButtonAK10_9_ManualControlDMFW;
 LinearPotentialmeterHandle  hTMotorManualControlPot_pos, hTMotorManualControlPot_vel, \
                             hTMotorManualControlPot_cur, hTMotorManualControlPot_kp, \
@@ -224,9 +225,13 @@ void UI_Init(void)
   UIPage_LowerLimb_SystemID.Page = UI_Page_LowerLimb_Exoskeleton_SystemID;
   UIPage_LowerLimb_SystemID.PageInit = UI_Page_LowerLimb_Exoskeleton_SystemID_Init;
   
-  UIPage_AK10_9_ManualControl.ifPageInitialized = 0;
-  UIPage_AK10_9_ManualControl.Page = UI_Page_AK10_9_ManualControl;
-  UIPage_AK10_9_ManualControl.PageInit = UI_Page_AK10_9_ManualControl_Init;
+  UIPage_AK10_9_ManualControlCubeMarsFWServoMode.ifPageInitialized = 0;
+  UIPage_AK10_9_ManualControlCubeMarsFWServoMode.Page = UI_Page_AK10_9_ManualControlCubeMarsFWServoMode;
+  UIPage_AK10_9_ManualControlCubeMarsFWServoMode.PageInit = UI_Page_AK10_9_ManualControlCubeMarsFWServoMode_Init;
+  
+  UIPage_AK10_9_ManualControlCubeMarsFWMITMode.ifPageInitialized = 0;
+  UIPage_AK10_9_ManualControlCubeMarsFWMITMode.Page = UI_Page_AK10_9_ManualControlCubeMarsFWMITMode;
+  UIPage_AK10_9_ManualControlCubeMarsFWMITMode.PageInit = UI_Page_AK10_9_ManualControlCubeMarsFWMITMode_Init;
   
   UIPage_AK10_9_ManualControlFirmwareSelection.ifPageInitialized = 0;
   UIPage_AK10_9_ManualControlFirmwareSelection.Page = UI_Page_AK10_9_ManualControlFirmwareSelection;
@@ -552,7 +557,7 @@ void UI_Page_Home1_Init(void)
   hButtonPageBriterEncoder = Button_Create(150, 400, 200, 40, "Briter Encoder", LIGHT_MAGENTA, LCD_RED);
 }
 
-void UI_Page_AK10_9_ManualControl(void)
+void UI_Page_AK10_9_ManualControlCubeMarsFWServoMode(void)
 {
   ButtonScan(&hButtonGoBack);
   ButtonScan(&hButtonMotorStart);
@@ -668,7 +673,7 @@ void UI_Page_AK10_9_ManualControl(void)
     ifManualControlStarted = 0;
   }
 }
-void UI_Page_AK10_9_ManualControl_Init(void)
+void UI_Page_AK10_9_ManualControlCubeMarsFWServoMode_Init(void)
 {
   hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
   hButtonMotorStart = Button_Create(0, 420, 100, 40, "START", LCD_WHITE, LCD_RED);
@@ -694,6 +699,126 @@ void UI_Page_AK10_9_ManualControl_Init(void)
   
   hMotorPtrManualControl = NULL;
 }
+
+void UI_Page_AK10_9_ManualControlCubeMarsFWMITMode(void)
+{
+  ButtonScan(&hButtonGoBack);
+  ButtonScan(&hButtonMotorStart);
+  ButtonScan(&hButtonMotorStop);
+  ButtonScan(&hButtonMotorZeroing);
+  ButtonScan(&hButtonGoBack);
+  ButtonScan(&hButtonMotorSelectRightHip);
+  ButtonScan(&hButtonMotorSelectRightKnee);
+  ButtonRefresh(&hButtonGoBack);
+  ButtonRefresh(&hButtonMotorStart);
+  ButtonRefresh(&hButtonMotorStop);
+  ButtonRefresh(&hButtonMotorZeroing);
+  ButtonRefresh(&hButtonMotorSelectRightHip);
+  ButtonRefresh(&hButtonMotorSelectRightKnee);
+  PotentialmeterUpdate(&hTMotorManualControlPot_pos);
+  PotentialmeterUpdate(&hTMotorManualControlPot_vel);
+  PotentialmeterUpdate(&hTMotorManualControlPot_cur);
+  PotentialmeterUpdate(&hTMotorManualControlPot_kp);
+  PotentialmeterUpdate(&hTMotorManualControlPot_kd);
+  
+  if (ifButtonPressed(&hButtonMotorSelectRightHip))
+  {
+    ifManualControlStarted = 0;
+    hMotorPtrManualControl = &hAKMotorRightHip;
+    LCD_ClearRect(0, 370, 400, 30);
+    PotentialmeterSliderGoTo(&hTMotorManualControlPot_pos, 0.0f);
+    PotentialmeterSliderGoTo(&hTMotorManualControlPot_vel, 0.0f);
+    PotentialmeterSliderGoTo(&hTMotorManualControlPot_cur, 0.0f);
+    hButtonMotorSelectRightHip.colorUnpressed = LIGHT_YELLOW;
+    hButtonMotorSelectRightKnee.colorUnpressed = DARK_YELLOW;
+    hButtonMotorSelectRightHip.ifNeedRefresh = 1;
+    hButtonMotorSelectRightKnee.ifNeedRefresh = 1;
+  }
+  else if (ifButtonPressed(&hButtonMotorSelectRightKnee))
+  {
+    ifManualControlStarted = 0;
+    hMotorPtrManualControl = &hAKMotorRightKnee;
+    LCD_ClearRect(0, 370, 400, 30);
+    PotentialmeterSliderGoTo(&hTMotorManualControlPot_pos, 0.0f);
+    PotentialmeterSliderGoTo(&hTMotorManualControlPot_vel, 0.0f);
+    PotentialmeterSliderGoTo(&hTMotorManualControlPot_cur, 0.0f);
+    hButtonMotorSelectRightHip.colorUnpressed = DARK_YELLOW;
+    hButtonMotorSelectRightKnee.colorUnpressed = LIGHT_YELLOW;
+    hButtonMotorSelectRightHip.ifNeedRefresh = 1;
+    hButtonMotorSelectRightKnee.ifNeedRefresh = 1;
+  }
+  
+  if(ifButtonPressed(&hButtonMotorZeroing))
+    AK10_9_MITMode_Zeroing(hMotorPtrManualControl);
+  if(ifButtonPressed(&hButtonMotorStart))
+  {
+    AK10_9_MITMode_EnableMotor(hMotorPtrManualControl);
+    ifManualControlStarted = 1;
+    
+  }
+  if(ifButtonPressed(&hButtonMotorStop))
+  {
+    AK10_9_MITMode_DisableMotor(hMotorPtrManualControl);
+    ifManualControlStarted = 0;
+    PotentialmeterSliderGoTo(&hTMotorManualControlPot_pos, 0.0f);
+    PotentialmeterSliderGoTo(&hTMotorManualControlPot_vel, 0.0f);
+    PotentialmeterSliderGoTo(&hTMotorManualControlPot_cur, 0.0f);
+  }
+  
+  LCD_SetLayer(1); 
+  LCD_SetColor(LCD_BLACK);
+
+  if (hMotorPtrManualControl->status == AK10_9_Online)
+    LCD_DisplayString(200, 0, "Motor  Online");
+  else
+    LCD_DisplayString(200, 0, "Motor Offline");
+  
+  LCD_DisplayDecimals(400, 735, (double)hMotorPtrManualControl->realTorque.f, 3, 2);
+  LCD_DisplayDecimals(150, 710, (double)hMotorPtrManualControl->realPosition.f, 6, 3);
+  LCD_DisplayDecimals(150, 735, (double)hMotorPtrManualControl->realVelocityPresent.f, 6, 3);
+  LCD_DisplayDecimals(150, 760, (double)hMotorPtrManualControl->realCurrent.f, 6, 3);
+  LCD_DisplayDecimals(250, 710, (double)hMotorPtrManualControl->setPosition.f, 6, 3);
+  LCD_DisplayDecimals(250, 735, (double)hMotorPtrManualControl->setVelocity.f, 6, 3);
+  LCD_DisplayDecimals(250, 760, (double)hMotorPtrManualControl->setCurrent.f, 6, 3);
+  LCD_DisplayDecimals(250, 80, (double)manualControlValue_pos, 3, 1);
+  LCD_DisplayDecimals(340, 80, (double)manualControlValue_vel, 3, 1);
+  LCD_DisplayDecimals(420, 80, (double)manualControlValue_cur, 3, 1);
+  LCD_DisplayDecimals(340, 510, (double)manualControlValue_kp, 3, 0);
+  LCD_DisplayDecimals(420, 510, (double)manualControlValue_kd, 3, 2);
+  
+  if (ifButtonPressed(&hButtonGoBack))
+    UI_Page_Change_To(&UIPage_Home1);
+}
+
+void UI_Page_AK10_9_ManualControlCubeMarsFWMITMode_Init(void)
+{
+  hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
+  hButtonMotorStart = Button_Create(0, 420, 100, 40, "START", LCD_WHITE, LCD_RED);
+  hButtonMotorStop = Button_Create(0, 80, 150, 250, "STOP", LCD_RED, LCD_YELLOW);
+  hButtonMotorZeroing = Button_Create(0, 620, 200, 40, "Motor Set Zero", LCD_BLUE, LCD_RED);
+  hButtonMotorSelectRightHip = Button_Create(0, 520, 160, 40, "Right Hip", DARK_YELLOW, LCD_RED);
+  hButtonMotorSelectRightKnee = Button_Create(0, 570, 160, 40, "Right Knee", DARK_YELLOW, LCD_RED);
+  hTMotorManualControlPot_pos = Potentialmeter_Create(250, 80, 30, 400, 60, 70, LCD_MAGENTA, LCD_RED, LIGHT_GREY, -12.5f, 12.5f, 0.0f, &manualControlValue_pos);
+  hTMotorManualControlPot_vel = Potentialmeter_Create(340, 80, 30, 400, 60, 70, LCD_MAGENTA, LCD_RED, LIGHT_GREY, -45.0f, 45.0f, 0.0f, &manualControlValue_vel);
+  hTMotorManualControlPot_cur = Potentialmeter_Create(420, 80, 30, 400, 60, 70, LCD_MAGENTA, LCD_RED, LIGHT_GREY, -18.0f, 18.0f, 0.0f, &manualControlValue_cur);
+  hTMotorManualControlPot_kp = Potentialmeter_Create(340, 510, 30, 200, 60, 70, LCD_MAGENTA, LCD_RED, LIGHT_GREY, 0.0f, 50.0f, 0.0f, &manualControlValue_kp);
+  hTMotorManualControlPot_kd = Potentialmeter_Create(420, 510, 30, 200, 60, 70, LCD_MAGENTA, LCD_RED, LIGHT_GREY, 0.0f, 5.0f, 0.0f, &manualControlValue_kd);
+  
+  
+  LCD_DisplayString(250, 50, "pos");
+  LCD_DisplayString(340, 50, "vel");
+  LCD_DisplayString(420, 50, "cur");
+  LCD_DisplayString(340, 480, "kp");
+  LCD_DisplayString(420, 480, "kd");
+  LCD_DisplayString(170, 685, "mes");
+  LCD_DisplayString(270, 685, "des");
+  LCD_DisplayString(10, 710, "Position: ");
+  LCD_DisplayString(10, 735, "Velocity: ");
+  LCD_DisplayString(10, 760, "Current:  ");
+  LCD_DisplayString(330, 735, "T(Nm):");
+}
+
+
 
 void UI_Page_AK10_9_ManualControlDMFW_Init(void)
 {
@@ -808,15 +933,21 @@ void UI_Page_AK10_9_ManualControlFirmwareSelection(void)
 {
   ButtonScan(&hButtonGoBack);
   ButtonRefresh(&hButtonGoBack);
-  ButtonScan(&hButtonAK10_9_ManualControlCubeMarsFW);
-  ButtonRefresh(&hButtonAK10_9_ManualControlCubeMarsFW);
+  ButtonScan(&hButtonAK10_9_ManualControlCubeMarsFWServoMode);
+  ButtonRefresh(&hButtonAK10_9_ManualControlCubeMarsFWServoMode);
+  ButtonScan(&hButtonAK10_9_ManualControlCubeMarsFWServoModeMITMode);
+  ButtonRefresh(&hButtonAK10_9_ManualControlCubeMarsFWServoModeMITMode);
   ButtonScan(&hButtonAK10_9_ManualControlDMFW);
   ButtonRefresh(&hButtonAK10_9_ManualControlDMFW);
   
-  if (ifButtonPressed(&hButtonAK10_9_ManualControlCubeMarsFW))
-    UI_Page_Change_To(&UIPage_AK10_9_ManualControl);
+  
+  
+  if (ifButtonPressed(&hButtonAK10_9_ManualControlCubeMarsFWServoMode))
+    UI_Page_Change_To(&UIPage_AK10_9_ManualControlCubeMarsFWServoMode);
   else if (ifButtonPressed(&hButtonAK10_9_ManualControlDMFW))
     UI_Page_Change_To(&UIPage_AK10_9_ManualControlDMFW);
+  else if (ifButtonPressed(&hButtonAK10_9_ManualControlCubeMarsFWServoModeMITMode))
+    UI_Page_Change_To(&UIPage_AK10_9_ManualControlCubeMarsFWMITMode);
   
   if (ifButtonPressed(&hButtonGoBack))
     UI_Page_Change_To(&UIPage_Home1);
@@ -824,7 +955,8 @@ void UI_Page_AK10_9_ManualControlFirmwareSelection(void)
 void UI_Page_AK10_9_ManualControlFirmwareSelection_Init(void)
 {
   hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
-  hButtonAK10_9_ManualControlCubeMarsFW = Button_Create(100, 300, 300, 60, "CubeMars Firmware", LCD_WHITE, LCD_RED);
+  hButtonAK10_9_ManualControlCubeMarsFWServoMode = Button_Create(10, 300, 400, 60, "CubeMars Firmware Servo Mode", LCD_WHITE, LCD_RED);
+  hButtonAK10_9_ManualControlCubeMarsFWServoModeMITMode = Button_Create(10, 400, 400, 60, "CubeMars Firmware MIT Mode", LCD_WHITE, LCD_RED);
   hButtonAK10_9_ManualControlDMFW = Button_Create(100, 500, 200, 60, "DM Firmware", LCD_WHITE, LCD_RED);
   
 }

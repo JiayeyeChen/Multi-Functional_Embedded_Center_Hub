@@ -52,6 +52,7 @@ typedef struct
   union FloatUInt8      realAccelerationRaw;
   union FloatUInt8      realAccelerationFiltered;
   union FloatUInt8      realAccelerationFilteredRad;
+  union FloatUInt8      kp, kd;
   uint8_t               ifCustomizedPositionSpeedControlFinished;
   //For acceleration estimation//
   //Moving average value method//
@@ -123,6 +124,11 @@ void AK10_9_ServoMode_PositionSpeenControlCustomizedWithOffset(AK10_9HandleCubaM
 void AK10_9_ServoMode_PositionSpeedControl(AK10_9HandleCubaMarsFW* hmotor, float position, float speed, int16_t acceleration);
 void AK10_9_ServoMode_GetFeedbackMsg(CAN_RxHeaderTypeDef* rxheader, AK10_9HandleCubaMarsFW* hmotor, uint8_t rxbuf[]);
 void AK10_9_ServoMode_Zeroing(AK10_9HandleCubaMarsFW* hmotor);
+void AK10_9_MITMode_EnableMotor(AK10_9HandleCubaMarsFW* hmotor);
+void AK10_9_MITMode_DisableMotor(AK10_9HandleCubaMarsFW* hmotor);
+void AK10_9_MITMode_Zeroing(AK10_9HandleCubaMarsFW* hmotor);
+void AK10_9_MITModeControl(AK10_9HandleCubaMarsFW* hmotor, float pos, float vel, float kp, float kd, float iq);
+void AK10_9_MITMode_GetFeedbackMsg(CAN_RxHeaderTypeDef* rxheader, AK10_9HandleCubaMarsFW* hmotor, uint8_t rxbuf[]);
 void AK10_9_MotorStatusMonitor(AK10_9HandleCubaMarsFW* hmotor);
 
 void AK10_9_DMFW_EnableMotor(AK10_9HandleDMFW* hmotor);

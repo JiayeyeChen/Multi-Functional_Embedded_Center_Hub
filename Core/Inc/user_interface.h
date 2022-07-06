@@ -102,8 +102,10 @@ void         UI_Page_LowerLimb_Exoskeleton_SystemID(void);
 void         UI_Page_LowerLimb_Exoskeleton_SystemID_Init(void);
 void         UI_Page_Home1(void);
 void         UI_Page_Home1_Init(void);
-void         UI_Page_AK10_9_ManualControl(void);
-void         UI_Page_AK10_9_ManualControl_Init(void);
+void         UI_Page_AK10_9_ManualControlCubeMarsFWServoMode(void);
+void         UI_Page_AK10_9_ManualControlCubeMarsFWServoMode_Init(void);
+void         UI_Page_AK10_9_ManualControlCubeMarsFWMITMode(void);
+void         UI_Page_AK10_9_ManualControlCubeMarsFWMITMode_Init(void);
 void         UI_Page_AK10_9_ManualControlFirmwareSelection(void);
 void         UI_Page_AK10_9_ManualControlFirmwareSelection_Init(void);
 void         UI_Page_AK10_9_ManualControlDMFW_Init(void);
@@ -122,6 +124,6 @@ void         UI_Page_BriterEncoder_Init(void);
 JoystickHandle Joystick_Create(uint16_t x, uint16_t y, uint16_t r, char label[]);
 
 extern UIHandle hUI;
-extern PageHandle UIPage_AK10_9_ManualControl, UIPage_AK10_9_ManualControlDMFW;
+extern PageHandle UIPage_AK10_9_ManualControlCubeMarsFWServoMode, UIPage_AK10_9_ManualControlCubeMarsFWMITMode, UIPage_AK10_9_ManualControlDMFW;
 //extern ButtonHandle hButtonDataLogStart, hButtonDataLogEnd, hButtonMotorProfilingStart, hButtonMotorProfilingEnd, hButtonMotorZeroing, hButtonMotorSteppingUp, hButtonMotorSteppingDown;
 #endif
