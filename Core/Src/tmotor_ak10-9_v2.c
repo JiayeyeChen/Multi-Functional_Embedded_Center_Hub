@@ -242,12 +242,6 @@ void AK10_9_MITMode_Zeroing(AK10_9HandleCubaMarsFW* hmotor)
 
 void AK10_9_MITModeControl(AK10_9HandleCubaMarsFW* hmotor, float pos, float vel, float kp, float kd, float iq)
 {
-  float P_MIN = -95.5f;
-  float P_MAX = 95.5f;
-  float V_MIN = -30.0f;
-  float V_MAX = 30.0f;
-  float I_MIN = -18.0f;
-  float I_MAX = 18.0f;
   float KP_MIN = 0.0f;
   float KP_MAX = 500.0f;
   float KD_MIN = 0.0f;
@@ -257,18 +251,16 @@ void AK10_9_MITModeControl(AK10_9HandleCubaMarsFW* hmotor, float pos, float vel,
   hmotor->setCurrent.f = iq;
   hmotor->kp.f = kp;
   hmotor->kd.f = kd;
-  pos = MIN(MAX(pos, P_MIN), P_MAX);
-  vel = MIN(MAX(vel, V_MIN), V_MAX);
   kp = MIN(MAX(kp, KP_MIN), KP_MAX);
   kd = MIN(MAX(kd, KD_MIN), KD_MAX);
-  iq = MIN(MAX(iq, I_MIN), I_MAX);
   
   
-  uint16_t pInt = FloatToUint(pos, P_MIN, P_MAX, 16);
-  uint16_t vInt = FloatToUint(vel, V_MIN, V_MAX, 12);
+  uint16_t pInt = (uint16_t)((hmotor->setPosition.f * 32767.0f / 720.0f) + 32767.0f);
+  uint16_t vInt = (uint16_t)(hmotor->setVelocity.f / 1.40625f + 2048.0f);
+  uint16_t iInt = (uint16_t)(hmotor->setCurrent.f * 100.0f + 2048.0f);
   uint16_t kpInt = FloatToUint(kp, KP_MIN, KP_MAX, 12);
   uint16_t kdInt = FloatToUint(kd, KD_MIN, KD_MAX, 12);
-  uint16_t iInt = FloatToUint(iq, I_MIN, I_MAX, 12);
+  
   
   hmotor->txBuf[0] = pInt >> 8;
   hmotor->txBuf[1] = pInt & 0xFF;
@@ -283,25 +275,15 @@ void AK10_9_MITModeControl(AK10_9HandleCubaMarsFW* hmotor, float pos, float vel,
 
 void AK10_9_MITMode_GetFeedbackMsg(CAN_RxHeaderTypeDef* rxheader, AK10_9HandleCubaMarsFW* hmotor, uint8_t rxbuf[])
 {
-  float P_MIN = -12.5f;
-  float P_MAX = 12.5f;
-  float V_MIN = -50.0f;
-  float V_MAX = 50.0f;
-  float I_MIN = -65.0f;
-  float I_MAX = 65.0f;
-  
   uint16_t pUint, vUint, iUint;
   pUint=(rxbuf[1] << 8) | rxbuf[2];
   vUint=(rxbuf[3] << 4) | (rxbuf[4] >> 4);
   iUint=((rxbuf[4] & 0xF) << 8) | rxbuf[5];
   
-  hmotor->realPosition.f = (float)((int16_t)pUint);
-  hmotor->realVelocityPresent.f = (float)((int16_t)vUint);
-  hmotor->realCurrent.f  = (float)((int16_t)iUint);
+  hmotor->realPosition.f = (((float)pUint) - 32767.0f) * 0.02197332682f;
+  hmotor->realVelocityPresent.f = (((float)vUint) - 2048.0f) * 1.40625f;
+  hmotor->realCurrent.f  = (((float)iUint) - 2048.0f) * 0.01f;
   
-//  hmotor->realPosition.f = UintToFloat(pUint, P_MIN,P_MAX, 16);
-//  hmotor->realVelocityPresent.f = UintToFloat(vUint, V_MIN, V_MAX, 12);
-//  hmotor->realCurrent.f  = UintToFloat(iUint, I_MIN, I_MAX, 12);
 }
 
 void AK10_9_MotorStatusMonitor(AK10_9HandleCubaMarsFW* hmotor)
