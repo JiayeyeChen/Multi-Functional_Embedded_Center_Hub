@@ -146,8 +146,8 @@ void AK10Calibration_Task(void *argument)
   
   for(;;)
   {
-    EXOSKELETON_SystemIDManager();
-//    AK10_9_DataLog_Manager(&hAKMotorRightHip, &hIMURightThigh);
+//    EXOSKELETON_SystemIDManager();
+    AK10_9_DataLog_Manager(&hAKMotorRightHip, &hIMURightThigh);
     if (ifMotorProfilingStarted)
       AK10_9_MotorProfiling_Function1_Half_Sin(&hAKMotorRightHip, tmotorProfilingSinWaveFrequency);
     
@@ -188,7 +188,7 @@ void AK10Calibration_Task(void *argument)
     AK10_9_MotorStatusMonitor(&hAKMotorRightKnee);
     AK10_9_MotorStatusMonitor(&hAKMotorRightHip);
     
-    osDelay(2);
+    osDelay(1);
   }
 }
 

@@ -281,9 +281,25 @@ void AK10_9_MITMode_GetFeedbackMsg(CAN_RxHeaderTypeDef* rxheader, AK10_9HandleCu
   iUint=((rxbuf[4] & 0xF) << 8) | rxbuf[5];
   
   hmotor->realPosition.f = (((float)pUint) - 32767.0f) * 0.02197332682f;
-  hmotor->realVelocityPresent.f = (((float)vUint) - 2048.0f) * 1.40625f;
+  hmotor->realVelocityPresent.f = (((float)vUint) - 2047.0f) * 1.40625f;
+  hmotor->realVelocityPresentRad.f = hmotor->realVelocityPresent.f * deg2rad;
+  hmotor->realAccelerationRaw.f = (hmotor->realVelocityPresent.f - hmotor->realVelocityPrevious[0].f) / 0.001f;
+  hmotor->realVelocityPrevious[0].f = hmotor->realVelocityPresent.f;
   hmotor->realCurrent.f  = (((float)iUint) - 2048.0f) * 0.01f;
   
+  //Butterworth filter method to estimate acceleration//
+  hmotor->realAccelerationFiltered.f = hmotor->b1Butter * hmotor->realAccelerationRaw.f + \
+                                       hmotor->b2Butter * hmotor->realAccelerationRawPreviousButter[0] + \
+                                       hmotor->b3Butter * hmotor->realAccelerationRawPreviousButter[1] - \
+                                       hmotor->a2Butter * hmotor->realAccelerationFilteredPreviousButter[0] - \
+                                       hmotor->a3Butter * hmotor->realAccelerationFilteredPreviousButter[1];
+  hmotor->realAccelerationRawPreviousButter[1] = hmotor->realAccelerationRawPreviousButter[0];
+  hmotor->realAccelerationRawPreviousButter[0] = hmotor->realAccelerationRaw.f;
+  hmotor->realAccelerationFilteredPreviousButter[1] = hmotor->realAccelerationFilteredPreviousButter[0];
+  hmotor->realAccelerationFilteredPreviousButter[0] = hmotor->realAccelerationFiltered.f;
+  
+  hmotor->realAccelerationFilteredRad.f = hmotor->realAccelerationFiltered.f * deg2rad;
+  //////////////////////////////////////////////////////
 }
 
 void AK10_9_MotorStatusMonitor(AK10_9HandleCubaMarsFW* hmotor)

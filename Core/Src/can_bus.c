@@ -5,8 +5,8 @@
 #include "encoder.h"
 
 //for testing//
-uint8_t rxfifo0detected = 0;
-uint8_t rxfifo1detected = 0;
+uint32_t rxfifo0detected = 0;
+uint32_t rxfifo1detected = 0;
 uint32_t wheelcount_left = 0, wheelcountsec_left = 0;
 uint32_t wheelcount_right = 0, wheelcountsec_right = 0;
 uint32_t armcount = 0, armcountsec = 0;

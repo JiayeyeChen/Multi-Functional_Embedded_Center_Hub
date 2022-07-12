@@ -798,7 +798,7 @@ void UI_Page_AK10_9_ManualControlCubeMarsFWMITMode_Init(void)
   hButtonMotorZeroing = Button_Create(0, 620, 200, 40, "Motor Set Zero", LCD_BLUE, LCD_RED);
   hButtonMotorSelectRightHip = Button_Create(0, 520, 160, 40, "Right Hip", DARK_YELLOW, LCD_RED);
   hButtonMotorSelectRightKnee = Button_Create(0, 570, 160, 40, "Right Knee", DARK_YELLOW, LCD_RED);
-  hTMotorManualControlPot_pos = Potentialmeter_Create(250, 80, 30, 400, 60, 70, LCD_MAGENTA, LCD_RED, LIGHT_GREY, -100.5f, 100.5f, 0.0f, &manualControlValue_pos);
+  hTMotorManualControlPot_pos = Potentialmeter_Create(250, 80, 30, 400, 60, 70, LCD_MAGENTA, LCD_RED, LIGHT_GREY, -800.5f, 800.5f, 0.0f, &manualControlValue_pos);
   hTMotorManualControlPot_vel = Potentialmeter_Create(340, 80, 30, 400, 60, 70, LCD_MAGENTA, LCD_RED, LIGHT_GREY, -800.0f, 800.0f, 0.0f, &manualControlValue_vel);
   hTMotorManualControlPot_cur = Potentialmeter_Create(420, 80, 30, 400, 60, 70, LCD_MAGENTA, LCD_RED, LIGHT_GREY, -18.0f, 18.0f, 0.0f, &manualControlValue_cur);
   hTMotorManualControlPot_kp = Potentialmeter_Create(340, 510, 30, 200, 60, 70, LCD_MAGENTA, LCD_RED, LIGHT_GREY, 0.0f, 50.0f, 0.0f, &manualControlValue_kp);
