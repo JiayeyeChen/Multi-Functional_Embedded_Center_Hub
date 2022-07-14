@@ -583,7 +583,7 @@ void UI_Page_AK10_9_ManualControlCubeMarsFWServoMode(void)
     PotentialmeterSliderGoTo(&hTMotorManualControlPot_cur, 0.0f);
     ifManualControlStarted = 0;
     controlModeCubeMarsFW++;
-    if (controlModeCubeMarsFW > 3)
+    if ((uint32_t)controlModeCubeMarsFW > 3)
       controlModeCubeMarsFW = 0;
   }
   if (ifButtonPressed(&hButtonMotorSelectRightHip))
@@ -875,7 +875,7 @@ void UI_Page_AK10_9_ManualControlDMFW(void)
     PotentialmeterSliderGoTo(&hTMotorManualControlPot_cur, 0.0f);
     ifManualControlStarted = 0;
     hAKMotorDMFW1.controlMode++;
-    if (hAKMotorDMFW1.controlMode > 2)
+    if ((uint32_t)hAKMotorDMFW1.controlMode > 2)
       hAKMotorDMFW1.controlMode = 0;
   }
   
