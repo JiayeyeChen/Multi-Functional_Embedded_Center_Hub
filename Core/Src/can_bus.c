@@ -43,14 +43,14 @@ void CAN_ConfigureFilters(void)
 {
   //Filter bank 0 & 1
   /*Servo mode*/
-//  hAKMotorRightKnee.rxFilter = ConfigCANFilter_EXT_ID_32BitIDListMode(&hcan2, 0, CAN_FILTER_FIFO1, CAN_ID_EXT, CAN_ID_TMOTOR_EXOSKELETON_RIGHT_KNEE_SERVO_MODE, 0);
-//  hAKMotorRightHip.rxFilter = ConfigCANFilter_EXT_ID_32BitIDListMode(&hcan2, 1, CAN_FILTER_FIFO1, CAN_ID_EXT, CAN_ID_TMOTOR_EXOSKELETON_RIGHT_HIP_SERVO_MODE, 0);
+//  hAKMotorRightKnee.rxFilter = ConfigCANFilter_EXT_ID_32BitIDListMode(&hcan2, 0, CAN_FILTER_FIFO1, CAN_ID_EXT, CAN_ID_TMOTOR_EXOSKELETON_RIGHT_KNEE_TX_SERVO_MODE, 0);
+//  hAKMotorRightHip_old.rxFilter = ConfigCANFilter_EXT_ID_32BitIDListMode(&hcan2, 1, CAN_FILTER_FIFO1, CAN_ID_EXT, CAN_ID_TMOTOR_EXOSKELETON_RIGHT_HIP_SERVO_MODE, 0);
   /*MIT mode*/
   hAKMotorRightHip.rxFilter.FilterMode = CAN_FILTERMODE_IDLIST;
 	hAKMotorRightHip.rxFilter.FilterScale = CAN_FILTERSCALE_16BIT;
 	hAKMotorRightHip.rxFilter.FilterFIFOAssignment = CAN_FILTER_FIFO1;
 	hAKMotorRightHip.rxFilter.FilterBank = 0;
-	hAKMotorRightHip.rxFilter.FilterIdHigh = hAKMotorRightHip.canID << 5;
+	hAKMotorRightHip.rxFilter.FilterIdHigh = CAN_ID_TMOTOR_EXOSKELETON_RIGHT_HIP_RX << 5;
 	hAKMotorRightHip.rxFilter.FilterActivation = ENABLE;
 	HAL_CAN_ConfigFilter(hAKMotorRightHip.hcan, &hAKMotorRightHip.rxFilter);
   hAKMotorRightKnee.rxFilter.FilterMode = CAN_FILTERMODE_IDLIST;
@@ -201,20 +201,17 @@ void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
   HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO1, &temRxHeader, temRxData);
   
   //Application specific codes
-  if (temRxHeader.StdId == CAN_ID_TMOTOR_RX)//)
-  {
-    if (temRxData[0] == CAN_ID_TMOTOR_EXOSKELETON_RIGHT_HIP_MIT_MODE)
-      AK10_9_MITMode_GetFeedbackMsg(&temRxHeader, &hAKMotorRightHip, temRxData);
-    else if (temRxData[0] == CAN_ID_TMOTOR_EXOSKELETON_RIGHT_KNEE_MIT_MODE)
-      AK10_9_MITMode_GetFeedbackMsg(&temRxHeader, &hAKMotorRightKnee, temRxData);
-  }
-    
+  if (temRxHeader.StdId == CAN_ID_TMOTOR_EXOSKELETON_RIGHT_HIP_RX)
+    AK10_9_DMFW_GetFeedbackMsg(&temRxHeader, &hAKMotorRightHip, temRxData);
+  else if (temRxHeader.StdId == CAN_ID_TMOTOR_EXOSKELETON_RIGHT_KNEE_RX)
+    AK10_9_MITMode_GetFeedbackMsg(&temRxHeader, &hAKMotorRightKnee, temRxData);
+  
   /*Exoskeleton tmotor servo mode, Briter encoders and Tmotor DMFW*/
 ////////////////  if (temRxHeader.ExtId == CAN_ID_TMOTOR_EXOSKELETON_RIGHT_HIP_SERVO_MODE)
 ////////////////  {
-////////////////    AK10_9_ServoMode_GetFeedbackMsg(&temRxHeader, &hAKMotorRightHip, temRxData);
+////////////////    AK10_9_ServoMode_GetFeedbackMsg(&temRxHeader, &hAKMotorRightHip_old, temRxData);
 ////////////////  }
-////////////////  else if (temRxHeader.ExtId == CAN_ID_TMOTOR_EXOSKELETON_RIGHT_KNEE_SERVO_MODE)
+////////////////  else if (temRxHeader.ExtId == CAN_ID_TMOTOR_EXOSKELETON_RIGHT_KNEE_TX_SERVO_MODE)
 ////////////////  {
 ////////////////    AK10_9_ServoMode_GetFeedbackMsg(&temRxHeader, &hAKMotorRightKnee, temRxData);
 ////////////////  }

@@ -37,10 +37,11 @@
 
 #define CAN_ID_TMOTOR_EXOSKELETON_LEFT_HIP_SERVOMODE            0x2901
 #define CAN_ID_TMOTOR_EXOSKELETON_RIGHT_HIP_SERVO_MODE          0x2901//0x2904
-#define CAN_ID_TMOTOR_EXOSKELETON_RIGHT_KNEE_SERVO_MODE         0x2902//0x2902
-#define CAN_ID_TMOTOR_RX                                        0x00
-#define CAN_ID_TMOTOR_EXOSKELETON_RIGHT_HIP_MIT_MODE            0x01
-#define CAN_ID_TMOTOR_EXOSKELETON_RIGHT_KNEE_MIT_MODE           0x02
+#define CAN_ID_TMOTOR_EXOSKELETON_RIGHT_KNEE_TX_SERVO_MODE         0x2902//0x2902
+#define CAN_ID_TMOTOR_EXOSKELETON_RIGHT_HIP_RX                  0x0D
+#define CAN_ID_TMOTOR_EXOSKELETON_RIGHT_HIP_TX                  0x04
+#define CAN_ID_TMOTOR_EXOSKELETON_RIGHT_KNEE_RX                 0x00
+#define CAN_ID_TMOTOR_EXOSKELETON_RIGHT_KNEE_TX                 0x02
 
 CAN_FilterTypeDef ConfigCANFilter_EXT_ID_32BitIDListMode(CAN_HandleTypeDef* hcan, uint32_t FilterBank, uint32_t FilterFIFOAssignment, uint8_t IDE, uint32_t ID1, uint32_t ID2);
 

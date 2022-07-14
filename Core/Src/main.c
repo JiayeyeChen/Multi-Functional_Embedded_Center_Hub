@@ -147,9 +147,9 @@ void AK10Calibration_Task(void *argument)
   for(;;)
   {
 //    EXOSKELETON_SystemIDManager();
-    AK10_9_DataLog_Manager(&hAKMotorRightHip, &hIMURightThigh);
+    AK10_9_DataLog_Manager_DM_FW(&hAKMotorRightHip, &hIMURightThigh);
     if (ifMotorProfilingStarted)
-      AK10_9_MotorProfiling_Function1_Half_Sin(&hAKMotorRightHip, tmotorProfilingSinWaveFrequency);
+      AK10_9_MotorProfiling_Function1_Half_Sin(&hAKMotorRightHip_old, tmotorProfilingSinWaveFrequency);
     
     if (ifManualControlStarted)
     {
@@ -164,18 +164,18 @@ void AK10Calibration_Task(void *argument)
       }
       else if (hUI.curPage == &UIPage_AK10_9_ManualControlCubeMarsFWMITMode)
       {
-        AK10_9_MITModeControl(hMotorPtrManualControl, manualControlValue_pos, manualControlValue_vel, manualControlValue_kp, manualControlValue_kd, manualControlValue_cur);
+        AK10_9_MITModeControl_Deg(hMotorPtrManualControl, manualControlValue_pos, manualControlValue_vel, manualControlValue_kp, manualControlValue_kd, manualControlValue_cur);
       }
       else if (hUI.curPage == &UIPage_AK10_9_ManualControlDMFW)
       {
-        if (hAKMotorDMFW1.controlMode == AK10_9_DM_FW_MODE_MIT)
-          AK10_9_DMFW_MITModeControl(&hAKMotorDMFW1, manualControlValue_pos, \
+        if (hAKMotorRightHip.controlMode == AK10_9_DM_FW_MODE_MIT)
+          AK10_9_DMFW_MITModeControl_Rad(&hAKMotorRightHip, manualControlValue_pos, \
                                      manualControlValue_vel, manualControlValue_kp, \
                                      manualControlValue_kd, manualControlValue_cur);
-        else if (hAKMotorDMFW1.controlMode == AK10_9_DM_FW_MODE_VELOCITY)
-          AK10_9_DMFW_VelocityControl(&hAKMotorDMFW1, manualControlValue_vel);
-        else if (hAKMotorDMFW1.controlMode == AK10_9_DM_FW_MODE_POSITION)
-          AK10_9_DMFW_PositionVelocityControl(&hAKMotorDMFW1, manualControlValue_pos, manualControlValue_vel);
+        else if (hAKMotorRightHip.controlMode == AK10_9_DM_FW_MODE_VELOCITY)
+          AK10_9_DMFW_VelocityControl(&hAKMotorRightHip, manualControlValue_vel);
+        else if (hAKMotorRightHip.controlMode == AK10_9_DM_FW_MODE_POSITION)
+          AK10_9_DMFW_PositionVelocityControl(&hAKMotorRightHip, manualControlValue_pos, manualControlValue_vel);
       }
     }
     
@@ -183,7 +183,7 @@ void AK10Calibration_Task(void *argument)
       EXOSKELETON_SetIMUMode_ACC_Only(&hIMURightThigh);
     
     AK10_9_MotorStatusMonitor(&hAKMotorRightKnee);
-    AK10_9_MotorStatusMonitor(&hAKMotorRightHip);
+    AK10_9_MotorStatusMonitor(&hAKMotorRightHip_old);
     
     osDelay(1);
   }

@@ -13,6 +13,6 @@
 
 
 extern const float pi;
-extern const float deg2rad;
+extern const float deg2rad, rad2deg;
 extern const double pi_double;
 #endif

@@ -1,7 +1,7 @@
 #include "tmotor_ak10-9_v2.h"
 
-const float p_min = -50.0f, p_max = 50.0f, \
-        v_min = -50.0f, v_max = 50.0f, \
+const float p_min = -50.2654824574f, p_max = 50.2654824574f, \
+        v_min = -50.2654824574f, v_max = 50.2654824574f, \
         i_min = -60.0f, i_max = 60.0f;
   
 const float kp_min = 0.0f, kp_max = 500.0f,\
@@ -240,7 +240,7 @@ void AK10_9_MITMode_Zeroing(AK10_9HandleCubaMarsFW* hmotor)
   HAL_CAN_AddTxMessage(hmotor->hcan, &(hmotor->txHeader), hmotor->txBuf, hmotor->pTxMailbox);
 }
 
-void AK10_9_MITModeControl(AK10_9HandleCubaMarsFW* hmotor, float pos, float vel, float kp, float kd, float iq)
+void AK10_9_MITModeControl_Deg(AK10_9HandleCubaMarsFW* hmotor, float pos, float vel, float kp, float kd, float iq)
 {
   float KP_MIN = 0.0f;
   float KP_MAX = 500.0f;
@@ -255,9 +255,9 @@ void AK10_9_MITModeControl(AK10_9HandleCubaMarsFW* hmotor, float pos, float vel,
   kd = MIN(MAX(kd, KD_MIN), KD_MAX);
   
   
-  uint16_t pInt = (uint16_t)((hmotor->setPosition.f * 32767.0f / 720.0f) + 32767.0f);
-  uint16_t vInt = (uint16_t)(hmotor->setVelocity.f / 1.40625f + 2048.0f);
-  uint16_t iInt = (uint16_t)(hmotor->setCurrent.f / 0.0293111871f + 2048.0f);
+  uint16_t pInt = (uint16_t)((hmotor->setPosition.f * hmotor->posDirectionCorrection * 32767.0f / 720.0f) + 32767.0f);
+  uint16_t vInt = (uint16_t)(hmotor->setVelocity.f * hmotor->posDirectionCorrection / 1.40625f + 2048.0f);
+  uint16_t iInt = (uint16_t)(hmotor->setCurrent.f * hmotor->posDirectionCorrection / 0.0293111871f + 2048.0f);
   uint16_t kpInt = FloatToUint(kp, KP_MIN, KP_MAX, 12);
   uint16_t kdInt = FloatToUint(kd, KD_MIN, KD_MAX, 12);
   
@@ -273,6 +273,14 @@ void AK10_9_MITModeControl(AK10_9HandleCubaMarsFW* hmotor, float pos, float vel,
   HAL_CAN_AddTxMessage(hmotor->hcan, &(hmotor->txHeader), hmotor->txBuf, hmotor->pTxMailbox);
 }
 
+void AK10_9_MITModeControl_Rad(AK10_9HandleCubaMarsFW* hmotor, float pos, float vel, float kp, float kd, float iq)
+{
+  float pos_deg, vel_deg;
+  pos_deg = pos * rad2deg;
+  vel_deg = vel * rad2deg;
+  AK10_9_MITModeControl_Deg(hmotor, pos_deg, vel_deg, kp, kd, iq);
+}
+
 void AK10_9_MITMode_GetFeedbackMsg(CAN_RxHeaderTypeDef* rxheader, AK10_9HandleCubaMarsFW* hmotor, uint8_t rxbuf[])
 {
   uint16_t pUint, vUint, iUint;
@@ -281,11 +289,17 @@ void AK10_9_MITMode_GetFeedbackMsg(CAN_RxHeaderTypeDef* rxheader, AK10_9HandleCu
   iUint=((rxbuf[4] & 0xF) << 8) | rxbuf[5];
   
   hmotor->realPosition.f = (((float)pUint) - 32767.0f) * 0.02197332682f;
+  hmotor->realPosition.f *= hmotor->posDirectionCorrection;
+  hmotor->realPositionOffseted.f = hmotor->realPosition.f - hmotor->posOffset;
+  hmotor->realPositionOffsetedRad.f = hmotor->realPositionOffseted.f * deg2rad;
   hmotor->realVelocityPresent.f = (((float)vUint) - 2047.0f) * 1.40625f;
+  hmotor->realVelocityPresent.f *= hmotor->posDirectionCorrection;
   hmotor->realVelocityPresentRad.f = hmotor->realVelocityPresent.f * deg2rad;
   hmotor->realAccelerationRaw.f = (hmotor->realVelocityPresent.f - hmotor->realVelocityPrevious[0].f) / 0.001f;
   hmotor->realVelocityPrevious[0].f = hmotor->realVelocityPresent.f;
   hmotor->realCurrent.f  = (((float)iUint) - 2048.0f) * 0.0293111871f;
+  hmotor->realCurrent.f *= hmotor->posDirectionCorrection;
+  hmotor->realTorque.f = hmotor->realCurrent.f * hmotor->kt;
   
   //Butterworth filter method to estimate acceleration//
   hmotor->realAccelerationFiltered.f = hmotor->b1Butter * hmotor->realAccelerationRaw.f + \
@@ -370,7 +384,7 @@ void AK10_9_DMFW_Zeroing(AK10_9HandleDMFW* hmotor)
   HAL_CAN_AddTxMessage(hmotor->hcan, &(hmotor->txHeader), hmotor->txBuf, hmotor->pTxMailbox);
 }
 
-void AK10_9_DMFW_MITModeControl(AK10_9HandleDMFW* hmotor, float pos, float vel, float kp, float kd, float iq)
+void AK10_9_DMFW_MITModeControl_Rad(AK10_9HandleDMFW* hmotor, float pos, float vel, float kp, float kd, float iq)
 {
   hmotor->setPosition.f = pos;
   hmotor->setVelocity.f = vel;
@@ -379,10 +393,13 @@ void AK10_9_DMFW_MITModeControl(AK10_9HandleDMFW* hmotor, float pos, float vel, 
   hmotor->kd.f = kd;
   
   pos = MIN(MAX(pos, p_min), p_max);
+  pos *= hmotor->posDirectionCorrection;
   vel = MIN(MAX(vel, v_min), v_max);
+  vel *= hmotor->posDirectionCorrection;
   kp = MIN(MAX(kp, kp_min), kp_max);
   kd = MIN(MAX(kd, kd_min), kd_max);
   iq = MIN(MAX(iq, i_min), i_max);
+  iq *= hmotor->posDirectionCorrection;
   
   uint16_t pInt = FloatToUint(pos, p_min, p_max, 16);
   uint16_t vInt = FloatToUint(vel, v_min, v_max, 12);
@@ -399,6 +416,14 @@ void AK10_9_DMFW_MITModeControl(AK10_9HandleDMFW* hmotor, float pos, float vel, 
   hmotor->txBuf[6] = ((kdInt & 0x0F) << 4) | (iInt >> 8);
   hmotor->txBuf[7] = iInt & 0xFF;
   HAL_CAN_AddTxMessage(hmotor->hcan, &(hmotor->txHeader), hmotor->txBuf, hmotor->pTxMailbox);
+}
+
+void AK10_9_DMFW_MITModeControl_Deg(AK10_9HandleDMFW* hmotor, float pos, float vel, float kp, float kd, float iq)
+{
+  float pos_rad, vel_rad;
+  pos_rad = pos * deg2rad;
+  vel_rad = vel * deg2rad;
+  AK10_9_DMFW_MITModeControl_Rad(hmotor, pos_rad, vel_rad, kp, kd, iq);
 }
 
 uint16_t FloatToUint(float x, float x_min, float x_max, uint16_t bits)
@@ -465,8 +490,29 @@ void AK10_9_DMFW_GetFeedbackMsg(CAN_RxHeaderTypeDef* rxheader, AK10_9HandleDMFW*
   iUint=((rxbuf[4] & 0xF) << 8) | rxbuf[5];
   
   hmotor->realPositionRad.f = UintToFloat(pUint, p_min,p_max, 16);
+  hmotor->realPositionRad.f *= hmotor->posDirectionCorrection;
   hmotor->realPositionDeg.f = hmotor->realPositionRad.f * 180.0f / pi;
-  hmotor->realVelocityRad.f = UintToFloat(vUint, v_min, v_max, 12);
-  hmotor->realVelocityDeg.f = hmotor->realVelocityRad.f * 180.0f / pi;
+  hmotor->realPositionOffseted.f = hmotor->realPositionDeg.f - hmotor->posOffset;
+  hmotor->realPositionOffsetedRad.f = hmotor->realPositionOffseted.f * deg2rad;
+  hmotor->realVelocityPresentRad.f = UintToFloat(vUint, v_min, v_max, 12);
+  hmotor->realVelocityPresentRad.f *= hmotor->posDirectionCorrection;
+  hmotor->realVelocityPresent.f = hmotor->realVelocityPresentRad.f * rad2deg;
+  hmotor->realAccelerationRaw.f = (hmotor->realVelocityPresent.f - hmotor->realVelocityPrevious[0].f) / 0.001f;
+  hmotor->realVelocityPrevious[0].f = hmotor->realVelocityPresent.f;
   hmotor->realCurrent.f  = UintToFloat(iUint, i_min, i_max, 12);
+  hmotor->realCurrent.f *= hmotor->posDirectionCorrection;
+  
+  //Butterworth filter method to estimate acceleration//
+  hmotor->realAccelerationFiltered.f = hmotor->b1Butter * hmotor->realAccelerationRaw.f + \
+                                       hmotor->b2Butter * hmotor->realAccelerationRawPreviousButter[0] + \
+                                       hmotor->b3Butter * hmotor->realAccelerationRawPreviousButter[1] - \
+                                       hmotor->a2Butter * hmotor->realAccelerationFilteredPreviousButter[0] - \
+                                       hmotor->a3Butter * hmotor->realAccelerationFilteredPreviousButter[1];
+  hmotor->realAccelerationRawPreviousButter[1] = hmotor->realAccelerationRawPreviousButter[0];
+  hmotor->realAccelerationRawPreviousButter[0] = hmotor->realAccelerationRaw.f;
+  hmotor->realAccelerationFilteredPreviousButter[1] = hmotor->realAccelerationFilteredPreviousButter[0];
+  hmotor->realAccelerationFilteredPreviousButter[0] = hmotor->realAccelerationFiltered.f;
+  
+  hmotor->realAccelerationFilteredRad.f = hmotor->realAccelerationFiltered.f * deg2rad;
+  //////////////////////////////////////////////////////
 }

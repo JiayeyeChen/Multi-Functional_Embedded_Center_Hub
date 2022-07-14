@@ -306,9 +306,9 @@ void UI_Page_LowerLimb_Exoskeleton(void)
   
   LCD_SetLayer(1); 
   LCD_SetColor(LCD_BLACK);
-  LCD_DisplayDecimals(350, 100, hAKMotorRightHip.realPositionOffseted.f, 5, 1);
+  LCD_DisplayDecimals(350, 100, hAKMotorRightHip_old.realPositionOffseted.f, 5, 1);
   LCD_DisplayDecimals(350, 125, hAKMotorRightKnee.realPositionOffseted.f, 5, 1);
-  if (hAKMotorRightHip.status == AK10_9_Online)
+  if (hAKMotorRightHip_old.status == AK10_9_Online)
     LCD_DisplayString(150, 100, "Online");
   else
     LCD_DisplayString(150, 100, "Offline");
@@ -328,7 +328,7 @@ void UI_Page_LowerLimb_Exoskeleton(void)
     EXOSKELETON_SystemID_Init();
   }
   else if(ifButtonPressed(&hButtonHipMotorZeroing))
-    AK10_9_ServoMode_Zeroing(&hAKMotorRightHip);
+    AK10_9_ServoMode_Zeroing(&hAKMotorRightHip_old);
   else if(ifButtonPressed(&hButtonKneeMotorZeroing))
     AK10_9_ServoMode_Zeroing(&hAKMotorRightKnee);
   
@@ -399,9 +399,9 @@ void UI_Page_LowerLimb_Exoskeleton_SystemID(void)
   else if (hSystemID.curTask == EXOSKELETON_SYSTEMID_TASK_END)
     LCD_DisplayString(0, 70, "Ending...            ");
   
-  LCD_DisplayDecimals(350, 700, hAKMotorRightHip.realPositionOffseted.f, 5, 1);
+  LCD_DisplayDecimals(350, 700, hAKMotorRightHip_old.realPositionOffseted.f, 5, 1);
   LCD_DisplayDecimals(350, 725, hAKMotorRightKnee.realPositionOffseted.f, 5, 1);
-  if (hAKMotorRightHip.status == AK10_9_Online)
+  if (hAKMotorRightHip_old.status == AK10_9_Online)
     LCD_DisplayString(150, 700, "Online");
   else
     LCD_DisplayString(150, 700, "Offline");
@@ -589,7 +589,7 @@ void UI_Page_AK10_9_ManualControlCubeMarsFWServoMode(void)
   if (ifButtonPressed(&hButtonMotorSelectRightHip))
   {
     ifManualControlStarted = 0;
-    hMotorPtrManualControl = &hAKMotorRightHip;
+    hMotorPtrManualControl = &hAKMotorRightHip_old;
     LCD_ClearRect(0, 370, 400, 30);
     PotentialmeterSliderGoTo(&hTMotorManualControlPot_pos, 0.0f);
     PotentialmeterSliderGoTo(&hTMotorManualControlPot_vel, 0.0f);
@@ -710,7 +710,7 @@ void UI_Page_AK10_9_ManualControlCubeMarsFWMITMode(void)
   if (ifButtonPressed(&hButtonMotorSelectRightHip))
   {
     ifManualControlStarted = 0;
-    hMotorPtrManualControl = &hAKMotorRightHip;
+    hMotorPtrManualControl = &hAKMotorRightHip_old;
     LCD_ClearRect(0, 370, 400, 30);
     PotentialmeterSliderGoTo(&hTMotorManualControlPot_pos, 0.0f);
     PotentialmeterSliderGoTo(&hTMotorManualControlPot_vel, 0.0f);
@@ -853,16 +853,16 @@ void UI_Page_AK10_9_ManualControlDMFW(void)
   
   if(ifButtonPressed(&hButtonMotorZeroing))
   {
-    AK10_9_DMFW_Zeroing(&hAKMotorDMFW1);
+    AK10_9_DMFW_Zeroing(&hAKMotorRightHip);
   }
   if(ifButtonPressed(&hButtonMotorStart))
   {
     ifManualControlStarted = 1;
-    AK10_9_DMFW_EnableMotor(&hAKMotorDMFW1);
+    AK10_9_DMFW_EnableMotor(&hAKMotorRightHip);
   }
   if(ifButtonPressed(&hButtonMotorStop))
   {
-    AK10_9_DMFW_DisableMotor(&hAKMotorDMFW1);
+    AK10_9_DMFW_DisableMotor(&hAKMotorRightHip);
     ifManualControlStarted = 0;
     PotentialmeterSliderGoTo(&hTMotorManualControlPot_pos, 0.0f);
     PotentialmeterSliderGoTo(&hTMotorManualControlPot_vel, 0.0f);
@@ -874,22 +874,22 @@ void UI_Page_AK10_9_ManualControlDMFW(void)
     PotentialmeterSliderGoTo(&hTMotorManualControlPot_vel, 0.0f);
     PotentialmeterSliderGoTo(&hTMotorManualControlPot_cur, 0.0f);
     ifManualControlStarted = 0;
-    hAKMotorDMFW1.controlMode++;
-    if ((uint32_t)hAKMotorDMFW1.controlMode > 2)
-      hAKMotorDMFW1.controlMode = 0;
+    hAKMotorRightHip.controlMode++;
+    if ((uint32_t)hAKMotorRightHip.controlMode > 2)
+      hAKMotorRightHip.controlMode = 0;
   }
   
   LCD_SetLayer(1); 
   LCD_SetColor(LCD_BLACK);
-  if (hAKMotorDMFW1.controlMode == AK10_9_DM_FW_MODE_MIT)
+  if (hAKMotorRightHip.controlMode == AK10_9_DM_FW_MODE_MIT)
   {
     LCD_DisplayString(0, 340, "MIT Mode");
   }
-  else if (hAKMotorDMFW1.controlMode == AK10_9_DM_FW_MODE_POSITION)
+  else if (hAKMotorRightHip.controlMode == AK10_9_DM_FW_MODE_POSITION)
   {
     LCD_DisplayString(0, 340, "Position Control");
   }
-  else if (hAKMotorDMFW1.controlMode == AK10_9_DM_FW_MODE_VELOCITY)
+  else if (hAKMotorRightHip.controlMode == AK10_9_DM_FW_MODE_VELOCITY)
   {
     LCD_DisplayString(0, 340, "Velocity Control");
   }
@@ -898,13 +898,13 @@ void UI_Page_AK10_9_ManualControlDMFW(void)
   else
     LCD_DisplayString(200, 0, "Motor Offline");
   
-  LCD_DisplayDecimals(400, 735, (double)hAKMotorDMFW1.realTorque.f, 3, 2);
-  LCD_DisplayDecimals(150, 710, (double)hAKMotorDMFW1.realPositionDeg.f, 6, 3);
-  LCD_DisplayDecimals(150, 735, (double)hAKMotorDMFW1.realVelocityDeg.f, 6, 3);
-  LCD_DisplayDecimals(150, 760, (double)hAKMotorDMFW1.realCurrent.f, 6, 3);
-  LCD_DisplayDecimals(250, 710, (double)hAKMotorDMFW1.setPosition.f, 6, 3);
-  LCD_DisplayDecimals(250, 735, (double)hAKMotorDMFW1.setVelocity.f, 6, 3);
-  LCD_DisplayDecimals(250, 760, (double)hAKMotorDMFW1.setCurrent.f, 6, 3);
+  LCD_DisplayDecimals(400, 735, (double)hAKMotorRightHip.realTorque.f, 3, 2);
+  LCD_DisplayDecimals(150, 710, (double)hAKMotorRightHip.realPositionDeg.f, 6, 3);
+  LCD_DisplayDecimals(150, 735, (double)hAKMotorRightHip.realVelocityPresent.f, 6, 3);
+  LCD_DisplayDecimals(150, 760, (double)hAKMotorRightHip.realCurrent.f, 6, 3);
+  LCD_DisplayDecimals(250, 710, (double)hAKMotorRightHip.setPosition.f, 6, 3);
+  LCD_DisplayDecimals(250, 735, (double)hAKMotorRightHip.setVelocity.f, 6, 3);
+  LCD_DisplayDecimals(250, 760, (double)hAKMotorRightHip.setCurrent.f, 6, 3);
   LCD_DisplayDecimals(250, 80, (double)manualControlValue_pos, 3, 1);
   LCD_DisplayDecimals(340, 80, (double)manualControlValue_vel, 3, 1);
   LCD_DisplayDecimals(420, 80, (double)manualControlValue_cur, 3, 1);
@@ -1056,19 +1056,19 @@ void UI_Page_TMotor_Acceleration_Observer_Project(void)
     timeDifference = 0;
   }
   if(ifButtonPressed(&hButtonMotorZeroing))
-    AK10_9_ServoMode_Zeroing(&hAKMotorRightHip);
+    AK10_9_ServoMode_Zeroing(&hAKMotorRightHip_old);
   
   LCD_SetLayer(1); 
   LCD_SetColor(LCD_BLACK);
-  if (hAKMotorRightHip.status == AK10_9_Online)
+  if (hAKMotorRightHip_old.status == AK10_9_Online)
     LCD_DisplayString(200, 0, "Motor  Online");
   else
     LCD_DisplayString(200, 0, "Motor Offline");
   
   
-  LCD_DisplayDecimals(140, 720, (double)hAKMotorRightHip.realPosition.f, 10, 4);
-  LCD_DisplayDecimals(140, 745, (double)hAKMotorRightHip.setPosition.f, 10, 4);
-  LCD_DisplayDecimals(140, 770, (double)hAKMotorRightHip.realVelocityPresent.f, 10, 4);
+  LCD_DisplayDecimals(140, 720, (double)hAKMotorRightHip_old.realPosition.f, 10, 4);
+  LCD_DisplayDecimals(140, 745, (double)hAKMotorRightHip_old.setPosition.f, 10, 4);
+  LCD_DisplayDecimals(140, 770, (double)hAKMotorRightHip_old.realVelocityPresent.f, 10, 4);
   LCD_SetColor(DARK_RED);
   LCD_DisplayDecimals(90, 495, (double)hIMURightThigh.rawData.liaccX.b16, 7, 1);
   LCD_DisplayDecimals(90, 520, (double)hIMURightThigh.rawData.liaccY.b16, 7, 1);
@@ -1080,7 +1080,7 @@ void UI_Page_TMotor_Acceleration_Observer_Project(void)
   LCD_DisplayDecimals(90, 670, (double)hIMURightThigh.rawData.gyroY.b16, 7, 1);
   LCD_DisplayDecimals(90, 695, (double)hIMURightThigh.rawData.gyroZ.b16, 7, 1);
   LCD_DisplayDecimals(200, 470, (double)tmotorProfilingSinWaveFrequency, 3, 4);
-  LCD_DisplayDecimals(230, 445, (double)(hAKMotorRightHip.realPosition.f - hAKMotorRightHip.setPosition.f), 3, 4);
+  LCD_DisplayDecimals(230, 445, (double)(hAKMotorRightHip_old.realPosition.f - hAKMotorRightHip_old.setPosition.f), 3, 4);
   LCD_SetColor(LCD_BLACK);
   
   ifIMUFeedbackStarted = 1;
