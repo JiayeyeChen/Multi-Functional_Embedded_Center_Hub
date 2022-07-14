@@ -68,7 +68,7 @@ uint8_t USB_CompareRxCfmMsgWithStr(char str[], uint8_t size_of_str);
 void USB_DataLogConfigureDataSlot(float* data, uint8_t len);
 
 extern USBHandle hUSB;
-extern union FloatUInt8 dataSlots_AK10_9_Acceleration_Observer_Testing[11];
+extern union FloatUInt8 dataSlots_AK10_9_Acceleration_Observer_Testing[12];
 extern union FloatUInt8 dataSlots_AK10_9_TorqueConstantTesting[2];
 extern union FloatUInt8 dataSlots_Exoskeleton_SystemID[9];
 #endif

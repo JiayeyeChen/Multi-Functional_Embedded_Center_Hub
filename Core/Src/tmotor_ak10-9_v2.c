@@ -257,7 +257,7 @@ void AK10_9_MITModeControl(AK10_9HandleCubaMarsFW* hmotor, float pos, float vel,
   
   uint16_t pInt = (uint16_t)((hmotor->setPosition.f * 32767.0f / 720.0f) + 32767.0f);
   uint16_t vInt = (uint16_t)(hmotor->setVelocity.f / 1.40625f + 2048.0f);
-  uint16_t iInt = (uint16_t)(hmotor->setCurrent.f * 100.0f + 2048.0f);
+  uint16_t iInt = (uint16_t)(hmotor->setCurrent.f / 0.0293111871f + 2048.0f);
   uint16_t kpInt = FloatToUint(kp, KP_MIN, KP_MAX, 12);
   uint16_t kdInt = FloatToUint(kd, KD_MIN, KD_MAX, 12);
   
@@ -285,7 +285,7 @@ void AK10_9_MITMode_GetFeedbackMsg(CAN_RxHeaderTypeDef* rxheader, AK10_9HandleCu
   hmotor->realVelocityPresentRad.f = hmotor->realVelocityPresent.f * deg2rad;
   hmotor->realAccelerationRaw.f = (hmotor->realVelocityPresent.f - hmotor->realVelocityPrevious[0].f) / 0.001f;
   hmotor->realVelocityPrevious[0].f = hmotor->realVelocityPresent.f;
-  hmotor->realCurrent.f  = (((float)iUint) - 2048.0f) * 0.01f;
+  hmotor->realCurrent.f  = (((float)iUint) - 2048.0f) * 0.0293111871f;
   
   //Butterworth filter method to estimate acceleration//
   hmotor->realAccelerationFiltered.f = hmotor->b1Butter * hmotor->realAccelerationRaw.f + \
