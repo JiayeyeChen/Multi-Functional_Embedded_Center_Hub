@@ -110,8 +110,6 @@ void         UI_Page_AK10_9_ManualControlFirmwareSelection(void);
 void         UI_Page_AK10_9_ManualControlFirmwareSelection_Init(void);
 void         UI_Page_AK10_9_ManualControlDMFW_Init(void);
 void         UI_Page_AK10_9_ManualControlDMFW(void);
-void         UI_Page_AK10_9_ImpedanceControlDemo(void);
-void         UI_Page_AK10_9_ImpedanceControlDemo_Init(void);
 void         UI_Page_BNO055_Monitor(void);
 void         UI_Page_BNO055_Monitor_Init(void);
 void         UI_Page_TMotor_Acceleration_Observer_Project(void);
@@ -125,5 +123,4 @@ JoystickHandle Joystick_Create(uint16_t x, uint16_t y, uint16_t r, char label[])
 
 extern UIHandle hUI;
 extern PageHandle UIPage_AK10_9_ManualControlCubeMarsFWServoMode, UIPage_AK10_9_ManualControlCubeMarsFWMITMode, UIPage_AK10_9_ManualControlDMFW;
-//extern ButtonHandle hButtonDataLogStart, hButtonDataLogEnd, hButtonMotorProfilingStart, hButtonMotorProfilingEnd, hButtonMotorZeroing, hButtonMotorSteppingUp, hButtonMotorSteppingDown;
 #endif

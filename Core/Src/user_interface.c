@@ -29,11 +29,6 @@ LinearPotentialmeterHandle  hTMotorManualControlPot_pos, hTMotorManualControlPot
                             hTMotorManualControlPot_cur, hTMotorManualControlPot_kp, \
                             hTMotorManualControlPot_kd;
 ///////////////////////////
-/* AK10-9 Impedance Control Demo*/
-PageHandle UIPage_AK10_9_ImpedanceControlDemo;
-ButtonHandle hButtonPageAK10_9ImpedanceControlDemo, hButtonSpringConstantUp, \
-             hButtonSpringConstantDown, hButtonDampingConstantUp, hButtonDampingConstantDown;
-//////////////////////////////////
 /* BNO055 Monitor */
 PageHandle UIPage_BNO055_Monitor;
 ButtonHandle hButtonPageBNO055_Monitor, hButtonIMUSetModeNDOF, \
@@ -240,10 +235,6 @@ void UI_Init(void)
   UIPage_AK10_9_ManualControlDMFW.ifPageInitialized = 0;
   UIPage_AK10_9_ManualControlDMFW.Page = UI_Page_AK10_9_ManualControlDMFW;
   UIPage_AK10_9_ManualControlDMFW.PageInit = UI_Page_AK10_9_ManualControlDMFW_Init;
-  
-  UIPage_AK10_9_ImpedanceControlDemo.ifPageInitialized = 0;
-  UIPage_AK10_9_ImpedanceControlDemo.Page = UI_Page_AK10_9_ImpedanceControlDemo;
-  UIPage_AK10_9_ImpedanceControlDemo.PageInit = UI_Page_AK10_9_ImpedanceControlDemo_Init;
   
   UIPage_BNO055_Monitor.ifPageInitialized = 0;
   UIPage_BNO055_Monitor.Page = UI_Page_BNO055_Monitor;
@@ -520,8 +511,6 @@ void UI_Page_Home1(void)
   ButtonRefresh(&hButtonPageExoskeletonInterface);
   ButtonScan(&hButtonPageAK10_9ManualControl);
   ButtonRefresh(&hButtonPageAK10_9ManualControl);
-  ButtonScan(&hButtonPageAK10_9ImpedanceControlDemo);
-  ButtonRefresh(&hButtonPageAK10_9ImpedanceControlDemo);
   ButtonScan(&hButtonPageBNO055_Monitor);
   ButtonRefresh(&hButtonPageBNO055_Monitor);
   ButtonScan(&hButtonPageTMotorAccelerationObserverProject);
@@ -535,8 +524,6 @@ void UI_Page_Home1(void)
     UI_Page_Change_To(&UIPage_LowerLimb_Exoskeleton);
   if (ifButtonPressed(&hButtonPageAK10_9ManualControl))
     UI_Page_Change_To(&UIPage_AK10_9_ManualControlFirmwareSelection);
-  if (ifButtonPressed(&hButtonPageAK10_9ImpedanceControlDemo))
-    UI_Page_Change_To(&UIPage_AK10_9_ImpedanceControlDemo);
   if (ifButtonPressed(&hButtonPageBNO055_Monitor))
     UI_Page_Change_To(&UIPage_BNO055_Monitor);
   if (ifButtonPressed(&hButtonPageTMotorAccelerationObserverProject))
@@ -550,7 +537,6 @@ void UI_Page_Home1_Init(void)
 {
   hButtonPageExoskeletonInterface = Button_Create(100, 100, 300, 40, "Lower Limb Exoskeleton", LIGHT_MAGENTA, LCD_RED);
   hButtonPageAK10_9ManualControl = Button_Create(80, 150, 360, 40, "AK10-9 V2.0 Manual Control", LIGHT_MAGENTA, LCD_RED);
-  hButtonPageAK10_9ImpedanceControlDemo = Button_Create(30, 200, 430, 40, "AK10-9 V2.0 Impedance Control Demo", LIGHT_MAGENTA, LCD_RED);
   hButtonPageBNO055_Monitor = Button_Create(150, 250, 200, 40, "BNO055 Monitor", LIGHT_MAGENTA, LCD_RED);
   hButtonPageTMotorAccelerationObserverProject = Button_Create(10, 300, 450, 40, "TMotor Acceleration Observer Project", LIGHT_MAGENTA, LCD_RED);
   hButtonPageADCMonitor = Button_Create(150, 350, 200, 40, "ADC Monitor", LIGHT_MAGENTA, LCD_RED);
@@ -959,77 +945,6 @@ void UI_Page_AK10_9_ManualControlFirmwareSelection_Init(void)
   hButtonAK10_9_ManualControlCubeMarsFWServoModeMITMode = Button_Create(10, 400, 400, 60, "CubeMars Firmware MIT Mode", LCD_WHITE, LCD_RED);
   hButtonAK10_9_ManualControlDMFW = Button_Create(100, 500, 200, 60, "DM Firmware", LCD_WHITE, LCD_RED);
   
-}
-
-void UI_Page_AK10_9_ImpedanceControlDemo(void)
-{
-  ButtonScan(&hButtonGoBack);
-  ButtonRefresh(&hButtonGoBack);
-  ButtonScan(&hButtonSpringConstantUp);
-  ButtonRefresh(&hButtonSpringConstantUp);
-  ButtonScan(&hButtonSpringConstantDown);
-  ButtonRefresh(&hButtonSpringConstantDown);
-  ButtonScan(&hButtonDampingConstantUp);
-  ButtonRefresh(&hButtonDampingConstantUp);
-  ButtonScan(&hButtonDampingConstantDown);
-  ButtonRefresh(&hButtonDampingConstantDown);
-  ButtonScan(&hButtonMotorStart);
-  ButtonRefresh(&hButtonMotorStart);
-  ButtonScan(&hButtonMotorStop);
-  ButtonRefresh(&hButtonMotorStop);
-  ButtonScan(&hButtonMotorZeroing);
-  ButtonRefresh(&hButtonMotorZeroing);
-  if (ifButtonPressed(&hButtonSpringConstantUp))
-    impedance_control_spring_constant += 0.005f;
-  if (ifButtonPressed(&hButtonSpringConstantDown))
-    impedance_control_spring_constant -= 0.005f;
-  if (ifButtonPressed(&hButtonDampingConstantUp))
-    impedance_control_damping_constant += 0.001f;
-  if (ifButtonPressed(&hButtonDampingConstantDown))
-    impedance_control_damping_constant -= 0.001f;
-  if (ifButtonPressed(&hButtonMotorStart))
-    ifImpedanceControlStarted = 1;
-  if (ifButtonPressed(&hButtonMotorStop))
-    ifImpedanceControlStarted = 0;
-  if(ifButtonPressed(&hButtonMotorZeroing))
-    AK10_9_ServoMode_Zeroing(&hAKMotorLeftHip);
-  
-  LCD_SetLayer(1); 
-  LCD_SetColor(LCD_BLACK);
-  LCD_DisplayDecimals(280, 100, (double)impedance_control_spring_constant, 10, 4);
-  LCD_DisplayDecimals(280, 200, (double)impedance_control_damping_constant, 10, 4);
-  if (hAKMotorLeftHip.status == AK10_9_Online)
-    LCD_DisplayString(200, 0, "Motor  Online");
-  else
-    LCD_DisplayString(200, 0, "Motor Offline");
-  
-  LCD_DisplayString(300, 500, "Torque(Nm):");
-  LCD_DisplayDecimals(320, 530, (double)hAKMotorLeftHip.realTorque.f, 3, 2);
-  LCD_DisplayString(20, 570, "Temperature:");
-  LCD_DisplayNumber(70, 600, hAKMotorLeftHip.temperature, 2);
-  LCD_DisplayString(230, 600, "Real");
-  LCD_DisplayString(360, 600, "Desired");
-  LCD_DisplayString(50, 650, "Position: ");LCD_DisplayDecimals(170, 650, (double)hAKMotorLeftHip.realPosition.f, 10, 4);
-  LCD_DisplayString(50, 700, "Velocity: ");LCD_DisplayDecimals(170, 700, (double)hAKMotorLeftHip.realVelocityPresent.f, 10, 4);
-  LCD_DisplayString(50, 750, "Current:  ");LCD_DisplayDecimals(170, 750, (double)hAKMotorLeftHip.realCurrent.f, 10, 4);
-  
-  LCD_DisplayDecimals(310, 650, (double)hAKMotorLeftHip.setPosition.f, 10, 4);
-  LCD_DisplayDecimals(310, 700, (double)hAKMotorLeftHip.setVelocity.f, 10, 4);
-  LCD_DisplayDecimals(310, 750, (double)hAKMotorLeftHip.setCurrent.f, 10, 4);
-  
-  if (ifButtonPressed(&hButtonGoBack))
-    UI_Page_Change_To(&UIPage_Home1);
-}
-void UI_Page_AK10_9_ImpedanceControlDemo_Init(void)
-{
-  hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
-  hButtonSpringConstantUp = Button_Create(20, 80, 250, 40, "Spring Constant +", LCD_WHITE, LCD_RED);
-  hButtonSpringConstantDown = Button_Create(20, 130, 250, 40, "Spring Constant -", LCD_WHITE, LCD_RED);
-  hButtonDampingConstantUp = Button_Create(20, 180, 250, 40, "Damping Constant +", LCD_WHITE, LCD_RED);
-  hButtonDampingConstantDown = Button_Create(20, 230, 250, 40, "Damping Constant -", LCD_WHITE, LCD_RED);
-  hButtonMotorZeroing = Button_Create(50, 500, 200, 50, "Motor Set Zero", LCD_BLUE, LCD_RED);
-  hButtonMotorStart = Button_Create(100, 300, 250, 40, "       START", LCD_WHITE, LCD_RED);
-  hButtonMotorStop = Button_Create(100, 360, 250, 40, "        STOP", LCD_WHITE, LCD_RED);
 }
 
 void UI_Page_BNO055_Monitor(void)
