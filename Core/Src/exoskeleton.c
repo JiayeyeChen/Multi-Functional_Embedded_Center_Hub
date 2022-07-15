@@ -144,12 +144,12 @@ void EXOSKELETON_SystemIDManager(void)
     case EXOSKELETON_SYSTEMID_TASK_KNEE_JOINT_MOVEMENT_POSITIONING:
       
       /* for hip position control*/
-        AK10_9_ServoMode_PositionSpeenControlCustomizedWithOffset(&hAKMotorRightHip_old, 180.0f, 36.0f, 0.002f);
+        AK10_9_ServoMode_PositionSpeedControlCustomizedWithOffset(&hAKMotorRightHip_old, 180.0f, 36.0f, 0.002f);
       /* for hip current control*/
 //      AK10_9_ServoMode_CurrentControl(&hAKMotorRightHip_old, 0.0f);
       ////////////////////////////
       
-      AK10_9_ServoMode_PositionSpeenControlCustomizedWithOffset(&hAKMotorRightKnee, 90.0f, 36.0f, 0.002f);
+      AK10_9_ServoMode_PositionSpeedControlCustomizedWithOffset(&hAKMotorRightKnee, 90.0f, 36.0f, 0.002f);
 //////////    /* for debug */
 //////////    hAKMotorRightHip_old.ifCustomizedPositionSpeedControlFinished = 1;
 //////////    hAKMotorRightKnee.ifCustomizedPositionSpeedControlFinished = 1;
@@ -208,11 +208,11 @@ void EXOSKELETON_SystemIDManager(void)
       break;
     case EXOSKELETON_SYSTEMID_TASK_HIP_JOINT_MOVEMENT_POSITIONING:
       /* for hip position control*/
-      AK10_9_ServoMode_PositionSpeenControlCustomizedWithOffset(&hAKMotorRightHip_old, 180.0f, 36.0f, 0.002f);
+      AK10_9_ServoMode_PositionSpeedControlCustomizedWithOffset(&hAKMotorRightHip_old, 180.0f, 36.0f, 0.002f);
       /* for hip current control*/
 //      AK10_9_ServoMode_CurrentControl(&hAKMotorRightHip_old, 0.0f);
       ////////////////////////////
-      AK10_9_ServoMode_PositionSpeenControlCustomizedWithOffset(&hAKMotorRightKnee, 90.0f, 36.0f, 0.002f);
+      AK10_9_ServoMode_PositionSpeedControlCustomizedWithOffset(&hAKMotorRightKnee, 90.0f, 36.0f, 0.002f);
     
     
 //////////      /* for debug */
@@ -266,11 +266,11 @@ void EXOSKELETON_SystemIDManager(void)
       break;
     case EXOSKELETON_SYSTEMID_TASK_RELEASING_JOINTS:
       /* for hip position control*/
-      AK10_9_ServoMode_PositionSpeenControlCustomizedWithOffset(&hAKMotorRightHip_old, 180.0f, 36.0f, 0.002f);
+      AK10_9_ServoMode_PositionSpeedControlCustomizedWithOffset(&hAKMotorRightHip_old, 180.0f, 36.0f, 0.002f);
       /* for hip current control*/
 //      AK10_9_ServoMode_CurrentControl(&hAKMotorRightHip_old, 0.0f);
       ////////////////////////////
-      AK10_9_ServoMode_PositionSpeenControlCustomizedWithOffset(&hAKMotorRightKnee, 5.0f, 36.0f, 0.002f);
+      AK10_9_ServoMode_PositionSpeedControlCustomizedWithOffset(&hAKMotorRightKnee, 5.0f, 36.0f, 0.002f);
 //////////      /* for debug */
 //////////      hAKMotorRightHip_old.ifCustomizedPositionSpeedControlFinished = 1;
 //////////      hAKMotorRightKnee.ifCustomizedPositionSpeedControlFinished = 1;

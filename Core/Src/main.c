@@ -147,7 +147,7 @@ void AK10Calibration_Task(void *argument)
   for(;;)
   {
 //    EXOSKELETON_SystemIDManager();
-    AK10_9_DataLog_Manager_DM_FW(&hAKMotorRightHip, &hIMURightThigh);
+//    AK10_9_DataLog_Manager_DM_FW(&hAKMotorRightHip, &hIMURightThigh);
     if (ifMotorProfilingStarted)
       AK10_9_MotorProfiling_Function1_Half_Sin(&hAKMotorRightHip_old, tmotorProfilingSinWaveFrequency);
     
@@ -164,14 +164,17 @@ void AK10Calibration_Task(void *argument)
       }
       else if (hUI.curPage == &UIPage_AK10_9_ManualControlCubeMarsFWMITMode)
       {
-        AK10_9_MITModeControl_Deg(hMotorPtrManualControl, manualControlValue_pos, manualControlValue_vel, manualControlValue_kp, manualControlValue_kd, manualControlValue_cur);
+        AK10_9_MITModeControl_Deg(hMotorPtrManualControl, manualControlValue_pos, manualControlValue_vel, \
+                                        manualControlValue_kp, manualControlValue_kd, manualControlValue_cur);
       }
       else if (hUI.curPage == &UIPage_AK10_9_ManualControlDMFW)
       {
         if (hAKMotorRightHip.controlMode == AK10_9_DM_FW_MODE_MIT)
-          AK10_9_DMFW_MITModeControl_Rad(&hAKMotorRightHip, manualControlValue_pos, \
-                                     manualControlValue_vel, manualControlValue_kp, \
-                                     manualControlValue_kd, manualControlValue_cur);
+          AK10_9_DMFW_MITModeControl_Deg(&hAKMotorRightHip, manualControlValue_pos, manualControlValue_vel, \
+                                         manualControlValue_kp, manualControlValue_kd, manualControlValue_cur);
+//          AK10_9_DMFW_MITMode_PositionSpeedControlCustomized_Deg(&hAKMotorRightHip, manualControlValue_pos, \
+//                                     manualControlValue_vel, manualControlValue_kp, \
+//                                     manualControlValue_kd, 0.001f);
         else if (hAKMotorRightHip.controlMode == AK10_9_DM_FW_MODE_VELOCITY)
           AK10_9_DMFW_VelocityControl(&hAKMotorRightHip, manualControlValue_vel);
         else if (hAKMotorRightHip.controlMode == AK10_9_DM_FW_MODE_POSITION)

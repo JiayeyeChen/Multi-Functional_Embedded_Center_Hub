@@ -34,7 +34,8 @@ typedef struct
   enum AK10_9_Status    status;
   
   float                 kt;
-  float                 posOffset;
+  float                 posOffsetDeg;
+  float                 posOffsetRad;
   float                 posDirectionCorrection;
   union FloatUInt8      setCurrent;
   union FloatUInt8      setPosition;
@@ -90,7 +91,8 @@ typedef struct
   enum ControlModeDMFW  controlMode;
   
   float                 kt;
-  float                 posOffset;
+  float                 posOffsetDeg;
+  float                 posOffsetRad;
   float                 posDirectionCorrection;
   union FloatUInt8      setCurrent;
   union FloatUInt8      setPosition;
@@ -134,7 +136,7 @@ void AK10_9_ServoMode_VelocityControl(AK10_9HandleCubaMarsFW* hmotor, float spee
 void AK10_9_ServoMode_PositionControl(AK10_9HandleCubaMarsFW* hmotor, float position);
 void AK10_9_ServoMode_PositionSpeenControlCustomized(AK10_9HandleCubaMarsFW* hmotor, float position, float speed, float loop_duration);
 void AK10_9_ServoMode_PositionControlWithOffset(AK10_9HandleCubaMarsFW* hmotor, float position);
-void AK10_9_ServoMode_PositionSpeenControlCustomizedWithOffset(AK10_9HandleCubaMarsFW* hmotor, float position, float speed, float loop_duration);
+void AK10_9_ServoMode_PositionSpeedControlCustomizedWithOffset(AK10_9HandleCubaMarsFW* hmotor, float position, float speed, float loop_duration);
 void AK10_9_ServoMode_PositionSpeedControl(AK10_9HandleCubaMarsFW* hmotor, float position, float speed, int16_t acceleration);
 void AK10_9_ServoMode_GetFeedbackMsg(CAN_RxHeaderTypeDef* rxheader, AK10_9HandleCubaMarsFW* hmotor, uint8_t rxbuf[]);
 void AK10_9_ServoMode_Zeroing(AK10_9HandleCubaMarsFW* hmotor);
@@ -143,7 +145,10 @@ void AK10_9_MITMode_DisableMotor(AK10_9HandleCubaMarsFW* hmotor);
 void AK10_9_MITMode_Zeroing(AK10_9HandleCubaMarsFW* hmotor);
 void AK10_9_MITModeControl_Deg(AK10_9HandleCubaMarsFW* hmotor, float pos, float vel, float kp, float kd, float iq);
 void AK10_9_MITModeControl_Rad(AK10_9HandleCubaMarsFW* hmotor, float pos, float vel, float kp, float kd, float iq);
+void AK10_9_MITModeCurrentControl(AK10_9HandleCubaMarsFW* hmotor, float iq);
 void AK10_9_MITMode_GetFeedbackMsg(CAN_RxHeaderTypeDef* rxheader, AK10_9HandleCubaMarsFW* hmotor, uint8_t rxbuf[]);
+void AK10_9_MITMode_PositionSpeedControlCustomized_Deg(AK10_9HandleCubaMarsFW* hmotor, float position, float speed, float kp, float kd, float loop_duration);
+void AK10_9_MITMode_PositionSpeedControlCustomizedWithOffset_Deg(AK10_9HandleCubaMarsFW* hmotor, float position, float speed, float kp, float kd, float loop_duration);
 void AK10_9_MotorStatusMonitor(AK10_9HandleCubaMarsFW* hmotor);
 
 void AK10_9_DMFW_EnableMotor(AK10_9HandleDMFW* hmotor);
@@ -151,6 +156,11 @@ void AK10_9_DMFW_DisableMotor(AK10_9HandleDMFW* hmotor);
 void AK10_9_DMFW_Zeroing(AK10_9HandleDMFW* hmotor);
 void AK10_9_DMFW_MITModeControl_Rad(AK10_9HandleDMFW* hmotor, float pos, float vel, float kp, float kd, float iq);
 void AK10_9_DMFW_MITModeControl_Deg(AK10_9HandleDMFW* hmotor, float pos, float vel, float kp, float kd, float iq);
+void AK10_9_DMFW_MITModeCurrentControl(AK10_9HandleDMFW* hmotor, float iq);
+void AK10_9_DMFW_MITMode_PositionSpeedControlCustomized_Rad(AK10_9HandleDMFW* hmotor, float position, float speed, float kp, float kd, float loop_duration);
+void AK10_9_DMFW_MITMode_PositionSpeedControlCustomizedWithOffset_Rad(AK10_9HandleDMFW* hmotor, float position, float speed, float kp, float kd, float loop_duration);
+void AK10_9_DMFW_MITMode_PositionSpeedControlCustomized_Deg(AK10_9HandleDMFW* hmotor, float position, float speed, float kp, float kd, float loop_duration);
+void AK10_9_DMFW_MITMode_PositionSpeedControlCustomizedWithOffset_Deg(AK10_9HandleDMFW* hmotor, float position, float speed, float kp, float kd, float loop_duration);
 void AK10_9_DMFW_PositionVelocityControl(AK10_9HandleDMFW* hmotor, float pos, float vel);
 void AK10_9_DMFW_VelocityControl(AK10_9HandleDMFW* hmotor, float vel);
 void AK10_9_DMFW_GetFeedbackMsg(CAN_RxHeaderTypeDef* rxheader, AK10_9HandleDMFW* hmotor, uint8_t rxbuf[]);

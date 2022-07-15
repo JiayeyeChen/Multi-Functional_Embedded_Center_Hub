@@ -93,13 +93,37 @@ void AK10_9_ServoMode_PositionSpeenControlCustomized(AK10_9HandleCubaMarsFW* hmo
   }
 }
 
+void AK10_9_MITMode_PositionSpeedControlCustomized_Deg(AK10_9HandleCubaMarsFW* hmotor, float position, float speed, float kp, float kd, float loop_duration)
+{
+  float setPosIncrement = speed * loop_duration;
+  if (fabs((double)(hmotor->setPosition.f - position)) >= 1.0f)
+  {
+    hmotor->ifCustomizedPositionSpeedControlFinished = 0;
+    if (position > hmotor->setPosition.f)
+      AK10_9_MITModeControl_Deg(hmotor, hmotor->setPosition.f + setPosIncrement, 360.0f, kp, kd, 0.0f);
+    else
+      AK10_9_MITModeControl_Deg(hmotor, hmotor->setPosition.f - setPosIncrement, 360.0f, kp, kd, 0.0f);
+  }
+  else
+  {
+    AK10_9_MITModeControl_Deg(hmotor, position, 360.0f, kp, kd, 0.0f);
+    hmotor->ifCustomizedPositionSpeedControlFinished = 1;
+  }
+}
+
+void AK10_9_MITMode_PositionSpeedControlCustomizedWithOffset_Deg(AK10_9HandleCubaMarsFW* hmotor, float position, float speed, float kp, float kd, float loop_duration)
+{
+  AK10_9_MITMode_PositionSpeedControlCustomized_Deg(hmotor, position * hmotor->posDirectionCorrection + hmotor->posOffsetDeg, \
+                                                  speed, kp, kd, loop_duration);
+}
+
 void AK10_9_ServoMode_PositionControlWithOffset(AK10_9HandleCubaMarsFW* hmotor, float position)
 {
-  AK10_9_ServoMode_PositionControl(hmotor, position * hmotor->posDirectionCorrection + hmotor->posOffset);
+  AK10_9_ServoMode_PositionControl(hmotor, position * hmotor->posDirectionCorrection + hmotor->posOffsetDeg);
 }
-void AK10_9_ServoMode_PositionSpeenControlCustomizedWithOffset(AK10_9HandleCubaMarsFW* hmotor, float position, float speed, float loop_duration)
+void AK10_9_ServoMode_PositionSpeedControlCustomizedWithOffset(AK10_9HandleCubaMarsFW* hmotor, float position, float speed, float loop_duration)
 {
-  AK10_9_ServoMode_PositionSpeenControlCustomized(hmotor, position * hmotor->posDirectionCorrection + hmotor->posOffset, \
+  AK10_9_ServoMode_PositionSpeenControlCustomized(hmotor, position * hmotor->posDirectionCorrection + hmotor->posOffsetDeg, \
                                                   speed, loop_duration);
 }
 
@@ -135,7 +159,7 @@ void AK10_9_ServoMode_GetFeedbackMsg(CAN_RxHeaderTypeDef* rxheader, AK10_9Handle
     memcpy(hmotor->rxBuf, rxbuf, 8);
   hmotor->realPosition.f = (float)((int16_t)(hmotor->rxBuf[0] << 8 | hmotor->rxBuf[1]));
   hmotor->realPosition.f /= 10.0f;
-  hmotor->realPositionOffseted.f = hmotor->realPosition.f - hmotor->posOffset;
+  hmotor->realPositionOffseted.f = hmotor->realPosition.f - hmotor->posOffsetDeg;
   hmotor->realPositionOffseted.f *= hmotor->posDirectionCorrection;
   hmotor->realPositionOffsetedRad.f = hmotor->realPositionOffseted.f * deg2rad;
   hmotor->realVelocityPresent.f = (float)((int16_t)(hmotor->rxBuf[2] << 8 | hmotor->rxBuf[3]));
@@ -281,6 +305,11 @@ void AK10_9_MITModeControl_Rad(AK10_9HandleCubaMarsFW* hmotor, float pos, float 
   AK10_9_MITModeControl_Deg(hmotor, pos_deg, vel_deg, kp, kd, iq);
 }
 
+void AK10_9_MITModeCurrentControl(AK10_9HandleCubaMarsFW* hmotor, float iq)
+{
+  AK10_9_MITModeControl_Deg(hmotor, 0.0f, 0.0f, 0.0f, 0.0f, iq);
+}
+
 void AK10_9_MITMode_GetFeedbackMsg(CAN_RxHeaderTypeDef* rxheader, AK10_9HandleCubaMarsFW* hmotor, uint8_t rxbuf[])
 {
   uint16_t pUint, vUint, iUint;
@@ -290,7 +319,7 @@ void AK10_9_MITMode_GetFeedbackMsg(CAN_RxHeaderTypeDef* rxheader, AK10_9HandleCu
   
   hmotor->realPosition.f = (((float)pUint) - 32767.0f) * 0.02197332682f;
   hmotor->realPosition.f *= hmotor->posDirectionCorrection;
-  hmotor->realPositionOffseted.f = hmotor->realPosition.f - hmotor->posOffset;
+  hmotor->realPositionOffseted.f = hmotor->realPosition.f - hmotor->posOffsetDeg;
   hmotor->realPositionOffsetedRad.f = hmotor->realPositionOffseted.f * deg2rad;
   hmotor->realVelocityPresent.f = (((float)vUint) - 2047.0f) * 1.40625f;
   hmotor->realVelocityPresent.f *= hmotor->posDirectionCorrection;
@@ -426,6 +455,48 @@ void AK10_9_DMFW_MITModeControl_Deg(AK10_9HandleDMFW* hmotor, float pos, float v
   AK10_9_DMFW_MITModeControl_Rad(hmotor, pos_rad, vel_rad, kp, kd, iq);
 }
 
+void AK10_9_DMFW_MITModeCurrentControl(AK10_9HandleDMFW* hmotor, float iq)
+{
+  AK10_9_DMFW_MITModeControl_Rad(hmotor, 0.0f, 0.0f, 0.0f, 0.0f, iq);
+}
+
+void AK10_9_DMFW_MITMode_PositionSpeedControlCustomized_Rad(AK10_9HandleDMFW* hmotor, float position, float speed, float kp, float kd, float loop_duration)
+{
+  float setPosIncrement = speed * loop_duration;
+  if (fabs((double)(hmotor->setPosition.f - position)) >= deg2rad)
+  {
+    hmotor->ifCustomizedPositionSpeedControlFinished = 0;
+    if (position > hmotor->setPosition.f)
+      AK10_9_DMFW_MITModeControl_Rad(hmotor, hmotor->setPosition.f + setPosIncrement, 0.0f, kp, kd, 0.0f);
+    else
+      AK10_9_DMFW_MITModeControl_Rad(hmotor, hmotor->setPosition.f - setPosIncrement, 0.0f, kp, kd, 0.0f);
+  }
+  else
+  {
+    AK10_9_DMFW_MITModeControl_Rad(hmotor, position, 0.0f, kp, kd, 0.0f);
+    hmotor->ifCustomizedPositionSpeedControlFinished = 1;
+  }
+}
+
+void AK10_9_DMFW_MITMode_PositionSpeedControlCustomizedWithOffset_Rad(AK10_9HandleDMFW* hmotor, float position, float speed, float kp, float kd, float loop_duration)
+{
+  AK10_9_DMFW_MITMode_PositionSpeedControlCustomized_Rad(hmotor, position * hmotor->posDirectionCorrection + hmotor->posOffsetRad, \
+                                                  speed, kp, kd, loop_duration);
+}
+
+void AK10_9_DMFW_MITMode_PositionSpeedControlCustomized_Deg(AK10_9HandleDMFW* hmotor, float position, float speed, float kp, float kd, float loop_duration)
+{
+  float position_rad, speed_rad;
+  position_rad = position * deg2rad;
+  speed_rad = speed * deg2rad;
+  AK10_9_DMFW_MITMode_PositionSpeedControlCustomized_Rad(hmotor, position_rad, speed_rad, kp, kd, loop_duration);
+}
+
+void AK10_9_DMFW_MITMode_PositionSpeedControlCustomizedWithOffset_Deg(AK10_9HandleDMFW* hmotor, float position, float speed, float kp, float kd, float loop_duration)
+{
+  AK10_9_DMFW_MITMode_PositionSpeedControlCustomized_Deg(hmotor, position + hmotor->posOffsetDeg, speed, kp, kd, loop_duration);
+}
+
 uint16_t FloatToUint(float x, float x_min, float x_max, uint16_t bits)
 {
   float span = x_max - x_min;
@@ -492,7 +563,7 @@ void AK10_9_DMFW_GetFeedbackMsg(CAN_RxHeaderTypeDef* rxheader, AK10_9HandleDMFW*
   hmotor->realPositionRad.f = UintToFloat(pUint, p_min,p_max, 16);
   hmotor->realPositionRad.f *= hmotor->posDirectionCorrection;
   hmotor->realPositionDeg.f = hmotor->realPositionRad.f * 180.0f / pi;
-  hmotor->realPositionOffseted.f = hmotor->realPositionDeg.f - hmotor->posOffset;
+  hmotor->realPositionOffseted.f = hmotor->realPositionDeg.f - hmotor->posOffsetDeg;
   hmotor->realPositionOffsetedRad.f = hmotor->realPositionOffseted.f * deg2rad;
   hmotor->realVelocityPresentRad.f = UintToFloat(vUint, v_min, v_max, 12);
   hmotor->realVelocityPresentRad.f *= hmotor->posDirectionCorrection;
