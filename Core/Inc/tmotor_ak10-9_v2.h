@@ -45,9 +45,11 @@ typedef struct
   float                 posOffsetDeg;
   float                 posOffsetRad;
   float                 posDirectionCorrection;
-  union FloatUInt8      setCurrent;
-  union FloatUInt8      setPosition;
-  union FloatUInt8      setVelocity;
+  union FloatUInt8      setPos, goalPos;
+  union FloatUInt8      setVel, goalVel;
+  union FloatUInt8      setIq, goalIq;
+  union FloatUInt8      setKp, goalKp;
+  union FloatUInt8      setKd, goalKd;
   union FloatUInt8      realCurrent;
   union FloatUInt8      realPosition;
   union FloatUInt8      realPositionOffseted;
@@ -61,7 +63,6 @@ typedef struct
   union FloatUInt8      realAccelerationRaw;
   union FloatUInt8      realAccelerationFiltered;
   union FloatUInt8      realAccelerationFilteredRad;
-  union FloatUInt8      kp, kd;
   uint8_t               ifCustomizedPositionSpeedControlFinished;
   //For acceleration estimation//
   //Moving average value method//
@@ -103,9 +104,11 @@ typedef struct
   float                 posOffsetDeg;
   float                 posOffsetRad;
   float                 posDirectionCorrection;
-  union FloatUInt8      setCurrent;
-  union FloatUInt8      setPosition;
-  union FloatUInt8      setVelocity;
+  union FloatUInt8      setPos, goalPos;
+  union FloatUInt8      setVel, goalVel;
+  union FloatUInt8      setIq, goalIq;
+  union FloatUInt8      setKp, goalKp;
+  union FloatUInt8      setKd, goalKd;
   union FloatUInt8      realCurrent;
   union FloatUInt8      realPositionRad;
   union FloatUInt8      realPositionDeg;
@@ -120,7 +123,6 @@ typedef struct
   union FloatUInt8      realAccelerationRaw;
   union FloatUInt8      realAccelerationFiltered;
   union FloatUInt8      realAccelerationFilteredRad;
-  union FloatUInt8      kp, kd;
   uint8_t               ifCustomizedPositionSpeedControlFinished;
   //CAN BUS transmit
   uint8_t               txBuf[8];
@@ -157,6 +159,11 @@ void AK10_9_MITModeControl_Rad(AK10_9HandleCubaMarsFW* hmotor, float pos, float 
 void AK10_9_MITModeCurrentControl(AK10_9HandleCubaMarsFW* hmotor, float iq);
 void AK10_9_MITMode_GetFeedbackMsg(CAN_RxHeaderTypeDef* rxheader, AK10_9HandleCubaMarsFW* hmotor, uint8_t rxbuf[]);
 void AK10_9_MotorStatusMonitor(AK10_9HandleCubaMarsFW* hmotor);
+void AK10_9_CubeMarsFW_MITMode_ContinuousControlManager(AK10_9HandleCubaMarsFW* hmotor, \
+                                                        float pos_slope, float vel_slope, float iq_slope, \
+                                                        float kp_slope, float kd_slope, float loop_duration_ms);
+void AK10_9_CubaMarsFW_MITMode_ContinuousControl_Deg(AK10_9HandleCubaMarsFW* hmotor, float goal_pos, float goal_vel, \
+                                                 float goal_kp, float goal_kd, float goal_iq);
 
 void AK10_9_DMFW_EnableMotor(AK10_9HandleDMFW* hmotor);
 void AK10_9_DMFW_DisableMotor(AK10_9HandleDMFW* hmotor);
@@ -167,6 +174,14 @@ void AK10_9_DMFW_MITModeCurrentControl(AK10_9HandleDMFW* hmotor, float iq);
 void AK10_9_DMFW_PositionVelocityControl(AK10_9HandleDMFW* hmotor, float pos, float vel);
 void AK10_9_DMFW_VelocityControl(AK10_9HandleDMFW* hmotor, float vel);
 void AK10_9_DMFW_GetFeedbackMsg(CAN_RxHeaderTypeDef* rxheader, AK10_9HandleDMFW* hmotor, uint8_t rxbuf[]);
+void AK10_9_DMFW_MITMode_ContinuousControlManager(AK10_9HandleDMFW* hmotor, \
+                                                      float pos_slope, float vel_slope, float iq_slope, \
+                                                      float kp_slope, float kd_slope, float loop_duration_ms);
+void AK10_9_DMFW_MITMode_ContinuousControl_Rad(AK10_9HandleDMFW* hmotor, float goal_pos, float goal_vel, \
+                                                 float goal_kp, float goal_kd, float goal_iq);
+void AK10_9_DMFW_MITMode_ContinuousControl_Deg(AK10_9HandleDMFW* hmotor, float goal_pos, float goal_vel, \
+                                                 float goal_kp, float goal_kd, float goal_iq);
+                                           
 uint16_t FloatToUint(float x, float x_min, float x_max, uint16_t bits);
 float    UintToFloat(uint16_t x_int, float x_min, float x_max, uint16_t bits);
 

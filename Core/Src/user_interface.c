@@ -14,7 +14,8 @@ ButtonHandle hButtonGoBack, hButtonDataLogStart, hButtonDataLogEnd, \
 /* Exoskeleton User Interface */
 PageHandle UIPage_LowerLimb_Exoskeleton, UIPage_LowerLimb_SystemID;
 ButtonHandle hButtonPageExoskeletonInterface, hButtonSystemID, hButtonSystemIDJointMovementStart, \
-             hButtonHipMotorZeroing, hButtonKneeMotorZeroing, hButtonProfilingTimeIncrease, hButtonProfilingTimeDecrease;
+             hButtonHipMotorZeroing, hButtonKneeMotorZeroing, hButtonProfilingTimeIncrease, hButtonProfilingTimeDecrease, \
+             hButtonMotorEnable, hButtonMotorDisable;
              
 LinearPotentialmeterHandle hPotKneeProfilingFreq, hPotKneeProfilingAmp, hPotHipProfilingFreq, hPotHipProfilingAmp;
 ////////////////////////////////
@@ -303,6 +304,10 @@ void UI_Page_LowerLimb_Exoskeleton(void)
   ButtonRefresh(&hButtonHipMotorZeroing);
   ButtonScan(&hButtonKneeMotorZeroing);
   ButtonRefresh(&hButtonKneeMotorZeroing);
+  ButtonScan(&hButtonMotorEnable);
+  ButtonRefresh(&hButtonMotorEnable);
+  ButtonScan(&hButtonMotorDisable);
+  ButtonRefresh(&hButtonMotorDisable);
   
   LCD_SetLayer(1); 
   LCD_SetColor(LCD_BLACK);
@@ -331,6 +336,16 @@ void UI_Page_LowerLimb_Exoskeleton(void)
     AK10_9_DMFW_Zeroing(&hAKMotorRightHip);
   else if(ifButtonPressed(&hButtonKneeMotorZeroing))
     AK10_9_MITMode_Zeroing(&hAKMotorRightKnee);
+  else if (ifButtonPressed(&hButtonMotorEnable))
+  {
+    AK10_9_DMFW_EnableMotor(&hAKMotorRightHip);
+    AK10_9_MITMode_EnableMotor(&hAKMotorRightKnee);
+  }
+  else if (ifButtonPressed(&hButtonMotorDisable))
+  {
+    AK10_9_DMFW_DisableMotor(&hAKMotorRightHip);
+    AK10_9_MITMode_DisableMotor(&hAKMotorRightKnee);
+  }
   
   if (ifButtonPressed(&hButtonGoBack))
     UI_Page_Change_To(&UIPage_Home1);
@@ -342,6 +357,8 @@ void UI_Page_LowerLimb_Exoskeleton_Init(void)
   hButtonSystemID = Button_Create(100, 50, 280, 40, "System Identification", LCD_WHITE, LCD_RED);
   hButtonHipMotorZeroing = Button_Create(100, 150, 280, 40, "Hip Joint Zeroing", LCD_WHITE, LCD_RED);
   hButtonKneeMotorZeroing = Button_Create(100, 200, 280, 40, "Knee Joint Zeroing", LCD_WHITE, LCD_RED);
+  hButtonMotorEnable = Button_Create(100, 350, 280, 60, "Motor Enable", LIGHT_YELLOW, LCD_RED);
+  hButtonMotorDisable = Button_Create(100, 420, 280, 100, "Motor Disable", LIGHT_YELLOW, LCD_RED);
   LCD_DisplayString(0, 100, "Hip  Joint:");
   LCD_DisplayString(250, 100, "Angle:");
   LCD_DisplayString(0, 125, "Knee Joint:");
@@ -490,7 +507,7 @@ void UI_Page_LowerLimb_Exoskeleton_SystemID_Init(void)
   hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
   hButtonStart = Button_Create(0, 100, 110, 40, "Start", LCD_WHITE, LCD_RED);
   hButtonSystemIDJointMovementStart = Button_Create(150, 100, 300, 40, "Start Joint Motion", LCD_WHITE, LCD_RED);
-  hButtonStop = Button_Create(0, 150, 110, 50, "Stop", LCD_WHITE, LCD_RED);
+  hButtonStop = Button_Create(0, 150, 110, 80, "Stop", LCD_YELLOW, LCD_RED);
   hButtonProfilingTimeIncrease = Button_Create(50, 570, 250, 40, "Duration +10s", LCD_WHITE, LCD_RED);
   hButtonProfilingTimeDecrease = Button_Create(50, 620, 250, 40, "Duration -10s", LCD_WHITE, LCD_RED);
   
@@ -656,9 +673,9 @@ void UI_Page_AK10_9_ManualControlCubeMarsFWServoMode(void)
   LCD_DisplayDecimals(150, 710, (double)hMotorPtrManualControl->realPosition.f, 6, 3);
   LCD_DisplayDecimals(150, 735, (double)hMotorPtrManualControl->realVelocityPresent.f, 6, 3);
   LCD_DisplayDecimals(150, 760, (double)hMotorPtrManualControl->realCurrent.f, 6, 3);
-  LCD_DisplayDecimals(250, 710, (double)hMotorPtrManualControl->setPosition.f, 6, 3);
-  LCD_DisplayDecimals(250, 735, (double)hMotorPtrManualControl->setVelocity.f, 6, 3);
-  LCD_DisplayDecimals(250, 760, (double)hMotorPtrManualControl->setCurrent.f, 6, 3);
+  LCD_DisplayDecimals(250, 710, (double)hMotorPtrManualControl->setPos.f, 6, 3);
+  LCD_DisplayDecimals(250, 735, (double)hMotorPtrManualControl->setVel.f, 6, 3);
+  LCD_DisplayDecimals(250, 760, (double)hMotorPtrManualControl->setIq.f, 6, 3);
   
   if (ifButtonPressed(&hButtonGoBack))
   {
@@ -770,9 +787,9 @@ void UI_Page_AK10_9_ManualControlCubeMarsFWMITMode(void)
   LCD_DisplayDecimals(150, 710, (double)hMotorPtrManualControl->realPosition.f, 6, 3);
   LCD_DisplayDecimals(150, 735, (double)hMotorPtrManualControl->realVelocityPresent.f, 6, 3);
   LCD_DisplayDecimals(150, 760, (double)hMotorPtrManualControl->realCurrent.f, 6, 3);
-  LCD_DisplayDecimals(250, 710, (double)hMotorPtrManualControl->setPosition.f, 6, 3);
-  LCD_DisplayDecimals(250, 735, (double)hMotorPtrManualControl->setVelocity.f, 6, 3);
-  LCD_DisplayDecimals(250, 760, (double)hMotorPtrManualControl->setCurrent.f, 6, 3);
+  LCD_DisplayDecimals(250, 710, (double)hMotorPtrManualControl->setPos.f, 6, 3);
+  LCD_DisplayDecimals(250, 735, (double)hMotorPtrManualControl->setVel.f, 6, 3);
+  LCD_DisplayDecimals(250, 760, (double)hMotorPtrManualControl->setIq.f, 6, 3);
   LCD_DisplayDecimals(250, 80, (double)manualControlValue_pos, 3, 1);
   LCD_DisplayDecimals(340, 80, (double)manualControlValue_vel, 3, 1);
   LCD_DisplayDecimals(420, 80, (double)manualControlValue_cur, 3, 1);
@@ -909,9 +926,9 @@ void UI_Page_AK10_9_ManualControlDMFW(void)
   LCD_DisplayDecimals(150, 710, (double)hAKMotorRightHip.realPositionDeg.f, 6, 3);
   LCD_DisplayDecimals(150, 735, (double)hAKMotorRightHip.realVelocityPresent.f, 6, 3);
   LCD_DisplayDecimals(150, 760, (double)hAKMotorRightHip.realCurrent.f, 6, 3);
-  LCD_DisplayDecimals(250, 710, (double)hAKMotorRightHip.setPosition.f, 6, 3);
-  LCD_DisplayDecimals(250, 735, (double)hAKMotorRightHip.setVelocity.f, 6, 3);
-  LCD_DisplayDecimals(250, 760, (double)hAKMotorRightHip.setCurrent.f, 6, 3);
+  LCD_DisplayDecimals(250, 710, (double)hAKMotorRightHip.setPos.f, 6, 3);
+  LCD_DisplayDecimals(250, 735, (double)hAKMotorRightHip.setVel.f, 6, 3);
+  LCD_DisplayDecimals(250, 760, (double)hAKMotorRightHip.setIq.f, 6, 3);
   LCD_DisplayDecimals(250, 80, (double)manualControlValue_pos, 3, 1);
   LCD_DisplayDecimals(340, 80, (double)manualControlValue_vel, 3, 1);
   LCD_DisplayDecimals(420, 80, (double)manualControlValue_cur, 3, 1);
@@ -1074,7 +1091,7 @@ void UI_Page_TMotor_Acceleration_Observer_Project(void)
   
   
   LCD_DisplayDecimals(140, 720, (double)hAKMotorRightHip_old.realPosition.f, 10, 4);
-  LCD_DisplayDecimals(140, 745, (double)hAKMotorRightHip_old.setPosition.f, 10, 4);
+  LCD_DisplayDecimals(140, 745, (double)hAKMotorRightHip_old.setPos.f, 10, 4);
   LCD_DisplayDecimals(140, 770, (double)hAKMotorRightHip_old.realVelocityPresent.f, 10, 4);
   LCD_SetColor(DARK_RED);
   LCD_DisplayDecimals(90, 495, (double)hIMURightThigh.rawData.liaccX.b16, 7, 1);
@@ -1087,7 +1104,7 @@ void UI_Page_TMotor_Acceleration_Observer_Project(void)
   LCD_DisplayDecimals(90, 670, (double)hIMURightThigh.rawData.gyroY.b16, 7, 1);
   LCD_DisplayDecimals(90, 695, (double)hIMURightThigh.rawData.gyroZ.b16, 7, 1);
   LCD_DisplayDecimals(200, 470, (double)tmotorProfilingSinWaveFrequency, 3, 4);
-  LCD_DisplayDecimals(230, 445, (double)(hAKMotorRightHip_old.realPosition.f - hAKMotorRightHip_old.setPosition.f), 3, 4);
+  LCD_DisplayDecimals(230, 445, (double)(hAKMotorRightHip_old.realPosition.f - hAKMotorRightHip_old.setPos.f), 3, 4);
   LCD_SetColor(LCD_BLACK);
   
   ifIMUFeedbackStarted = 1;
