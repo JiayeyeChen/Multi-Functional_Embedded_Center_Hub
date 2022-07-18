@@ -164,6 +164,8 @@ void AK10_9_CubeMarsFW_MITMode_ContinuousControlManager(AK10_9HandleCubaMarsFW* 
                                                         float kp_slope, float kd_slope, float loop_duration_ms);
 void AK10_9_CubaMarsFW_MITMode_ContinuousControl_Deg(AK10_9HandleCubaMarsFW* hmotor, float goal_pos, float goal_vel, \
                                                  float goal_kp, float goal_kd, float goal_iq);
+void AK10_9_CubaMarsFW_MITMode_ContinuousControlWithOffset_Deg(AK10_9HandleCubaMarsFW* hmotor, float goal_pos, float goal_vel, \
+                                                               float goal_kp, float goal_kd, float goal_iq);
 
 void AK10_9_DMFW_EnableMotor(AK10_9HandleDMFW* hmotor);
 void AK10_9_DMFW_DisableMotor(AK10_9HandleDMFW* hmotor);
@@ -181,6 +183,8 @@ void AK10_9_DMFW_MITMode_ContinuousControl_Rad(AK10_9HandleDMFW* hmotor, float g
                                                  float goal_kp, float goal_kd, float goal_iq);
 void AK10_9_DMFW_MITMode_ContinuousControl_Deg(AK10_9HandleDMFW* hmotor, float goal_pos, float goal_vel, \
                                                  float goal_kp, float goal_kd, float goal_iq);
+void AK10_9_DMFW_MITMode_ContinuousControlWithOffset_Deg(AK10_9HandleDMFW* hmotor, float goal_pos, float goal_vel, \
+                                                         float goal_kp, float goal_kd, float goal_iq);
                                            
 uint16_t FloatToUint(float x, float x_min, float x_max, uint16_t bits);
 float    UintToFloat(uint16_t x_int, float x_min, float x_max, uint16_t bits);

@@ -406,6 +406,12 @@ void AK10_9_CubaMarsFW_MITMode_ContinuousControl_Deg(AK10_9HandleCubaMarsFW* hmo
   hmotor->goalIq.f = goal_iq;
 }
 
+void AK10_9_CubaMarsFW_MITMode_ContinuousControlWithOffset_Deg(AK10_9HandleCubaMarsFW* hmotor, float goal_pos, float goal_vel, \
+                                                               float goal_kp, float goal_kd, float goal_iq)
+{
+  AK10_9_CubaMarsFW_MITMode_ContinuousControl_Deg(hmotor, goal_pos + hmotor->posOffsetDeg, goal_vel, goal_kp, goal_kd, goal_iq);
+}
+
 void AK10_9_DMFW_EnableMotor(AK10_9HandleDMFW* hmotor)
 {
   hmotor->txHeader.DLC = 8;
@@ -602,6 +608,12 @@ void AK10_9_DMFW_MITMode_ContinuousControl_Deg(AK10_9HandleDMFW* hmotor, float g
   hmotor->goalKp.f = goal_kp;
   hmotor->goalKd.f = goal_kd;
   hmotor->goalIq.f = goal_iq;
+}
+
+void AK10_9_DMFW_MITMode_ContinuousControlWithOffset_Deg(AK10_9HandleDMFW* hmotor, float goal_pos, float goal_vel, \
+                                                         float goal_kp, float goal_kd, float goal_iq)
+{
+  AK10_9_DMFW_MITMode_ContinuousControl_Deg(hmotor, goal_pos + hmotor->posOffsetDeg, goal_vel, goal_kp, goal_kd, goal_iq);
 }
   
 uint16_t FloatToUint(float x, float x_min, float x_max, uint16_t bits)
