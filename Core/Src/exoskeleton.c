@@ -115,6 +115,11 @@ void EXOSKELETON_SystemIDManager(void)
 
   USB_DatalogCargoReceiveManager(EXOSKELETON_SystemID_Set_Datalog_Label);
   
+  AK10_9_CubeMarsFW_MITMode_ContinuousControlManager(&hAKMotorRightKnee, \
+                                                     60.0f, 180.0f, 1.0f, 100.0f, 0.5f, 0.001f);
+  AK10_9_DMFW_MITMode_ContinuousControlManager(&hAKMotorRightHip, \
+                                               60.0f, 180.0f, 1.0f, 100.0f, 0.5f, 0.001f);
+  
   switch (hSystemID.curTask)
   {
   	case EXOSKELETON_SYSTEMID_TASK_FREE:
@@ -143,33 +148,35 @@ void EXOSKELETON_SystemIDManager(void)
       break;
     case EXOSKELETON_SYSTEMID_TASK_KNEE_JOINT_MOVEMENT_POSITIONING:
       /*Knee joint 90 goes to 90 deg. Hip joint goes to 180 deg.*/
-
+      AK10_9_CubaMarsFW_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightKnee, 90.0f, 0.0f, 499.0f, 4.99f, 0.0f);
+      AK10_9_DMFW_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightHip, 180.0f, 0.0f, 499.0f, 4.99f, 0.0f);
 //////////    /* for debug */
 //////////    hAKMotorRightHip.ifCustomizedPositionSpeedControlFinished = 1;
 //////////    hAKMotorRightKnee.ifCustomizedPositionSpeedControlFinished = 1;
 //////////    ///////////////
-      if (hAKMotorRightHip.ifCustomizedPositionSpeedControlFinished && hAKMotorRightKnee.ifCustomizedPositionSpeedControlFinished)
+      if (hAKMotorRightHip.ifMITModeParameterSmootherWorkFinished && hAKMotorRightKnee.ifMITModeParameterSmootherWorkFinished)
       {
         hSystemID.curTask = EXOSKELETON_SYSTEMID_TASK_KNEE_JOINT_MOVEMENT_ONGOING;
         enterProfilingTimeStamp = HAL_GetTick();
       }
       break;
     case EXOSKELETON_SYSTEMID_TASK_KNEE_JOINT_MOVEMENT_ONGOING:
-      if (HAL_GetTick() - enterProfilingTimeStamp <= 3000)
+      if (HAL_GetTick() - enterProfilingTimeStamp <= SYSTEMID_JOINT_POSITIONING_STABILIZING_TIME)
       {
         /*Knee joint 90 remains at 90 deg. Hip joint remains at 180 deg.*/
-
+        AK10_9_CubaMarsFW_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightKnee, 90.0f, 0.0f, 499.0f, 4.99f, 0.0f);
+        AK10_9_DMFW_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightHip, 180.0f, 0.0f, 499.0f, 4.99f, 0.0f);
       }
       else
       {
-        if (HAL_GetTick() - enterProfilingTimeStamp - 3000 <= hSystemID.kneeProfilingTime)
+        if (HAL_GetTick() - enterProfilingTimeStamp - SYSTEMID_JOINT_POSITIONING_STABILIZING_TIME <= hSystemID.kneeProfilingTime)
         {
           EXOSKELETON_SystemID_UpdateDataSlot();
           USB_DataLogSingleCargoTransmit(dataSlots_Exoskeleton_SystemID);
           /*Knee joint does sin wave motion. Hip joint remains at 180 deg.*/
-          
+          AK10_9_DMFW_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightHip, 180.0f, 0.0f, 499.0f, 4.99f, 0.0f);
           EXOSKELETON_SystemID_KneeJoint_MotorProfilingSinWave(&hAKMotorRightKnee, hSystemID.kneeProfilingAmp, \
-                                                               hSystemID.kneeProfilingFreq, enterProfilingTimeStamp + 3000);
+                                                               hSystemID.kneeProfilingFreq, enterProfilingTimeStamp + SYSTEMID_JOINT_POSITIONING_STABILIZING_TIME);
         }
         else
         {
@@ -190,39 +197,35 @@ void EXOSKELETON_SystemIDManager(void)
       break;
     case EXOSKELETON_SYSTEMID_TASK_HIP_JOINT_MOVEMENT_POSITIONING:
       /*Knee joint 90 remains at 90 deg. Hip joint remains at 180 deg.*/
-    
+      AK10_9_CubaMarsFW_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightKnee, 90.0f, 0.0f, 499.0f, 4.99f, 0.0f);
+      AK10_9_DMFW_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightHip, 180.0f, 0.0f, 499.0f, 4.99f, 0.0f);
 //////////      /* for debug */
 //////////      hAKMotorRightHip.ifCustomizedPositionSpeedControlFinished = 1;
 //////////      hAKMotorRightKnee.ifCustomizedPositionSpeedControlFinished = 1;
 //////////      ///////////////
-      
-      /* for hip position control*/
-      if (hAKMotorRightHip.ifCustomizedPositionSpeedControlFinished && hAKMotorRightKnee.ifCustomizedPositionSpeedControlFinished)
+      if (hAKMotorRightHip.ifMITModeParameterSmootherWorkFinished && hAKMotorRightKnee.ifMITModeParameterSmootherWorkFinished)
       {
         hSystemID.curTask = EXOSKELETON_SYSTEMID_TASK_HIP_JOINT_MOVEMENT_ONGOING;
         enterProfilingTimeStamp = HAL_GetTick();
       }
-      /* for hip current control*/
-////      if (hAKMotorRightKnee.ifCustomizedPositionSpeedControlFinished)
-////      {
-////        hSystemID.curTask = EXOSKELETON_SYSTEMID_TASK_HIP_JOINT_MOVEMENT_ONGOING;
-////        enterProfilingTimeStamp = HAL_GetTick();
-////      }
       break;
     case EXOSKELETON_SYSTEMID_TASK_HIP_JOINT_MOVEMENT_ONGOING:
-      if (HAL_GetTick() - enterProfilingTimeStamp <= 3000)
+      if (HAL_GetTick() - enterProfilingTimeStamp <= SYSTEMID_JOINT_POSITIONING_STABILIZING_TIME)
       {
         /*Knee joint 90 remains at 90 deg. Hip joint remains at 180 deg.*/
+        AK10_9_CubaMarsFW_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightKnee, 90.0f, 0.0f, 499.0f, 4.99f, 0.0f);
+        AK10_9_DMFW_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightHip, 180.0f, 0.0f, 499.0f, 4.99f, 0.0f);
       }
       else
       {
-        if (HAL_GetTick() - enterProfilingTimeStamp - 3000 <= hSystemID.hipProfilingTime)
+        if (HAL_GetTick() - enterProfilingTimeStamp - SYSTEMID_JOINT_POSITIONING_STABILIZING_TIME <= hSystemID.hipProfilingTime)
         {
           EXOSKELETON_SystemID_UpdateDataSlot();
           USB_DataLogSingleCargoTransmit(dataSlots_Exoskeleton_SystemID);
           /*Hip joint does sin wave motion. Knee joint remains at 90 deg.*/
+          AK10_9_CubaMarsFW_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightKnee, 90.0f, 0.0f, 499.0f, 4.99f, 0.0f);
           EXOSKELETON_SystemID_HipJoint_MotorProfilingSinWave_PositionControl(&hAKMotorRightHip, hSystemID.hipProfilingAmp, \
-                                                               hSystemID.hipProfilingFreq, enterProfilingTimeStamp + 3000);
+                                                               hSystemID.hipProfilingFreq, enterProfilingTimeStamp + SYSTEMID_JOINT_POSITIONING_STABILIZING_TIME);
         }
         else
         {
@@ -232,13 +235,19 @@ void EXOSKELETON_SystemIDManager(void)
       }
       break;
     case EXOSKELETON_SYSTEMID_TASK_RELEASING_JOINTS:
-    /*Knee joint goes to 10 deg. Hip joint goes to 180 deg.*/
+      /*Knee joint goes to 10 deg. Hip joint goes to 180 deg.*/
+      AK10_9_CubaMarsFW_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightKnee, 10.0f, 0.0f, 100.0f, 2.0f, 0.0f);
+      AK10_9_DMFW_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightHip, 180.0f, 0.0f, 100.0f, 2.0f, 0.0f);
 //////////      /* for debug */
 //////////      hAKMotorRightHip.ifCustomizedPositionSpeedControlFinished = 1;
 //////////      hAKMotorRightKnee.ifCustomizedPositionSpeedControlFinished = 1;
 //////////      ///////////////
-      if (hAKMotorRightHip.ifCustomizedPositionSpeedControlFinished && hAKMotorRightKnee.ifCustomizedPositionSpeedControlFinished)
+      if (hAKMotorRightHip.ifMITModeParameterSmootherWorkFinished && hAKMotorRightKnee.ifMITModeParameterSmootherWorkFinished)
+      {
         hSystemID.curTask = EXOSKELETON_SYSTEMID_TASK_RECEIVING_RESULTS;
+        AK10_9_DMFW_MITMode_ZeroingControlParameters(&hAKMotorRightHip);
+        AK10_9_CubeMarsFW_MITMode_ZeroingControlParameters(&hAKMotorRightKnee);
+      }
       break;
     case EXOSKELETON_SYSTEMID_TASK_RECEIVING_RESULTS:
       USB_SendText("Receiving results from PC...");
@@ -290,14 +299,14 @@ void EXOSKELETON_SystemID_KneeJoint_MotorProfilingSinWave\
      {
        float t = (float)(HAL_GetTick() - time_stamp_shift) / 1000.0f;
        float motor_profiling_trajectory = 90.0f - amplitude / 2.0f + (amplitude / 2.0f) * (float)cos(fre * 2.0f * pi * t);
-       AK10_9_MITModeControl_Deg(hmotor, motor_profiling_trajectory, 0.0f, 499.0f, 4.9f, 0.0f);
+       AK10_9_CubaMarsFW_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightKnee, motor_profiling_trajectory, 0.0f, 499.0f, 4.99f, 0.0f);
      }
 void EXOSKELETON_SystemID_HipJoint_MotorProfilingSinWave_PositionControl\
      (AK10_9HandleDMFW* hmotor, float amplitude, float fre, uint32_t time_stamp_shift)
      {
        float t = (float)(HAL_GetTick() - time_stamp_shift) / 1000.0f;
        float motor_profiling_trajectory = 180.0f + (amplitude / 2.0f) * (float)sin(fre * 2.0f * pi * t);
-       AK10_9_DMFW_MITModeControl_Deg(hmotor, motor_profiling_trajectory, 0.0f, 499.0f, 4.9f, 0.0f);
+       AK10_9_DMFW_MITMode_ContinuousControlWithOffset_Deg(hmotor, motor_profiling_trajectory, 0.0f, 499.0f, 4.9f, 0.0f);
      }
 void EXOSKELETON_SystemID_HipJoint_MotorProfilingSinWave_CurrentControl \
      (AK10_9HandleCubaMarsFW* hmotor, float amplitude, float fre, uint32_t time_stamp_shift)

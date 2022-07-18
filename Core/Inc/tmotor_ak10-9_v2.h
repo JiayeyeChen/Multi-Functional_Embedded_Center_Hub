@@ -64,6 +64,7 @@ typedef struct
   union FloatUInt8      realAccelerationFiltered;
   union FloatUInt8      realAccelerationFilteredRad;
   uint8_t               ifCustomizedPositionSpeedControlFinished;
+  uint8_t               ifMITModeParameterSmootherWorkFinished;
   //For acceleration estimation//
   //Moving average value method//
   float                 accAverage;
@@ -124,6 +125,7 @@ typedef struct
   union FloatUInt8      realAccelerationFiltered;
   union FloatUInt8      realAccelerationFilteredRad;
   uint8_t               ifCustomizedPositionSpeedControlFinished;
+  uint8_t               ifMITModeParameterSmootherWorkFinished;
   //CAN BUS transmit
   uint8_t               txBuf[8];
   uint32_t*             pTxMailbox;
@@ -153,12 +155,13 @@ void AK10_9_ServoMode_GetFeedbackMsg(CAN_RxHeaderTypeDef* rxheader, AK10_9Handle
 void AK10_9_ServoMode_Zeroing(AK10_9HandleCubaMarsFW* hmotor);
 void AK10_9_MITMode_EnableMotor(AK10_9HandleCubaMarsFW* hmotor);
 void AK10_9_MITMode_DisableMotor(AK10_9HandleCubaMarsFW* hmotor);
+void AK10_9_CubeMarsFW_MITMode_ZeroingControlParameters(AK10_9HandleCubaMarsFW* hmotor);
 void AK10_9_MITMode_Zeroing(AK10_9HandleCubaMarsFW* hmotor);
 void AK10_9_MITModeControl_Deg(AK10_9HandleCubaMarsFW* hmotor, float pos, float vel, float kp, float kd, float iq);
 void AK10_9_MITModeControl_Rad(AK10_9HandleCubaMarsFW* hmotor, float pos, float vel, float kp, float kd, float iq);
 void AK10_9_MITModeCurrentControl(AK10_9HandleCubaMarsFW* hmotor, float iq);
 void AK10_9_MITMode_GetFeedbackMsg(CAN_RxHeaderTypeDef* rxheader, AK10_9HandleCubaMarsFW* hmotor, uint8_t rxbuf[]);
-void AK10_9_MotorStatusMonitor(AK10_9HandleCubaMarsFW* hmotor);
+void AK10_9_CubeMarsFW_MotorStatusMonitor(AK10_9HandleCubaMarsFW* hmotor, uint32_t timeout_ms);
 void AK10_9_CubeMarsFW_MITMode_ContinuousControlManager(AK10_9HandleCubaMarsFW* hmotor, \
                                                         float pos_slope, float vel_slope, float iq_slope, \
                                                         float kp_slope, float kd_slope, float loop_duration_ms);
@@ -170,12 +173,14 @@ void AK10_9_CubaMarsFW_MITMode_ContinuousControlWithOffset_Deg(AK10_9HandleCubaM
 void AK10_9_DMFW_EnableMotor(AK10_9HandleDMFW* hmotor);
 void AK10_9_DMFW_DisableMotor(AK10_9HandleDMFW* hmotor);
 void AK10_9_DMFW_Zeroing(AK10_9HandleDMFW* hmotor);
+void AK10_9_DMFW_MITMode_ZeroingControlParameters(AK10_9HandleDMFW* hmotor);
 void AK10_9_DMFW_MITModeControl_Rad(AK10_9HandleDMFW* hmotor, float pos, float vel, float kp, float kd, float iq);
 void AK10_9_DMFW_MITModeControl_Deg(AK10_9HandleDMFW* hmotor, float pos, float vel, float kp, float kd, float iq);
 void AK10_9_DMFW_MITModeCurrentControl(AK10_9HandleDMFW* hmotor, float iq);
 void AK10_9_DMFW_PositionVelocityControl(AK10_9HandleDMFW* hmotor, float pos, float vel);
 void AK10_9_DMFW_VelocityControl(AK10_9HandleDMFW* hmotor, float vel);
 void AK10_9_DMFW_GetFeedbackMsg(CAN_RxHeaderTypeDef* rxheader, AK10_9HandleDMFW* hmotor, uint8_t rxbuf[]);
+void AK10_9_DMFW_MotorStatusMonitor(AK10_9HandleDMFW* hmotor, uint32_t timeout_ms);
 void AK10_9_DMFW_MITMode_ContinuousControlManager(AK10_9HandleDMFW* hmotor, \
                                                       float pos_slope_deg, float vel_slope_deg, float iq_slope, \
                                                       float kp_slope, float kd_slope, float loop_duration_ms);

@@ -190,8 +190,8 @@ void AK10Calibration_Task(void *argument)
     if (ifIMUFeedbackStarted)
       EXOSKELETON_SetIMUMode_ACC_Only(&hIMURightThigh);
     
-    AK10_9_MotorStatusMonitor(&hAKMotorRightKnee);
-    AK10_9_MotorStatusMonitor(&hAKMotorRightHip_old);
+    AK10_9_CubeMarsFW_MotorStatusMonitor(&hAKMotorRightKnee, 100);
+    AK10_9_DMFW_MotorStatusMonitor(&hAKMotorRightHip, 100);
     
     osDelay(1);
   }

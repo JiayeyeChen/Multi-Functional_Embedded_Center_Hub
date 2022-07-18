@@ -5,6 +5,8 @@
 #include "system_periphrals.h"
 #include "usb.h"
 
+#define SYSTEMID_JOINT_POSITIONING_STABILIZING_TIME 1000
+
 enum IMU_Operation_Mode
 {
   IMU_MODE_NDOF,

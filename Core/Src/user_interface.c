@@ -311,9 +311,9 @@ void UI_Page_LowerLimb_Exoskeleton(void)
   
   LCD_SetLayer(1); 
   LCD_SetColor(LCD_BLACK);
-  LCD_DisplayDecimals(350, 100, hAKMotorRightHip_old.realPositionOffseted.f, 5, 1);
+  LCD_DisplayDecimals(350, 100, hAKMotorRightHip.realPositionOffseted.f, 5, 1);
   LCD_DisplayDecimals(350, 125, hAKMotorRightKnee.realPositionOffseted.f, 5, 1);
-  if (hAKMotorRightHip_old.status == AK10_9_Online)
+  if (hAKMotorRightHip.status == AK10_9_Online)
     LCD_DisplayString(150, 100, "Online");
   else
     LCD_DisplayString(150, 100, "Offline");
@@ -450,10 +450,7 @@ void UI_Page_LowerLimb_Exoskeleton_SystemID(void)
   {
     AK10_9_MITMode_EnableMotor(&hAKMotorRightKnee);
     AK10_9_DMFW_EnableMotor(&hAKMotorRightHip);
-    /*For testing*/
-    hSystemID.curTask = EXOSKELETON_SYSTEMID_TASK_KNEE_JOINT_MOVEMENT_POSITIONING;
-    ///////////////
-//    hSystemID.curTask = EXOSKELETON_SYSTEMID_TASK_START;
+    hSystemID.curTask = EXOSKELETON_SYSTEMID_TASK_START;
   }
   if (ifButtonPressed(&hButtonSystemIDJointMovementStart))
   {

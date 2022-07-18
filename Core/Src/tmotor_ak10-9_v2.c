@@ -206,16 +206,7 @@ void AK10_9_MITMode_EnableMotor(AK10_9HandleCubaMarsFW* hmotor)
   hmotor->txBuf[7] = 0xFC;
   HAL_CAN_AddTxMessage(hmotor->hcan, &(hmotor->txHeader), hmotor->txBuf, hmotor->pTxMailbox);
   
-  hmotor->setPos.f = 0.0f;
-  hmotor->goalPos.f = 0.0f;
-  hmotor->setVel.f = 0.0f;
-  hmotor->goalVel.f = 0.0f;
-  hmotor->setIq.f = 0.0f;
-  hmotor->goalIq.f = 0.0f;
-  hmotor->setKp.f = 0.0f;
-  hmotor->goalKp.f = 0.0f;
-  hmotor->setKd.f = 0.0f;
-  hmotor->goalKd.f = 0.0f;
+  AK10_9_CubeMarsFW_MITMode_ZeroingControlParameters(hmotor);
   hmotor->enablingStatus = AK10_9_MITMODE_ENABLED;
 }
 void AK10_9_MITMode_DisableMotor(AK10_9HandleCubaMarsFW* hmotor)
@@ -234,16 +225,7 @@ void AK10_9_MITMode_DisableMotor(AK10_9HandleCubaMarsFW* hmotor)
   hmotor->txBuf[7] = 0xFD;
   HAL_CAN_AddTxMessage(hmotor->hcan, &(hmotor->txHeader), hmotor->txBuf, hmotor->pTxMailbox);
   
-  hmotor->setPos.f = 0.0f;
-  hmotor->goalPos.f = 0.0f;
-  hmotor->setVel.f = 0.0f;
-  hmotor->goalVel.f = 0.0f;
-  hmotor->setIq.f = 0.0f;
-  hmotor->goalIq.f = 0.0f;
-  hmotor->setKp.f = 0.0f;
-  hmotor->goalKp.f = 0.0f;
-  hmotor->setKd.f = 0.0f;
-  hmotor->goalKd.f = 0.0f;
+  AK10_9_CubeMarsFW_MITMode_ZeroingControlParameters(hmotor);
   hmotor->enablingStatus = AK10_9_MITMODE_DISABLED;
 }
 
@@ -262,6 +244,21 @@ void AK10_9_MITMode_Zeroing(AK10_9HandleCubaMarsFW* hmotor)
   hmotor->txBuf[6] = 0xFF;
   hmotor->txBuf[7] = 0xFE;
   HAL_CAN_AddTxMessage(hmotor->hcan, &(hmotor->txHeader), hmotor->txBuf, hmotor->pTxMailbox);
+}
+
+void AK10_9_CubeMarsFW_MITMode_ZeroingControlParameters(AK10_9HandleCubaMarsFW* hmotor)
+{
+  hmotor->setPos.f = 0.0f;
+  hmotor->goalPos.f = 0.0f;
+  hmotor->setVel.f = 0.0f;
+  hmotor->goalVel.f = 0.0f;
+  hmotor->setIq.f = 0.0f;
+  hmotor->goalIq.f = 0.0f;
+  hmotor->setKp.f = 0.0f;
+  hmotor->goalKp.f = 0.0f;
+  hmotor->setKd.f = 0.0f;
+  hmotor->goalKd.f = 0.0f;
+  hmotor->ifMITModeParameterSmootherWorkFinished = 1;
 }
 
 void AK10_9_MITModeControl_Deg(AK10_9HandleCubaMarsFW* hmotor, float pos, float vel, float kp, float kd, float iq)
@@ -343,11 +340,12 @@ void AK10_9_MITMode_GetFeedbackMsg(CAN_RxHeaderTypeDef* rxheader, AK10_9HandleCu
   
   hmotor->realAccelerationFilteredRad.f = hmotor->realAccelerationFiltered.f * deg2rad;
   //////////////////////////////////////////////////////
+  hmotor->lastReceivedTime = HAL_GetTick();
 }
 
-void AK10_9_MotorStatusMonitor(AK10_9HandleCubaMarsFW* hmotor)
+void AK10_9_CubeMarsFW_MotorStatusMonitor(AK10_9HandleCubaMarsFW* hmotor, uint32_t timeout_ms)
 {
-  if ((HAL_GetTick() - hmotor->lastReceivedTime) > 100)
+  if ((HAL_GetTick() - hmotor->lastReceivedTime) > timeout_ms)
     hmotor->status = AK10_9_Offline;
   else
     hmotor->status = AK10_9_Online;
@@ -359,37 +357,37 @@ void AK10_9_CubeMarsFW_MITMode_ContinuousControlManager(AK10_9HandleCubaMarsFW* 
 {
   if (hmotor->enablingStatus == AK10_9_MITMODE_ENABLED)
   {
-    float diff_pos = hmotor->goalPos.f - hmotor->setPos.f;
-    float diff_vel = hmotor->goalVel.f - hmotor->setVel.f;
-    float diff_kp =  hmotor->goalKp.f - hmotor->setKp.f;
-    float diff_kd =  hmotor->goalKd.f - hmotor->setKd.f;
-    float diff_iq =  hmotor->goalIq.f - hmotor->setIq.f;
+    float diff_pos = hmotor->goalPos.f - hmotor->setPos.f, abs_diff_pos = fabs(diff_pos);
+    float diff_vel = hmotor->goalVel.f - hmotor->setVel.f, abs_diff_vel = fabs(diff_vel);
+    float diff_kp =  hmotor->goalKp.f - hmotor->setKp.f, abs_diff_kp = fabs(diff_kp);
+    float diff_kd =  hmotor->goalKd.f - hmotor->setKd.f, abs_diff_kd = fabs(diff_kd);
+    float diff_iq =  hmotor->goalIq.f - hmotor->setIq.f, abs_diff_iq = fabs(diff_iq);
     /* Position smoother */
     if (fabs(diff_pos) > 1.0f)//1 Deg
-      hmotor->setPos.f += (diff_pos / fabs(diff_pos)) * pos_slope * loop_duration_ms;
+      hmotor->setPos.f += (diff_pos / abs_diff_pos) * pos_slope * loop_duration_ms;
     else
       hmotor->setPos.f = hmotor->goalPos.f;
     /* Velocity smoother */
     if (fabs(diff_vel) > 1.0f)//1 Deg/sec
-      hmotor->setVel.f += (diff_vel / fabs(diff_vel)) * vel_slope * loop_duration_ms;
+      hmotor->setVel.f += (diff_vel / abs_diff_vel) * vel_slope * loop_duration_ms;
     else
       hmotor->setVel.f = hmotor->goalVel.f;
     /* Iq smoother */
     if (fabs(diff_iq) > 1.0f)//1 Deg/sec
-      hmotor->setIq.f += (diff_iq / fabs(diff_iq)) * iq_slope * loop_duration_ms;
+      hmotor->setIq.f += (diff_iq / abs_diff_iq) * iq_slope * loop_duration_ms;
     else
       hmotor->setIq.f = hmotor->goalIq.f;
     /* Kp smoother */
     if (fabs(diff_kp) > 1.0f)
-      hmotor->setKp.f += (diff_kp / fabs(diff_kp)) * kp_slope * loop_duration_ms;
+      hmotor->setKp.f += (diff_kp / abs_diff_kp) * kp_slope * loop_duration_ms;
     else
       hmotor->setKp.f = hmotor->goalKp.f;
     /* Kd smoother */
     if (fabs(diff_kd) > 1.0f)
-      hmotor->setKd.f += (diff_kd / fabs(diff_kd)) * kd_slope * loop_duration_ms;
+      hmotor->setKd.f += (diff_kd / abs_diff_kd) * kd_slope * loop_duration_ms;
     else
       hmotor->setKd.f = hmotor->goalKd.f;
-    
+
     AK10_9_MITModeControl_Deg(hmotor, hmotor->setPos.f, hmotor->setVel.f, hmotor->setKp.f, hmotor->setKd.f, hmotor->setIq.f);
   }
   else if (hmotor->enablingStatus == AK10_9_MITMODE_DISABLED)
@@ -404,6 +402,17 @@ void AK10_9_CubaMarsFW_MITMode_ContinuousControl_Deg(AK10_9HandleCubaMarsFW* hmo
   hmotor->goalKp.f = goal_kp;
   hmotor->goalKd.f = goal_kd;
   hmotor->goalIq.f = goal_iq;
+  
+  float diff_pos = hmotor->goalPos.f - hmotor->setPos.f, abs_diff_pos = fabs(diff_pos);
+  float diff_vel = hmotor->goalVel.f - hmotor->setVel.f, abs_diff_vel = fabs(diff_vel);
+  float diff_kp =  hmotor->goalKp.f - hmotor->setKp.f, abs_diff_kp = fabs(diff_kp);
+  float diff_kd =  hmotor->goalKd.f - hmotor->setKd.f, abs_diff_kd = fabs(diff_kd);
+  float diff_iq =  hmotor->goalIq.f - hmotor->setIq.f, abs_diff_iq = fabs(diff_iq);
+  
+  if (abs_diff_pos <= 1.0f && abs_diff_vel <= 1.0f && abs_diff_kp <= 1.0f && abs_diff_kd <= 1.0f && abs_diff_iq <= 1.0f)
+    hmotor->ifMITModeParameterSmootherWorkFinished = 1;
+  else
+    hmotor->ifMITModeParameterSmootherWorkFinished = 0;
 }
 
 void AK10_9_CubaMarsFW_MITMode_ContinuousControlWithOffset_Deg(AK10_9HandleCubaMarsFW* hmotor, float goal_pos, float goal_vel, \
@@ -433,16 +442,7 @@ void AK10_9_DMFW_EnableMotor(AK10_9HandleDMFW* hmotor)
   hmotor->txBuf[7] = 0xFC;
   HAL_CAN_AddTxMessage(hmotor->hcan, &(hmotor->txHeader), hmotor->txBuf, hmotor->pTxMailbox);
   
-  hmotor->setPos.f = 0.0f;
-  hmotor->goalPos.f = 0.0f;
-  hmotor->setVel.f = 0.0f;
-  hmotor->goalVel.f = 0.0f;
-  hmotor->setIq.f = 0.0f;
-  hmotor->goalIq.f = 0.0f;
-  hmotor->setKp.f = 0.0f;
-  hmotor->goalKp.f = 0.0f;
-  hmotor->setKd.f = 0.0f;
-  hmotor->goalKd.f = 0.0f;
+  AK10_9_DMFW_MITMode_ZeroingControlParameters(hmotor);
   hmotor->enablingStatus = AK10_9_MITMODE_ENABLED;
 }
 void AK10_9_DMFW_DisableMotor(AK10_9HandleDMFW* hmotor)
@@ -466,16 +466,7 @@ void AK10_9_DMFW_DisableMotor(AK10_9HandleDMFW* hmotor)
   hmotor->txBuf[7] = 0xFD;
   HAL_CAN_AddTxMessage(hmotor->hcan, &(hmotor->txHeader), hmotor->txBuf, hmotor->pTxMailbox);
   
-  hmotor->setPos.f = 0.0f;
-  hmotor->goalPos.f = 0.0f;
-  hmotor->setVel.f = 0.0f;
-  hmotor->goalVel.f = 0.0f;
-  hmotor->setIq.f = 0.0f;
-  hmotor->goalIq.f = 0.0f;
-  hmotor->setKp.f = 0.0f;
-  hmotor->goalKp.f = 0.0f;
-  hmotor->setKd.f = 0.0f;
-  hmotor->goalKd.f = 0.0f;
+  AK10_9_DMFW_MITMode_ZeroingControlParameters(hmotor);
   hmotor->enablingStatus = AK10_9_MITMODE_DISABLED;
 }
 
@@ -494,6 +485,29 @@ void AK10_9_DMFW_Zeroing(AK10_9HandleDMFW* hmotor)
   hmotor->txBuf[6] = 0xFF;
   hmotor->txBuf[7] = 0xFE;
   HAL_CAN_AddTxMessage(hmotor->hcan, &(hmotor->txHeader), hmotor->txBuf, hmotor->pTxMailbox);
+}
+
+void AK10_9_DMFW_MITMode_ZeroingControlParameters(AK10_9HandleDMFW* hmotor)
+{
+  hmotor->setPos.f = 0.0f;
+  hmotor->goalPos.f = 0.0f;
+  hmotor->setVel.f = 0.0f;
+  hmotor->goalVel.f = 0.0f;
+  hmotor->setIq.f = 0.0f;
+  hmotor->goalIq.f = 0.0f;
+  hmotor->setKp.f = 0.0f;
+  hmotor->goalKp.f = 0.0f;
+  hmotor->setKd.f = 0.0f;
+  hmotor->goalKd.f = 0.0f;
+  hmotor->ifMITModeParameterSmootherWorkFinished = 1;
+}
+
+void AK10_9_DMFW_MotorStatusMonitor(AK10_9HandleDMFW* hmotor, uint32_t timeout_ms)
+{
+  if ((HAL_GetTick() - hmotor->lastReceivedTime) > timeout_ms)
+    hmotor->status = AK10_9_Offline;
+  else
+    hmotor->status = AK10_9_Online;
 }
 
 void AK10_9_DMFW_MITModeControl_Rad(AK10_9HandleDMFW* hmotor, float pos, float vel, float kp, float kd, float iq)
@@ -549,34 +563,34 @@ void AK10_9_DMFW_MITMode_ContinuousControlManager(AK10_9HandleDMFW* hmotor, \
 {
   if (hmotor->enablingStatus == AK10_9_MITMODE_ENABLED)
   {
-    float diff_pos = hmotor->goalPos.f - hmotor->setPos.f;
-    float diff_vel = hmotor->goalVel.f - hmotor->setVel.f;
-    float diff_kp =  hmotor->goalKp.f - hmotor->setKp.f;
-    float diff_kd =  hmotor->goalKd.f - hmotor->setKd.f;
-    float diff_iq =  hmotor->goalIq.f - hmotor->setIq.f;
+    float diff_pos = hmotor->goalPos.f - hmotor->setPos.f, abs_diff_pos = fabs(diff_pos);
+    float diff_vel = hmotor->goalVel.f - hmotor->setVel.f, abs_diff_vel = fabs(diff_vel);
+    float diff_kp =  hmotor->goalKp.f - hmotor->setKp.f, abs_diff_kp = fabs(diff_kp);
+    float diff_kd =  hmotor->goalKd.f - hmotor->setKd.f, abs_diff_kd = fabs(diff_kd);
+    float diff_iq =  hmotor->goalIq.f - hmotor->setIq.f, abs_diff_iq = fabs(diff_iq);
     /* Position smoother */
     if (fabs(diff_pos) > deg2rad)//1 Deg
-      hmotor->setPos.f += (diff_pos / fabs(diff_pos)) * pos_slope_deg * deg2rad * loop_duration_ms;
+      hmotor->setPos.f += (diff_pos / abs_diff_pos) * pos_slope_deg * loop_duration_ms;
     else
       hmotor->setPos.f = hmotor->goalPos.f;
     /* Velocity smoother */
     if (fabs(diff_vel) > deg2rad)//1 Deg/sec
-      hmotor->setVel.f += (diff_vel / fabs(diff_vel)) * vel_slope_deg * deg2rad * loop_duration_ms;
+      hmotor->setVel.f += (diff_vel / abs_diff_vel) * vel_slope_deg * loop_duration_ms;
     else
       hmotor->setVel.f = hmotor->goalVel.f;
     /* Iq smoother */
     if (fabs(diff_iq) > 1.0f)
-      hmotor->setIq.f += (diff_iq / fabs(diff_iq)) * iq_slope * loop_duration_ms;
+      hmotor->setIq.f += (diff_iq / abs_diff_iq) * iq_slope * loop_duration_ms;
     else
       hmotor->setIq.f = hmotor->goalIq.f;
     /* Kp smoother */
     if (fabs(diff_kp) > 1.0f)
-      hmotor->setKp.f += (diff_kp / fabs(diff_kp)) * kp_slope * loop_duration_ms;
+      hmotor->setKp.f += (diff_kp / abs_diff_kp) * kp_slope * loop_duration_ms;
     else
       hmotor->setKp.f = hmotor->goalKp.f;
     /* Kd smoother */
     if (fabs(diff_kd) > 1.0f)
-      hmotor->setKd.f += (diff_kd / fabs(diff_kd)) * kd_slope * loop_duration_ms;
+      hmotor->setKd.f += (diff_kd / abs_diff_kd) * kd_slope * loop_duration_ms;
     else
       hmotor->setKd.f = hmotor->goalKd.f;
     
@@ -594,6 +608,17 @@ void AK10_9_DMFW_MITMode_ContinuousControl_Rad(AK10_9HandleDMFW* hmotor, float g
   hmotor->goalKp.f = goal_kp;
   hmotor->goalKd.f = goal_kd;
   hmotor->goalIq.f = goal_iq;
+  
+  float diff_pos = hmotor->goalPos.f - hmotor->setPos.f, abs_diff_pos = fabs(diff_pos);
+  float diff_vel = hmotor->goalVel.f - hmotor->setVel.f, abs_diff_vel = fabs(diff_vel);
+  float diff_kp =  hmotor->goalKp.f - hmotor->setKp.f, abs_diff_kp = fabs(diff_kp);
+  float diff_kd =  hmotor->goalKd.f - hmotor->setKd.f, abs_diff_kd = fabs(diff_kd);
+  float diff_iq =  hmotor->goalIq.f - hmotor->setIq.f, abs_diff_iq = fabs(diff_iq);
+  
+  if (abs_diff_pos <= deg2rad && abs_diff_vel <= deg2rad && abs_diff_kp <= 1.0f && abs_diff_kd <= 1.0f && abs_diff_iq <= 1.0f)
+    hmotor->ifMITModeParameterSmootherWorkFinished = 1;
+  else
+    hmotor->ifMITModeParameterSmootherWorkFinished = 0;
 }
 
 void AK10_9_DMFW_MITMode_ContinuousControl_Deg(AK10_9HandleDMFW* hmotor, float goal_pos, float goal_vel, \
@@ -603,11 +628,7 @@ void AK10_9_DMFW_MITMode_ContinuousControl_Deg(AK10_9HandleDMFW* hmotor, float g
   goal_pos_rad = goal_pos * deg2rad;
   goal_vel_rad = goal_vel * deg2rad;
   
-  hmotor->goalPos.f = goal_pos_rad;
-  hmotor->goalVel.f = goal_vel_rad;
-  hmotor->goalKp.f = goal_kp;
-  hmotor->goalKd.f = goal_kd;
-  hmotor->goalIq.f = goal_iq;
+  AK10_9_DMFW_MITMode_ContinuousControl_Rad(hmotor, goal_pos_rad, goal_vel_rad, goal_kp, goal_kd, goal_iq);
 }
 
 void AK10_9_DMFW_MITMode_ContinuousControlWithOffset_Deg(AK10_9HandleDMFW* hmotor, float goal_pos, float goal_vel, \
@@ -705,6 +726,7 @@ void AK10_9_DMFW_GetFeedbackMsg(CAN_RxHeaderTypeDef* rxheader, AK10_9HandleDMFW*
   
   hmotor->realAccelerationFilteredRad.f = hmotor->realAccelerationFiltered.f * deg2rad;
   //////////////////////////////////////////////////////
+  hmotor->lastReceivedTime = HAL_GetTick();
 }
 
 /*Dump Dump Dump Dump Dump Dump Dump Dump Dump Dump Dump Dump Dump Dump Dump Dump Dump Dump */
