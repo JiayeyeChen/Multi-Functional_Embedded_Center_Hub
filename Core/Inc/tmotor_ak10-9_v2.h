@@ -175,7 +175,7 @@ void AK10_9_DMFW_PositionVelocityControl(AK10_9HandleDMFW* hmotor, float pos, fl
 void AK10_9_DMFW_VelocityControl(AK10_9HandleDMFW* hmotor, float vel);
 void AK10_9_DMFW_GetFeedbackMsg(CAN_RxHeaderTypeDef* rxheader, AK10_9HandleDMFW* hmotor, uint8_t rxbuf[]);
 void AK10_9_DMFW_MITMode_ContinuousControlManager(AK10_9HandleDMFW* hmotor, \
-                                                      float pos_slope, float vel_slope, float iq_slope, \
+                                                      float pos_slope_deg, float vel_slope_deg, float iq_slope, \
                                                       float kp_slope, float kd_slope, float loop_duration_ms);
 void AK10_9_DMFW_MITMode_ContinuousControl_Rad(AK10_9HandleDMFW* hmotor, float goal_pos, float goal_vel, \
                                                  float goal_kp, float goal_kd, float goal_iq);

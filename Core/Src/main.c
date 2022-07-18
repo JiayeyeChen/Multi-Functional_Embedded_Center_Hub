@@ -164,17 +164,22 @@ void AK10Calibration_Task(void *argument)
       }
       else if (hUI.curPage == &UIPage_AK10_9_ManualControlCubeMarsFWMITMode)
       {
-        AK10_9_MITModeControl_Deg(hMotorPtrManualControl, manualControlValue_pos, manualControlValue_vel, \
-                                        manualControlValue_kp, manualControlValue_kd, manualControlValue_cur);
+        AK10_9_CubaMarsFW_MITMode_ContinuousControl_Deg(hMotorPtrManualControl, \
+                                                        manualControlValue_pos, manualControlValue_vel, \
+                                                        manualControlValue_kp, manualControlValue_kd, manualControlValue_cur);
+        AK10_9_CubeMarsFW_MITMode_ContinuousControlManager(hMotorPtrManualControl, \
+                                                           30.0f, 180.0f, 1.0f, 100.0f, 0.5f, 0.001f);
       }
       else if (hUI.curPage == &UIPage_AK10_9_ManualControlDMFW)
       {
         if (hAKMotorRightHip.controlMode == AK10_9_DM_FW_MODE_MIT)
-          AK10_9_DMFW_MITModeControl_Deg(&hAKMotorRightHip, manualControlValue_pos, manualControlValue_vel, \
-                                         manualControlValue_kp, manualControlValue_kd, manualControlValue_cur);
-//          AK10_9_DMFW_MITMode_PositionSpeedControlCustomized_Deg(&hAKMotorRightHip, manualControlValue_pos, \
-//                                     manualControlValue_vel, manualControlValue_kp, \
-//                                     manualControlValue_kd, 0.001f);
+        {
+          AK10_9_DMFW_MITMode_ContinuousControl_Deg(&hAKMotorRightHip, \
+                                                    manualControlValue_pos, manualControlValue_vel, \
+                                                    manualControlValue_kp, manualControlValue_kd, manualControlValue_cur);
+          AK10_9_DMFW_MITMode_ContinuousControlManager(&hAKMotorRightHip, \
+                                                        30.0f, 180.0f, 1.0f, 100.0f, 0.5f, 0.001f);
+        }
         else if (hAKMotorRightHip.controlMode == AK10_9_DM_FW_MODE_VELOCITY)
           AK10_9_DMFW_VelocityControl(&hAKMotorRightHip, manualControlValue_vel);
         else if (hAKMotorRightHip.controlMode == AK10_9_DM_FW_MODE_POSITION)

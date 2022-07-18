@@ -353,7 +353,7 @@ void AK10_9_MotorStatusMonitor(AK10_9HandleCubaMarsFW* hmotor)
     hmotor->status = AK10_9_Online;
 }
 
-void AK10_9_CubeMarsFW_MITMode_ContinuousControlManager_Deg(AK10_9HandleCubaMarsFW* hmotor, \
+void AK10_9_CubeMarsFW_MITMode_ContinuousControlManager(AK10_9HandleCubaMarsFW* hmotor, \
                                                  float pos_slope, float vel_slope, float iq_slope, \
                                                  float kp_slope, float kd_slope, float loop_duration_ms)
 {
@@ -538,8 +538,8 @@ void AK10_9_DMFW_MITModeCurrentControl(AK10_9HandleDMFW* hmotor, float iq)
 }
 
 void AK10_9_DMFW_MITMode_ContinuousControlManager(AK10_9HandleDMFW* hmotor, \
-                                           float pos_slope, float vel_slope, float iq_slope, \
-                                           float kp_slope, float kd_slope, float loop_duration_ms)
+                                                  float pos_slope_deg, float vel_slope_deg, float iq_slope, \
+                                                  float kp_slope, float kd_slope, float loop_duration_ms)
 {
   if (hmotor->enablingStatus == AK10_9_MITMODE_ENABLED)
   {
@@ -549,17 +549,17 @@ void AK10_9_DMFW_MITMode_ContinuousControlManager(AK10_9HandleDMFW* hmotor, \
     float diff_kd =  hmotor->goalKd.f - hmotor->setKd.f;
     float diff_iq =  hmotor->goalIq.f - hmotor->setIq.f;
     /* Position smoother */
-    if (fabs(diff_pos) > 1.0f)//1 Deg
-      hmotor->setPos.f += (diff_pos / fabs(diff_pos)) * pos_slope * loop_duration_ms;
+    if (fabs(diff_pos) > deg2rad)//1 Deg
+      hmotor->setPos.f += (diff_pos / fabs(diff_pos)) * pos_slope_deg * deg2rad * loop_duration_ms;
     else
       hmotor->setPos.f = hmotor->goalPos.f;
     /* Velocity smoother */
-    if (fabs(diff_vel) > 1.0f)//1 Deg/sec
-      hmotor->setVel.f += (diff_vel / fabs(diff_vel)) * vel_slope * loop_duration_ms;
+    if (fabs(diff_vel) > deg2rad)//1 Deg/sec
+      hmotor->setVel.f += (diff_vel / fabs(diff_vel)) * vel_slope_deg * deg2rad * loop_duration_ms;
     else
       hmotor->setVel.f = hmotor->goalVel.f;
     /* Iq smoother */
-    if (fabs(diff_iq) > 1.0f)//1 Deg/sec
+    if (fabs(diff_iq) > 1.0f)
       hmotor->setIq.f += (diff_iq / fabs(diff_iq)) * iq_slope * loop_duration_ms;
     else
       hmotor->setIq.f = hmotor->goalIq.f;
@@ -583,12 +583,8 @@ void AK10_9_DMFW_MITMode_ContinuousControlManager(AK10_9HandleDMFW* hmotor, \
 void AK10_9_DMFW_MITMode_ContinuousControl_Rad(AK10_9HandleDMFW* hmotor, float goal_pos, float goal_vel, \
                                                  float goal_kp, float goal_kd, float goal_iq)
 {
-  float goal_pos_rad, goal_vel_rad;
-  goal_pos_rad = goal_pos * deg2rad;
-  goal_vel_rad = goal_vel * deg2rad;
-  
-  hmotor->goalPos.f = goal_pos_rad;
-  hmotor->goalVel.f = goal_vel_rad;
+  hmotor->goalPos.f = goal_pos;
+  hmotor->goalVel.f = goal_vel;
   hmotor->goalKp.f = goal_kp;
   hmotor->goalKd.f = goal_kd;
   hmotor->goalIq.f = goal_iq;
@@ -597,8 +593,12 @@ void AK10_9_DMFW_MITMode_ContinuousControl_Rad(AK10_9HandleDMFW* hmotor, float g
 void AK10_9_DMFW_MITMode_ContinuousControl_Deg(AK10_9HandleDMFW* hmotor, float goal_pos, float goal_vel, \
                                                  float goal_kp, float goal_kd, float goal_iq)
 {
-  hmotor->goalPos.f = goal_pos;
-  hmotor->goalVel.f = goal_vel;
+  float goal_pos_rad, goal_vel_rad;
+  goal_pos_rad = goal_pos * deg2rad;
+  goal_vel_rad = goal_vel * deg2rad;
+  
+  hmotor->goalPos.f = goal_pos_rad;
+  hmotor->goalVel.f = goal_vel_rad;
   hmotor->goalKp.f = goal_kp;
   hmotor->goalKd.f = goal_kd;
   hmotor->goalIq.f = goal_iq;
