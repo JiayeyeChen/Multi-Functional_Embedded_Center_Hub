@@ -76,13 +76,16 @@ void USB_ReceiveCargo(void)
       crcReceive.b8[2] = hUSB.rxMsgRaw[*hUSB.len - 3];
       crcReceive.b8[3] = hUSB.rxMsgRaw[*hUSB.len - 2];
       
+      #ifdef USB_USE_CRC
+      if (crcCalculatedResult == crcReceive.b32)
+      {
+        memcpy(hUSB.rxMessageCfrm, &hUSB.rxMsgRaw[3], hUSB.rxMessageLen);
+        hUSB.ifNewCargo = 1;
+      }
+      #else
       memcpy(hUSB.rxMessageCfrm, &hUSB.rxMsgRaw[3], hUSB.rxMessageLen);
       hUSB.ifNewCargo = 1;
-//////      if (crcCalculatedResult == crcReceive.b32)
-//////      {
-//////        memcpy(hUSB.rxMessageCfrm, &hUSB.rxMsgRaw[3], hUSB.rxMessageLen);
-//////        hUSB.ifNewCargo = 1;
-//////      }
+      #endif
     }
     else
     {

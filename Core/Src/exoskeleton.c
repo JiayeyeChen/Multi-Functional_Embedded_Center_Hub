@@ -325,7 +325,7 @@ void EXOSKELETON_SystemID_Set_Datalog_Label(void)
 void EXOSKELETON_SystemID_UpdateDataSlot(void)
 {
   uint8_t ptr = 0;
-  dataSlots_Exoskeleton_SystemID[ptr++].f = pi/12.0f;
+  dataSlots_Exoskeleton_SystemID[ptr++].f = 0.0f;
   dataSlots_Exoskeleton_SystemID[ptr++].f = hAKMotorRightHip.realPositionOffsetedRad.f;
   dataSlots_Exoskeleton_SystemID[ptr++].f = hAKMotorRightHip.realVelocityPresentRad.f;
   dataSlots_Exoskeleton_SystemID[ptr++].f = hAKMotorRightHip.realAccelerationFilteredRad.f;

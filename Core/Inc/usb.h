@@ -8,6 +8,8 @@
 #include "common.h"
 #include <stdarg.h>
 
+//#define USB_USE_CRC
+
 enum DatalogType
 {
   DATALOG_TYPE_NOLIMIT,

@@ -712,6 +712,7 @@ void AK10_9_DMFW_GetFeedbackMsg(CAN_RxHeaderTypeDef* rxheader, AK10_9HandleDMFW*
   hmotor->realVelocityPrevious[0].f = hmotor->realVelocityPresent.f;
   hmotor->realCurrent.f  = UintToFloat(iUint, i_min, i_max, 12);
   hmotor->realCurrent.f *= hmotor->posDirectionCorrection;
+  hmotor->realTorque.f = hmotor->realCurrent.f * hmotor->kt;
   
   //Butterworth filter method to estimate acceleration//
   hmotor->realAccelerationFiltered.f = hmotor->b1Butter * hmotor->realAccelerationRaw.f + \
