@@ -12,7 +12,14 @@
 #define AK10_9_SPECIAL_COMMAND_ZEROING_MOTOR 2U
 
 #define SIZE_OF_MOVING_ACC_AVG_BUFFER        25U
-enum AK10_9_Status
+
+enum AK10_9_MITMode_MotorEnablingStatus
+{
+  AK10_9_MITMODE_ENABLED,
+  AK10_9_MITMODE_DISABLED
+};
+
+enum AK10_9_OnlineStatus
 {
   AK10_9_Online,
   AK10_9_Offline
@@ -27,11 +34,12 @@ enum ControlModeDMFW
 
 typedef struct
 {
-  CAN_HandleTypeDef*    hcan;
-  uint32_t              canID;
-  int8_t                temperature;
-  uint8_t               errorCode;
-  enum AK10_9_Status    status;
+  CAN_HandleTypeDef*                        hcan;
+  uint32_t                                  canID;
+  int8_t                                    temperature;
+  uint8_t                                   errorCode;
+  enum AK10_9_OnlineStatus                  status;
+  enum AK10_9_MITMode_MotorEnablingStatus   enablingStatus;
   
   float                 kt;
   float                 posOffsetDeg;
@@ -85,10 +93,11 @@ typedef struct
 
 typedef struct
 {
-  CAN_HandleTypeDef*    hcan;
-  uint8_t               canID;
-  enum AK10_9_Status    status;
-  enum ControlModeDMFW  controlMode;
+  CAN_HandleTypeDef*                        hcan;
+  uint8_t                                   canID;
+  enum AK10_9_OnlineStatus                  status;
+  enum ControlModeDMFW                      controlMode;
+  enum AK10_9_MITMode_MotorEnablingStatus   enablingStatus;
   
   float                 kt;
   float                 posOffsetDeg;
@@ -147,8 +156,6 @@ void AK10_9_MITModeControl_Deg(AK10_9HandleCubaMarsFW* hmotor, float pos, float 
 void AK10_9_MITModeControl_Rad(AK10_9HandleCubaMarsFW* hmotor, float pos, float vel, float kp, float kd, float iq);
 void AK10_9_MITModeCurrentControl(AK10_9HandleCubaMarsFW* hmotor, float iq);
 void AK10_9_MITMode_GetFeedbackMsg(CAN_RxHeaderTypeDef* rxheader, AK10_9HandleCubaMarsFW* hmotor, uint8_t rxbuf[]);
-void AK10_9_MITMode_PositionSpeedControlCustomized_Deg(AK10_9HandleCubaMarsFW* hmotor, float position, float speed, float kp, float kd, float loop_duration);
-void AK10_9_MITMode_PositionSpeedControlCustomizedWithOffset_Deg(AK10_9HandleCubaMarsFW* hmotor, float position, float speed, float kp, float kd, float loop_duration);
 void AK10_9_MotorStatusMonitor(AK10_9HandleCubaMarsFW* hmotor);
 
 void AK10_9_DMFW_EnableMotor(AK10_9HandleDMFW* hmotor);
@@ -157,18 +164,28 @@ void AK10_9_DMFW_Zeroing(AK10_9HandleDMFW* hmotor);
 void AK10_9_DMFW_MITModeControl_Rad(AK10_9HandleDMFW* hmotor, float pos, float vel, float kp, float kd, float iq);
 void AK10_9_DMFW_MITModeControl_Deg(AK10_9HandleDMFW* hmotor, float pos, float vel, float kp, float kd, float iq);
 void AK10_9_DMFW_MITModeCurrentControl(AK10_9HandleDMFW* hmotor, float iq);
-void AK10_9_DMFW_MITMode_PositionSpeedControlCustomized_Rad(AK10_9HandleDMFW* hmotor, float position, float speed, float kp, float kd, float loop_duration);
-void AK10_9_DMFW_MITMode_PositionSpeedControlCustomizedWithOffset_Rad(AK10_9HandleDMFW* hmotor, float position, float speed, float kp, float kd, float loop_duration);
-void AK10_9_DMFW_MITMode_PositionSpeedControlCustomized_Deg(AK10_9HandleDMFW* hmotor, float position, float speed, float kp, float kd, float loop_duration);
-void AK10_9_DMFW_MITMode_PositionSpeedControlCustomizedWithOffset_Deg(AK10_9HandleDMFW* hmotor, float position, float speed, float kp, float kd, float loop_duration);
 void AK10_9_DMFW_PositionVelocityControl(AK10_9HandleDMFW* hmotor, float pos, float vel);
 void AK10_9_DMFW_VelocityControl(AK10_9HandleDMFW* hmotor, float vel);
 void AK10_9_DMFW_GetFeedbackMsg(CAN_RxHeaderTypeDef* rxheader, AK10_9HandleDMFW* hmotor, uint8_t rxbuf[]);
 uint16_t FloatToUint(float x, float x_min, float x_max, uint16_t bits);
 float    UintToFloat(uint16_t x_int, float x_min, float x_max, uint16_t bits);
 
-
-
+/*Dump Dump Dump Dump Dump Dump Dump Dump Dump Dump Dump Dump Dump Dump Dump Dump Dump Dump Dump Dump*/
+//void AK10_9_MITMode_PositionSpeedControlCustomized_Deg(AK10_9HandleCubaMarsFW* hmotor, float position, float speed, float kp, float kd, float loop_duration);
+//void AK10_9_MITMode_PositionSpeedControlCustomizedWithOffset_Deg(AK10_9HandleCubaMarsFW* hmotor, float position, float speed, float kp, float kd, float loop_duration);
+//void AK10_9_DMFW_MITMode_PositionSpeedControlCustomized_Rad(AK10_9HandleDMFW* hmotor, float position, float speed, float kp, float kd, float loop_duration);
+//void AK10_9_DMFW_MITMode_PositionSpeedControlCustomizedWithOffset_Rad(AK10_9HandleDMFW* hmotor, float position, float speed, float kp, float kd, float loop_duration);
+//void AK10_9_DMFW_MITMode_PositionSpeedControlCustomized_Deg(AK10_9HandleDMFW* hmotor, float position, float speed, float kp, float kd, float loop_duration);
+//void AK10_9_DMFW_MITMode_PositionSpeedControlCustomizedWithOffset_Deg(AK10_9HandleDMFW* hmotor, float position, float speed, float kp, float kd, float loop_duration);
+//typedef struct
+//{
+//  uint8_t ifCustomizedPositionSpeedControlStarted;
+//}AK10_9HandleCubaMarsFW;
+//typedef struct
+//{
+//  uint8_t ifCustomizedPositionSpeedControlStarted;
+//}}AK10_9HandleDMFW;
+/*Dump Dump Dump Dump Dump Dump Dump Dump Dump Dump Dump Dump Dump Dump Dump Dump Dump Dump Dump Dump*/
 
 
 #endif

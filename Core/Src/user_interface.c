@@ -328,9 +328,9 @@ void UI_Page_LowerLimb_Exoskeleton(void)
     EXOSKELETON_SystemID_Init();
   }
   else if(ifButtonPressed(&hButtonHipMotorZeroing))
-    AK10_9_ServoMode_Zeroing(&hAKMotorRightHip_old);
+    AK10_9_DMFW_Zeroing(&hAKMotorRightHip);
   else if(ifButtonPressed(&hButtonKneeMotorZeroing))
-    AK10_9_ServoMode_Zeroing(&hAKMotorRightKnee);
+    AK10_9_MITMode_Zeroing(&hAKMotorRightKnee);
   
   if (ifButtonPressed(&hButtonGoBack))
     UI_Page_Change_To(&UIPage_Home1);
@@ -399,7 +399,7 @@ void UI_Page_LowerLimb_Exoskeleton_SystemID(void)
   else if (hSystemID.curTask == EXOSKELETON_SYSTEMID_TASK_END)
     LCD_DisplayString(0, 70, "Ending...            ");
   
-  LCD_DisplayDecimals(350, 700, hAKMotorRightHip_old.realPositionOffseted.f, 5, 1);
+  LCD_DisplayDecimals(350, 700, hAKMotorRightHip.realPositionOffseted.f, 5, 1);
   LCD_DisplayDecimals(350, 725, hAKMotorRightKnee.realPositionOffseted.f, 5, 1);
   if (hAKMotorRightHip_old.status == AK10_9_Online)
     LCD_DisplayString(150, 700, "Online");
@@ -431,7 +431,12 @@ void UI_Page_LowerLimb_Exoskeleton_SystemID(void)
   
   if (ifButtonPressed(&hButtonStart))
   {
-    hSystemID.curTask = EXOSKELETON_SYSTEMID_TASK_START;
+    AK10_9_MITMode_EnableMotor(&hAKMotorRightKnee);
+    AK10_9_DMFW_EnableMotor(&hAKMotorRightHip);
+    /*For testing*/
+    hSystemID.curTask = EXOSKELETON_SYSTEMID_TASK_KNEE_JOINT_MOVEMENT_POSITIONING;
+    ///////////////
+//    hSystemID.curTask = EXOSKELETON_SYSTEMID_TASK_START;
   }
   if (ifButtonPressed(&hButtonSystemIDJointMovementStart))
   {
@@ -446,6 +451,8 @@ void UI_Page_LowerLimb_Exoskeleton_SystemID(void)
   if (ifButtonPressed(&hButtonStop))
   {
     USB_SendText("STOP");
+    AK10_9_MITMode_DisableMotor(&hAKMotorRightKnee);
+    AK10_9_DMFW_DisableMotor(&hAKMotorRightHip);
     hSystemID.curTask = EXOSKELETON_SYSTEMID_TASK_FREE;
     hUSB.datalogTask = DATALOG_TASK_FREE;
   }
