@@ -6,6 +6,10 @@
 #include "usb.h"
 
 #define SYSTEMID_JOINT_POSITIONING_STABILIZING_TIME 1000
+#define SYSTEMID_KNEE_JOINT_LEARNING_STARTING_POSITION_HIP_JOINT 180.0f
+#define SYSTEMID_KNEE_JOINT_LEARNING_STARTING_POSITION_KNEE_JOINT 110.0f
+#define SYSTEMID_HIP_JOINT_LEARNING_STARTING_POSITION_HIP_JOINT 180.0f
+#define SYSTEMID_HIP_JOINT_LEARNING_STARTING_POSITION_KNEE_JOINT 90.0f
 
 enum IMU_Operation_Mode
 {
@@ -40,9 +44,10 @@ typedef struct
   uint32_t hipProfilingTime;
   
   uint8_t ifIdentified;
-  union FloatUInt8 sysIDResults_a1;
-  union FloatUInt8 sysIDResults_m1;
-  union FloatUInt8 sysIDResults_a2;
+  union FloatUInt8 sysIDResults_J2;
+  union FloatUInt8 sysIDResults_X2;
+  union FloatUInt8 sysIDResults_J1;
+  union FloatUInt8 sysIDResults_X1;
   union FloatUInt8 sysIDResults_m2;
 }Exoskeleton_SystemIDHandle;
 
