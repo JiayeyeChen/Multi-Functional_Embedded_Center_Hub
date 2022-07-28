@@ -413,11 +413,12 @@ void EXOSKELETON_CentreControl(void)
                                                    0.0f, 0.0f, 5.0f, 0.0f, 0.0f, 0.001f);
       break;
     case EXOSKELETON_MAIN_TASK_FREE:
+      AK10_9_MITModeControl_Deg(&hAKMotorRightKnee, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+      AK10_9_DMFW_MITModeControl_Rad(&hAKMotorRightHip, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
       break;
     default:
       break;
   }
-  
   
   EXOSKELETON_SystemIDManager();
   EXOSKELETON_GravityCompemsationManager();
