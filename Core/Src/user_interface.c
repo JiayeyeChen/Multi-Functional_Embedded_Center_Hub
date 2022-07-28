@@ -326,7 +326,6 @@ void UI_Page_LowerLimb_Exoskeleton(void)
   LCD_DisplayDecimals(70, 275, hSystemID.sysIDResults_X1.f, 5, 3);
   LCD_DisplayDecimals(70, 300, hSystemID.sysIDResults_J2.f, 5, 3);
   LCD_DisplayDecimals(70, 325, hSystemID.sysIDResults_X2.f, 5, 3);
-  LCD_DisplayDecimals(270, 325, hSystemID.sysIDResults_X2.f, 5, 3);
   
   if (ifButtonPressed(&hButtonSystemID))
   {
@@ -369,7 +368,6 @@ void UI_Page_LowerLimb_Exoskeleton_Init(void)
   LCD_DisplayString(0, 275, "X1 = ");
   LCD_DisplayString(0, 300, "J2 = ");
   LCD_DisplayString(0, 325, "X2 = ");
-  LCD_DisplayString(200, 325, "m2 = ");
 }
 
 void UI_Page_LowerLimb_Exoskeleton_SystemID(void)

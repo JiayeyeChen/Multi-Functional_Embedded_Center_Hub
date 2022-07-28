@@ -5,6 +5,8 @@
 #include "system_periphrals.h"
 #include "usb.h"
 
+//#define HIP_JOINT_LEARNING_USE_CURRENT_CONTROL
+
 #define SYSTEMID_JOINT_POSITIONING_STABILIZING_TIME 1000
 #define SYSTEMID_KNEE_JOINT_LEARNING_STARTING_POSITION_HIP_JOINT 180.0f
 #define SYSTEMID_KNEE_JOINT_LEARNING_STARTING_POSITION_KNEE_JOINT 110.0f
@@ -48,7 +50,6 @@ typedef struct
   union FloatUInt8 sysIDResults_X2;
   union FloatUInt8 sysIDResults_J1;
   union FloatUInt8 sysIDResults_X1;
-  union FloatUInt8 sysIDResults_m2;
 }Exoskeleton_SystemIDHandle;
 
 typedef struct
@@ -131,7 +132,7 @@ void EXOSKELETON_SystemIDManager(void);
 void EXOSKELETON_SystemID_Init(void);
 void EXOSKELETON_SystemID_KneeJoint_MotorProfilingSinWave(AK10_9HandleCubaMarsFW* hmotor, float amplitude, float fre, uint32_t time_stamp_shift);
 void EXOSKELETON_SystemID_HipJoint_MotorProfilingSinWave_PositionControl(AK10_9HandleDMFW* hmotor, float amplitude, float fre, uint32_t time_stamp_shift);
-void EXOSKELETON_SystemID_HipJoint_MotorProfilingSinWave_CurrentControl(AK10_9HandleCubaMarsFW* hmotor, float amplitude, float fre, uint32_t time_stamp_shift);
+void EXOSKELETON_SystemID_HipJoint_MotorProfilingSinWave_CurrentControl(AK10_9HandleDMFW* hmotor, float amplitude, float fre, uint32_t time_stamp_shift);
 void EXOSKELETON_SystemID_Set_Datalog_Label(void);
 void EXOSKELETON_SystemID_UpdateDataSlot(void);
 
