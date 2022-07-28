@@ -146,7 +146,7 @@ void AK10Calibration_Task(void *argument)
   
   for(;;)
   {
-    EXOSKELETON_SystemIDManager();
+    EXOSKELETON_CentreControl();
 //    AK10_9_DataLog_Manager_DM_FW(&hAKMotorRightHip, &hIMURightThigh);
     if (ifMotorProfilingStarted)
       AK10_9_MotorProfiling_Function1_Half_Sin(&hAKMotorRightHip_old, tmotorProfilingSinWaveFrequency);

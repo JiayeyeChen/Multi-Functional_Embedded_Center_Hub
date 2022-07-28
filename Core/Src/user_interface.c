@@ -12,12 +12,13 @@ ButtonHandle hButtonGoBack, hButtonDataLogStart, hButtonDataLogEnd, \
              hButtonStart, hButtonStop;
 //////////////////
 /* Exoskeleton User Interface */
-PageHandle UIPage_LowerLimb_Exoskeleton, UIPage_LowerLimb_SystemID;
-ButtonHandle hButtonPageExoskeletonInterface, hButtonSystemID, hButtonSystemIDJointMovementStart, \
+PageHandle UIPage_LowerLimb_Exoskeleton, UIPage_LowerLimb_SystemID, UIPage_LowerLimb_GravityCompensation;
+ButtonHandle hButtonPageExoskeletonInterface, hButtonPageSystemID, hButtonPageGravityCompensation, hButtonSystemIDJointMovementStart, \
              hButtonHipMotorZeroing, hButtonKneeMotorZeroing, hButtonProfilingTimeIncrease, hButtonProfilingTimeDecrease, \
              hButtonMotorEnable, hButtonMotorDisable;
              
-LinearPotentialmeterHandle hPotKneeProfilingFreq, hPotKneeProfilingAmp, hPotHipProfilingFreq, hPotHipProfilingAmp;
+LinearPotentialmeterHandle hPotKneeProfilingFreq, hPotKneeProfilingAmp, hPotHipProfilingFreq, hPotHipProfilingAmp, \
+                           hPotGravityCompensationHipThrottle, hPotGravityCompensationKneeThrottle;
 ////////////////////////////////
 /* AK10-9 Manual Control */
 PageHandle UIPage_AK10_9_ManualControlCubeMarsFWServoMode, UIPage_AK10_9_ManualControlCubeMarsFWMITMode, UIPage_AK10_9_ManualControlFirmwareSelection, UIPage_AK10_9_ManualControlDMFW;
@@ -221,6 +222,10 @@ void UI_Init(void)
   UIPage_LowerLimb_SystemID.Page = UI_Page_LowerLimb_Exoskeleton_SystemID;
   UIPage_LowerLimb_SystemID.PageInit = UI_Page_LowerLimb_Exoskeleton_SystemID_Init;
   
+  UIPage_LowerLimb_GravityCompensation.ifPageInitialized = 0;
+  UIPage_LowerLimb_GravityCompensation.Page = UI_Page_LowerLimb_Exoskeleton_GravityCompensation;
+  UIPage_LowerLimb_GravityCompensation.PageInit = UI_Page_LowerLimb_Exoskeleton_GravityCompensation_Init;
+  
   UIPage_AK10_9_ManualControlCubeMarsFWServoMode.ifPageInitialized = 0;
   UIPage_AK10_9_ManualControlCubeMarsFWServoMode.Page = UI_Page_AK10_9_ManualControlCubeMarsFWServoMode;
   UIPage_AK10_9_ManualControlCubeMarsFWServoMode.PageInit = UI_Page_AK10_9_ManualControlCubeMarsFWServoMode_Init;
@@ -298,8 +303,8 @@ void UI_Page_LowerLimb_Exoskeleton(void)
 {
   ButtonScan(&hButtonGoBack);
   ButtonRefresh(&hButtonGoBack);
-  ButtonScan(&hButtonSystemID);
-  ButtonRefresh(&hButtonSystemID);
+  ButtonScan(&hButtonPageSystemID);
+  ButtonRefresh(&hButtonPageSystemID);
   ButtonScan(&hButtonHipMotorZeroing);
   ButtonRefresh(&hButtonHipMotorZeroing);
   ButtonScan(&hButtonKneeMotorZeroing);
@@ -308,6 +313,8 @@ void UI_Page_LowerLimb_Exoskeleton(void)
   ButtonRefresh(&hButtonMotorEnable);
   ButtonScan(&hButtonMotorDisable);
   ButtonRefresh(&hButtonMotorDisable);
+  ButtonScan(&hButtonPageGravityCompensation);
+  ButtonRefresh(&hButtonPageGravityCompensation);
   
   LCD_SetLayer(1); 
   LCD_SetColor(LCD_BLACK);
@@ -327,7 +334,7 @@ void UI_Page_LowerLimb_Exoskeleton(void)
   LCD_DisplayDecimals(70, 300, hSystemID.sysIDResults_J2.f, 5, 3);
   LCD_DisplayDecimals(70, 325, hSystemID.sysIDResults_X2.f, 5, 3);
   
-  if (ifButtonPressed(&hButtonSystemID))
+  if (ifButtonPressed(&hButtonPageSystemID))
   {
     UI_Page_Change_To(&UIPage_LowerLimb_SystemID);
     EXOSKELETON_SystemID_Init();
@@ -346,6 +353,8 @@ void UI_Page_LowerLimb_Exoskeleton(void)
     AK10_9_DMFW_DisableMotor(&hAKMotorRightHip);
     AK10_9_MITMode_DisableMotor(&hAKMotorRightKnee);
   }
+  else if (ifButtonPressed(&hButtonPageGravityCompensation))
+    UI_Page_Change_To(&UIPage_LowerLimb_GravityCompensation);
   
   if (ifButtonPressed(&hButtonGoBack))
     UI_Page_Change_To(&UIPage_Home1);
@@ -353,12 +362,14 @@ void UI_Page_LowerLimb_Exoskeleton(void)
 
 void UI_Page_LowerLimb_Exoskeleton_Init(void)
 {
+  hExoskeleton.mainTask = EXOSKELETON_MAIN_TASK_FREE;
   hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
-  hButtonSystemID = Button_Create(100, 50, 280, 40, "System Identification", LCD_WHITE, LCD_RED);
+  hButtonPageSystemID = Button_Create(100, 50, 280, 40, "System Identification", LCD_WHITE, LCD_RED);
   hButtonHipMotorZeroing = Button_Create(100, 150, 280, 40, "Hip Joint Zeroing", LCD_WHITE, LCD_RED);
   hButtonKneeMotorZeroing = Button_Create(100, 200, 280, 40, "Knee Joint Zeroing", LCD_WHITE, LCD_RED);
   hButtonMotorEnable = Button_Create(100, 350, 280, 60, "Motor Enable", LIGHT_YELLOW, LCD_RED);
   hButtonMotorDisable = Button_Create(100, 420, 280, 100, "Motor Disable", LIGHT_YELLOW, LCD_RED);
+  hButtonPageGravityCompensation = Button_Create(100, 530, 280, 60, "Gravity Compensation", LIGHT_GREEN, LCD_RED);
   LCD_DisplayString(0, 100, "Hip  Joint:");
   LCD_DisplayString(250, 100, "Angle:");
   LCD_DisplayString(0, 125, "Knee Joint:");
@@ -497,10 +508,11 @@ void UI_Page_LowerLimb_Exoskeleton_SystemID(void)
     LCD_DisplayString(350, 570, "NA          ");
     
   if (ifButtonPressed(&hButtonGoBack))
-    UI_Page_Change_To(&UIPage_Home1);
+    UI_Page_Change_To(&UIPage_LowerLimb_Exoskeleton);
 }
 void UI_Page_LowerLimb_Exoskeleton_SystemID_Init(void)
 {
+  hExoskeleton.mainTask = EXOSKELETON_MAIN_TASK_SYSTEM_ID;
   hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
   hButtonStart = Button_Create(0, 100, 110, 40, "Start", LCD_WHITE, LCD_RED);
   hButtonSystemIDJointMovementStart = Button_Create(150, 100, 300, 40, "Start Joint Motion", LCD_WHITE, LCD_RED);
@@ -521,6 +533,60 @@ void UI_Page_LowerLimb_Exoskeleton_SystemID_Init(void)
   LCD_DisplayString(250, 700, "Angle:");
   LCD_DisplayString(0, 725, "Knee Joint:");
   LCD_DisplayString(250, 725, "Angle:");
+}
+
+void UI_Page_LowerLimb_Exoskeleton_GravityCompensation(void)
+{
+  ButtonScan(&hButtonGoBack);
+  ButtonRefresh(&hButtonGoBack);
+  ButtonScan(&hButtonStart);
+  ButtonRefresh(&hButtonStart);
+  ButtonScan(&hButtonStop);
+  ButtonRefresh(&hButtonStop);
+  PotentialmeterUpdate(&hPotGravityCompensationHipThrottle);
+  PotentialmeterUpdate(&hPotGravityCompensationKneeThrottle);
+  
+  LCD_SetLayer(1); 
+  LCD_SetColor(LCD_BLACK);
+  LCD_DisplayDecimals(280, 215, hGravityCompensation.throttleKnee, 4, 3);
+  LCD_DisplayDecimals(380, 215, hGravityCompensation.throttleHip, 4, 3);
+  LCD_DisplayDecimals(350, 0, hAKMotorRightHip.realTorque.f, 4, 1);
+  LCD_DisplayDecimals(350, 30, hAKMotorRightKnee.realTorque.f, 4, 1);
+  LCD_DisplayDecimals(350, 60, hGravityCompensation.torqueDesiredHip.f, 4, 1);
+  LCD_DisplayDecimals(350, 90, hGravityCompensation.torqueDesiredKnee.f, 4, 1);
+  
+  if (ifButtonPressed(&hButtonStart))
+  {
+    hGravityCompensation.ifGravityCompensationStarted = 1;
+  }
+  else if (ifButtonPressed(&hButtonStop))
+  {
+    hGravityCompensation.ifGravityCompensationStarted = 0;
+    AK10_9_MITMode_DisableMotor(&hAKMotorRightKnee);
+    AK10_9_DMFW_DisableMotor(&hAKMotorRightHip);
+  }
+  
+  if (ifButtonPressed(&hButtonGoBack))
+    UI_Page_Change_To(&UIPage_LowerLimb_Exoskeleton);
+}
+void UI_Page_LowerLimb_Exoskeleton_GravityCompensation_Init(void)
+{
+  hExoskeleton.mainTask = EXOSKELETON_MAIN_TASK_GRAVITY_COMPENSATION;
+  hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
+  hButtonStart = Button_Create(0, 100, 100, 150, "Start", LCD_BLUE, LCD_RED);
+  hButtonStop = Button_Create(0, 300, 200, 250, "Stop", LCD_YELLOW, LCD_RED);
+  LCD_DisplayString(280, 190, "Knee%:");
+  LCD_DisplayString(380, 190, "Hip %:");
+  LCD_DisplayString(80, 0, "Hip Torque rel/Nm:  ");
+  LCD_DisplayString(80, 30,"Knee Torque rel/Nm: ");
+  LCD_DisplayString(130, 60, "Hip Torque des/Nm:  ");
+  LCD_DisplayString(130, 90,"Knee Torque des/Nm: ");
+  
+  hPotGravityCompensationHipThrottle = Potentialmeter_Create(400, 250, 30, 400, 130, 70, \
+                          LCD_MAGENTA, LCD_RED, LIGHT_GREY, 0.0f, 1.0f, 0.0f, &hGravityCompensation.throttleHip);
+  hPotGravityCompensationKneeThrottle = Potentialmeter_Create(300, 250, 30, 400, 130, 70, \
+                          LCD_MAGENTA, LCD_RED, LIGHT_GREY, 0.0f, 1.0f, 0.0f, &hGravityCompensation.throttleKnee);
+  EXOSKELETON_GravityCompensation_Init(&hGravityCompensation);
 }
 
 void UI_Page_Home1(void)

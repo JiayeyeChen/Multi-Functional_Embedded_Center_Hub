@@ -7,6 +7,7 @@
 
 //#define HIP_JOINT_LEARNING_USE_CURRENT_CONTROL
 
+#define GRAVITATIONAL_ACCELERATION     9.781
 #define SYSTEMID_JOINT_POSITIONING_STABILIZING_TIME 1000
 #define SYSTEMID_KNEE_JOINT_LEARNING_STARTING_POSITION_HIP_JOINT 180.0f
 #define SYSTEMID_KNEE_JOINT_LEARNING_STARTING_POSITION_KNEE_JOINT 110.0f
@@ -35,6 +36,13 @@ enum EXOSKELETON_SystemID_Tasks
   EXOSKELETON_SYSTEMID_TASK_END
 };
 
+enum EXOSKELETON_Main_Tasks
+{
+  EXOSKELETON_MAIN_TASK_FREE,
+  EXOSKELETON_MAIN_TASK_SYSTEM_ID,
+  EXOSKELETON_MAIN_TASK_GRAVITY_COMPENSATION
+};
+
 typedef struct
 {
   enum EXOSKELETON_SystemID_Tasks curTask;
@@ -51,6 +59,21 @@ typedef struct
   union FloatUInt8 sysIDResults_J1;
   union FloatUInt8 sysIDResults_X1;
 }Exoskeleton_SystemIDHandle;
+
+typedef struct
+{
+  float throttleHip, throttleKnee;
+  uint8_t ifGravityCompensationStarted;
+  union FloatUInt8 torqueDesiredHip;
+  union FloatUInt8 torqueDesiredKnee;
+}Exoskeleton_GravityCompensation;
+
+typedef struct
+{
+  enum EXOSKELETON_Main_Tasks mainTask;
+  Exoskeleton_SystemIDHandle* hsysid;
+  Exoskeleton_GravityCompensation* hgravitycompensation;
+}ExoskeletonHandle;
 
 typedef struct
 {
@@ -135,7 +158,12 @@ void EXOSKELETON_SystemID_HipJoint_MotorProfilingSinWave_PositionControl(AK10_9H
 void EXOSKELETON_SystemID_HipJoint_MotorProfilingSinWave_CurrentControl(AK10_9HandleDMFW* hmotor, float amplitude, float fre, uint32_t time_stamp_shift);
 void EXOSKELETON_SystemID_Set_Datalog_Label(void);
 void EXOSKELETON_SystemID_UpdateDataSlot(void);
+void EXOSKELETON_GravityCompensation_Init(Exoskeleton_GravityCompensation* hgravitycompensation);
+void EXOSKELETON_CentreControl(void);
+void EXOSKELETON_GravityCompemsationManager(void);
 
 extern BNO055Handle hIMURightThigh, hIMURightKnee;
 extern Exoskeleton_SystemIDHandle hSystemID;
+extern Exoskeleton_GravityCompensation hGravityCompensation;
+extern ExoskeletonHandle hExoskeleton;
 #endif

@@ -8,7 +8,7 @@
 #include "common.h"
 #include <stdarg.h>
 
-//#define USB_USE_CRC
+#define USB_USE_CRC
 
 enum DatalogType
 {
