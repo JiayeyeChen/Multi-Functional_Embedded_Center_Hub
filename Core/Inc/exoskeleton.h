@@ -151,6 +151,9 @@ typedef struct
 }BNO055Handle;
 
 void EXOSKELETON_Init(void);
+void EXOSKELETON_CommonDatalogManager(void);
+void EXOSKELETON_UpdateCommonDataSlot(void);
+void EXOSKELETON_Set_Common_Datalog_Label(void);
 void EXOSKELETON_GetIMUFeedbackLiAcc(BNO055Handle* himu, uint8_t data[]);
 void EXOSKELETON_GetIMUFeedbackGyro(BNO055Handle* himu, uint8_t data[]);
 void EXOSKELETON_GetIMUFeedbackQuaternion(BNO055Handle* himu, uint8_t data[]);

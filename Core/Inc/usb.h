@@ -73,4 +73,5 @@ extern USBHandle hUSB;
 extern union FloatUInt8 dataSlots_AK10_9_Acceleration_Observer_Testing[12];
 extern union FloatUInt8 dataSlots_AK10_9_TorqueConstantTesting[2];
 extern union FloatUInt8 dataSlots_Exoskeleton_SystemID[9];
+extern union FloatUInt8 dataSlots_Exoskeleton_Common[11];
 #endif

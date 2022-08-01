@@ -687,11 +687,9 @@ void UI_Page_LowerLimb_Exoskeleton_MuscularTorqueMonitor(void)
   else if (ifButtonPressed(&hButtonOff))
     hExoskeleton.hmusculartorque->ifEstimating = 0;
   else if (ifButtonPressed(&hButtonDataLogStart))
-  {
-  }
+    USB_DataLogStart();
   else if (ifButtonPressed(&hButtonDataLogEnd))
-  {
-  }
+    USB_DataLogEnd();
   
   
   if (ifButtonPressed(&hButtonGoBack))
@@ -699,6 +697,7 @@ void UI_Page_LowerLimb_Exoskeleton_MuscularTorqueMonitor(void)
 }
 void UI_Page_LowerLimb_Exoskeleton_MuscularTorqueMonitor_Init(void)
 {
+  USB_SetNewDataSlotLen(sizeof(dataSlots_Exoskeleton_Common)/4);
   hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
   hButtonOn = Button_Create(100, 100, 100, 70, "On", LCD_WHITE, LCD_RED);
   hButtonOff = Button_Create(100, 200, 100, 70, "Off", LCD_WHITE, LCD_RED);

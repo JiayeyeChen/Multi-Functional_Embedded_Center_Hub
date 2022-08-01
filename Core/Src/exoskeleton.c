@@ -35,6 +35,35 @@ void EXOSKELETON_Init(void)
   hExoskeleton.L1.f = 0.0f;
 }
 
+void EXOSKELETON_Set_Common_Datalog_Label(void)
+{
+  USB_SendDataSlotLabel("11", "theta0", "theta1", "theta1 vel", \
+                        "theta1 acc", "theta2", "theta2 vel", "theta2 acc", "torque1", "torque2", "HipMTq", "KneeMTq");
+}
+
+void EXOSKELETON_CommonDatalogManager(void)
+{
+  EXOSKELETON_UpdateCommonDataSlot();
+  USB_DataLogManager(EXOSKELETON_Set_Common_Datalog_Label, dataSlots_Exoskeleton_Common);
+}
+
+void EXOSKELETON_UpdateCommonDataSlot(void)
+{
+  uint8_t ptr = 0;
+  dataSlots_Exoskeleton_Common[ptr++].f = 0.0f;
+  dataSlots_Exoskeleton_Common[ptr++].f = hAKMotorRightHip.realPositionOffsetedRad.f;
+  dataSlots_Exoskeleton_Common[ptr++].f = hAKMotorRightHip.realVelocityPresentRad.f;
+  dataSlots_Exoskeleton_Common[ptr++].f = hAKMotorRightHip.realAccelerationFilteredRad.f;
+  dataSlots_Exoskeleton_Common[ptr++].f = hAKMotorRightKnee.realPositionOffsetedRad.f;
+  dataSlots_Exoskeleton_Common[ptr++].f = hAKMotorRightKnee.realVelocityPresentRad.f;
+  dataSlots_Exoskeleton_Common[ptr++].f = hAKMotorRightKnee.realAccelerationFilteredRad.f;
+  dataSlots_Exoskeleton_Common[ptr++].f = hAKMotorRightHip.realTorque.f;
+  dataSlots_Exoskeleton_Common[ptr++].f = hAKMotorRightKnee.realTorque.f;
+  dataSlots_Exoskeleton_Common[ptr++].f = hExoskeleton.hmusculartorque->muscularTorqueHip.f;
+  dataSlots_Exoskeleton_Common[ptr++].f = hExoskeleton.hmusculartorque->muscularTorqueKnee.f;
+  hUSB.ifNewDataLogPiece2Send = 1;
+}
+
 void EXOSKELETON_SystemID_Init(void)
 {
   hSystemID.curTask = EXOSKELETON_SYSTEMID_TASK_FREE;
@@ -432,7 +461,7 @@ void EXOSKELETON_CentreControl(void)
       break;
   }
   
-  EXOSKELETON_SystemIDManager();
+//  EXOSKELETON_SystemIDManager();
   EXOSKELETON_GravityCompemsationManager();
   EXOSKELETON_MuscularTorqueCalculation(&hExoskeleton);
 }
@@ -487,9 +516,9 @@ void EXOSKELETON_MuscularTorqueCalculation(ExoskeletonHandle* hexoskeleton)
     
     hexoskeleton->hmusculartorque->muscularTorqueHip.f = M11 * hAKMotorRightHip.realAccelerationFilteredRad.f + \
                                                          M12 * hAKMotorRightKnee.realAccelerationFilteredRad.f + \
-                                                         C1 + G1;
+                                                         C1 + G1 - hAKMotorRightHip.realTorque.f;
     hexoskeleton->hmusculartorque->muscularTorqueKnee.f = M12 * hAKMotorRightHip.realAccelerationFilteredRad.f + \
                                                           M22 * hAKMotorRightKnee.realAccelerationFilteredRad.f + \
-                                                          C2 + G2;
+                                                          C2 + G2 - hAKMotorRightKnee.realTorque.f;
   }
 }
