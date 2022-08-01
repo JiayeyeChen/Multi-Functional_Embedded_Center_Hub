@@ -18,12 +18,13 @@ ButtonHandle hButtonPageExoskeletonInterface, hButtonPageSystemID, hButtonPageGr
              hButtonPageExoskeletonParameterPanel, hButtonPageExoskeletonMuscularTorqueMonitor, \
              hButtonSystemIDJointMovementStart, hButtonHipMotorZeroing, \
              hButtonKneeMotorZeroing, hButtonProfilingTimeIncrease, hButtonProfilingTimeDecrease, \
-             hButtonMotorEnable, hButtonMotorDisable;
+             hButtonMotorEnable, hButtonMotorDisable, hButtonAugmentedControlOn, hButtonAugmentedControlOff;
              
 LinearPotentialmeterHandle hPotKneeProfilingFreq, hPotKneeProfilingAmp, hPotHipProfilingFreq, hPotHipProfilingAmp, \
                            hPotGravityCompensationHipThrottle, hPotGravityCompensationKneeThrottle, \
                            hPotParameterAdjust_L1, hPotParameterAdjust_J1, hPotParameterAdjust_X1, \
-                           hPotParameterAdjust_J2, hPotParameterAdjust_X2;
+                           hPotParameterAdjust_J2, hPotParameterAdjust_X2, \
+                           hPotAugmentedControlHipThrottle, hPotAugmentedControlKneeThrottle;
 ////////////////////////////////
 /* AK10-9 Manual Control */
 PageHandle UIPage_AK10_9_ManualControlCubeMarsFWServoMode, UIPage_AK10_9_ManualControlCubeMarsFWMITMode, UIPage_AK10_9_ManualControlFirmwareSelection, UIPage_AK10_9_ManualControlDMFW;
@@ -674,13 +675,22 @@ void UI_Page_LowerLimb_Exoskeleton_MuscularTorqueMonitor(void)
   ButtonRefresh(&hButtonDataLogStart);
   ButtonScan(&hButtonDataLogEnd);
   ButtonRefresh(&hButtonDataLogEnd);
+  ButtonScan(&hButtonAugmentedControlOff);
+  ButtonRefresh(&hButtonAugmentedControlOff);
+  ButtonScan(&hButtonAugmentedControlOn);
+  ButtonRefresh(&hButtonAugmentedControlOn);
+  PotentialmeterUpdate(&hPotAugmentedControlHipThrottle);
+  PotentialmeterUpdate(&hPotAugmentedControlKneeThrottle);
+  
+  
   
   LCD_SetLayer(1); 
   LCD_SetColor(LCD_BLACK);
   LCD_DisplayDecimals(300, 0, hExoskeleton.hmusculartorque->muscularTorqueHip.f, 5, 1);
   LCD_DisplayDecimals(300, 25, hExoskeleton.hmusculartorque->muscularTorqueKnee.f, 5, 1);
-  LCD_DisplayString(200, 0, "Hip/Nm:  ");
-  LCD_DisplayString(200, 25,"Knee/Nm: ");
+  LCD_DisplayDecimals(340, 75, hExoskeleton.haugmentedcontrol->hipJointAugmentedControlThrottle, 2,1);
+  LCD_DisplayDecimals(390, 75, hExoskeleton.haugmentedcontrol->kneeJointAugmentedControlThrottle, 2,1);
+  
   
   if (ifButtonPressed(&hButtonOn))
     hExoskeleton.hmusculartorque->ifEstimating = 1;
@@ -690,6 +700,16 @@ void UI_Page_LowerLimb_Exoskeleton_MuscularTorqueMonitor(void)
     USB_DataLogStart();
   else if (ifButtonPressed(&hButtonDataLogEnd))
     USB_DataLogEnd();
+  else if (ifButtonPressed(&hButtonAugmentedControlOn))
+  {
+    hExoskeleton.mainTask = EXOSKELETON_MAIN_TASK_AUGMENTED_CONTROL;
+    hExoskeleton.haugmentedcontrol->ifAugmentedControl = 1;
+  }
+  else if (ifButtonPressed(&hButtonAugmentedControlOff))
+  {
+    hExoskeleton.mainTask = EXOSKELETON_MAIN_TASK_FREE;
+    hExoskeleton.haugmentedcontrol->ifAugmentedControl = 0;
+  }
   
   
   if (ifButtonPressed(&hButtonGoBack))
@@ -703,9 +723,17 @@ void UI_Page_LowerLimb_Exoskeleton_MuscularTorqueMonitor_Init(void)
   hButtonOff = Button_Create(100, 200, 100, 70, "Off", LCD_WHITE, LCD_RED);
   hButtonDataLogStart = Button_Create(100, 300, 200, 70, "Datalog Start", LCD_WHITE, LCD_RED);
   hButtonDataLogEnd = Button_Create(100, 400, 200, 70, "Datalog End", LCD_WHITE, LCD_RED);
+  hButtonAugmentedControlOn = Button_Create(100, 500, 200, 70, "Augmented Control On", LCD_WHITE, LCD_RED);
+  hButtonAugmentedControlOff = Button_Create(100, 600, 200, 70, "Augmented Control Off", LCD_WHITE, LCD_RED);
+  hPotAugmentedControlHipThrottle = Potentialmeter_Create(350, 100, 20, 400, 130, 40, \
+                                    LCD_MAGENTA, LCD_RED, LIGHT_GREY, 0.0f, 2.0f, 0.0f, &hExoskeleton.haugmentedcontrol->hipJointAugmentedControlThrottle);
+  hPotAugmentedControlKneeThrottle = Potentialmeter_Create(400, 100, 20, 400, 130, 40, \
+                                    LCD_MAGENTA, LCD_RED, LIGHT_GREY, 0.0f, 2.0f, 0.0f, &hExoskeleton.haugmentedcontrol->kneeJointAugmentedControlThrottle);
   
   LCD_DisplayString(200, 0, "Hip/Nm:  ");
   LCD_DisplayString(200, 25,"Knee/Nm: ");
+  LCD_DisplayString(340, 100, "hip");
+  LCD_DisplayString(390, 100, "knee");
 }
 
 void UI_Page_Home1(void)

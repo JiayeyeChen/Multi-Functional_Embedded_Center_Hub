@@ -40,7 +40,8 @@ enum EXOSKELETON_Main_Tasks
 {
   EXOSKELETON_MAIN_TASK_FREE,
   EXOSKELETON_MAIN_TASK_SYSTEM_ID,
-  EXOSKELETON_MAIN_TASK_GRAVITY_COMPENSATION
+  EXOSKELETON_MAIN_TASK_GRAVITY_COMPENSATION,
+  EXOSKELETON_MAIN_TASK_AUGMENTED_CONTROL
 };
 
 typedef struct
@@ -77,11 +78,19 @@ typedef struct
 
 typedef struct
 {
+  uint8_t ifAugmentedControl;
+  float hipJointAugmentedControlThrottle;
+  float kneeJointAugmentedControlThrottle;
+}Exoskeleton_AugmentedControlHandle;
+
+typedef struct
+{
   union FloatUInt8 L1;
   enum EXOSKELETON_Main_Tasks mainTask;
   Exoskeleton_SystemIDHandle* hsysid;
   Exoskeleton_GravityCompensation* hgravitycompensation;
   Exoskeleton_MuscularTorqueEstimationHandle* hmusculartorque;
+  Exoskeleton_AugmentedControlHandle* haugmentedcontrol;
 }ExoskeletonHandle;
 
 typedef struct
@@ -174,9 +183,11 @@ void EXOSKELETON_GravityCompensation_Init(Exoskeleton_GravityCompensation* hgrav
 void EXOSKELETON_CentreControl(void);
 void EXOSKELETON_GravityCompemsationManager(void);
 void EXOSKELETON_MuscularTorqueCalculation(ExoskeletonHandle* hexoskeleton);
+void EXOSKELETON_AugmentedControlManager(void);
 
 extern BNO055Handle hIMURightThigh, hIMURightKnee;
 extern Exoskeleton_SystemIDHandle hSystemID;
 extern Exoskeleton_GravityCompensation hGravityCompensation;
 extern ExoskeletonHandle hExoskeleton;
+extern Exoskeleton_AugmentedControlHandle hAugmentedControl;
 #endif

@@ -6,6 +6,7 @@ Exoskeleton_SystemIDHandle hSystemID;
 Exoskeleton_GravityCompensation hGravityCompensation;
 ExoskeletonHandle hExoskeleton;
 Exoskeleton_MuscularTorqueEstimationHandle hMuscularTorque;
+Exoskeleton_AugmentedControlHandle hAugmentedControl;
 
 void EXOSKELETON_Init(void)
 {
@@ -28,11 +29,16 @@ void EXOSKELETON_Init(void)
   hSystemID.sysIDResults_J2.f = 0.247732f;
   hSystemID.sysIDResults_X2.f = 1.13107f;
   
+  hAugmentedControl.hipJointAugmentedControlThrottle = 0.0f;
+  hAugmentedControl.kneeJointAugmentedControlThrottle = 0.0f;
+  hAugmentedControl.ifAugmentedControl = 0;
+  
   hExoskeleton.hgravitycompensation = &hGravityCompensation;
   hExoskeleton.hsysid = &hSystemID;
   hExoskeleton.mainTask = EXOSKELETON_MAIN_TASK_FREE;
   hExoskeleton.hmusculartorque = &hMuscularTorque;
   hExoskeleton.L1.f = 0.0f;
+  hExoskeleton.haugmentedcontrol = &hAugmentedControl;
 }
 
 void EXOSKELETON_Set_Common_Datalog_Label(void)
@@ -457,6 +463,12 @@ void EXOSKELETON_CentreControl(void)
       AK10_9_MITModeControl_Deg(&hAKMotorRightKnee, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
       AK10_9_DMFW_MITModeControl_Rad(&hAKMotorRightHip, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
       break;
+    case EXOSKELETON_MAIN_TASK_AUGMENTED_CONTROL:
+      AK10_9_CubeMarsFW_MITMode_ContinuousControlManager(&hAKMotorRightKnee, \
+                                                         0.0f, 0.0f, 5.0f, 0.0f, 0.0f, 0.001f);
+      AK10_9_DMFW_MITMode_ContinuousControlManager(&hAKMotorRightHip, \
+                                                   0.0f, 0.0f, 5.0f, 0.0f, 0.0f, 0.001f);
+      break;
     default:
       break;
   }
@@ -464,6 +476,7 @@ void EXOSKELETON_CentreControl(void)
 //  EXOSKELETON_SystemIDManager();
   EXOSKELETON_GravityCompemsationManager();
   EXOSKELETON_MuscularTorqueCalculation(&hExoskeleton);
+  EXOSKELETON_AugmentedControlManager();
 }
 
 void EXOSKELETON_GravityCompemsationManager(void)
@@ -480,7 +493,7 @@ void EXOSKELETON_GravityCompemsationManager(void)
   if (hGravityCompensation.ifGravityCompensationStarted)
   {
     AK10_9_DMFW_MITMode_ContinuousControl_Rad(&hAKMotorRightHip, 0.0f, 0.0f, 0.0f, 0.0f, \
-                                              hGravityCompensation.torqueDesiredHip.f / hAKMotorRightHip.kt);
+                                               hGravityCompensation.torqueDesiredHip.f / hAKMotorRightHip.kt);
     AK10_9_CubaMarsFW_MITMode_ContinuousControl_Deg(&hAKMotorRightKnee, 0.0f, 0.0f, 0.0f, 0.0f, \
                                                     hGravityCompensation.torqueDesiredKnee.f / hAKMotorRightKnee.kt);
   }
@@ -520,5 +533,18 @@ void EXOSKELETON_MuscularTorqueCalculation(ExoskeletonHandle* hexoskeleton)
     hexoskeleton->hmusculartorque->muscularTorqueKnee.f = M12 * hAKMotorRightHip.realAccelerationFilteredRad.f + \
                                                           M22 * hAKMotorRightKnee.realAccelerationFilteredRad.f + \
                                                           C2 + G2 - hAKMotorRightKnee.realTorque.f;
+  }
+}
+
+void EXOSKELETON_AugmentedControlManager(void)
+{
+  if (hExoskeleton.haugmentedcontrol->ifAugmentedControl)
+  {
+    AK10_9_DMFW_MITMode_ContinuousControl_Rad(&hAKMotorRightHip, 0.0f, 0.0f, 0.0f, 0.0f, \
+                                              hExoskeleton.haugmentedcontrol->hipJointAugmentedControlThrottle * \
+                                              hExoskeleton.hmusculartorque->muscularTorqueHip.f / hAKMotorRightHip.kt);
+    AK10_9_CubaMarsFW_MITMode_ContinuousControl_Deg(&hAKMotorRightKnee, 0.0f, 0.0f, 0.0f, 0.0f, \
+                                                    hExoskeleton.haugmentedcontrol->kneeJointAugmentedControlThrottle * \
+                                                    hExoskeleton.hmusculartorque->muscularTorqueKnee.f/ hAKMotorRightKnee.kt);
   }
 }
