@@ -5,6 +5,7 @@ BNO055Handle hIMURightThigh, hIMURightKnee;
 Exoskeleton_SystemIDHandle hSystemID;
 Exoskeleton_GravityCompensation hGravityCompensation;
 ExoskeletonHandle hExoskeleton;
+Exoskeleton_MuscularTorqueEstimationHandle hMuscularTorque;
 
 void EXOSKELETON_Init(void)
 {
@@ -17,10 +18,21 @@ void EXOSKELETON_Init(void)
   hIMURightThigh.lpfCutOffFrequency = 10.0f;
   hIMURightThigh.lpfDuration = 0.002f;
   hIMURightThigh.lpfAlpha = 2.0f * pi * hIMURightThigh.lpfCutOffFrequency * hIMURightThigh.lpfDuration / (1.0f + 2.0f * pi * hIMURightThigh.lpfCutOffFrequency * hIMURightThigh.lpfDuration);
-
+  
+  hMuscularTorque.ifEstimating = 0;
+  hMuscularTorque.muscularTorqueHip.f = 0.0f;
+  hMuscularTorque.muscularTorqueKnee.f = 0.0f;
+  
+  hSystemID.sysIDResults_J1.f = 1.29053f;
+  hSystemID.sysIDResults_X1.f = 4.21455f;
+  hSystemID.sysIDResults_J2.f = 0.247732f;
+  hSystemID.sysIDResults_X2.f = 1.13107f;
+  
   hExoskeleton.hgravitycompensation = &hGravityCompensation;
   hExoskeleton.hsysid = &hSystemID;
   hExoskeleton.mainTask = EXOSKELETON_MAIN_TASK_FREE;
+  hExoskeleton.hmusculartorque = &hMuscularTorque;
+  hExoskeleton.L1.f = 0.0f;
 }
 
 void EXOSKELETON_SystemID_Init(void)
@@ -422,6 +434,7 @@ void EXOSKELETON_CentreControl(void)
   
   EXOSKELETON_SystemIDManager();
   EXOSKELETON_GravityCompemsationManager();
+  EXOSKELETON_MuscularTorqueCalculation(&hExoskeleton);
 }
 
 void EXOSKELETON_GravityCompemsationManager(void)
@@ -441,5 +454,42 @@ void EXOSKELETON_GravityCompemsationManager(void)
                                               hGravityCompensation.torqueDesiredHip.f / hAKMotorRightHip.kt);
     AK10_9_CubaMarsFW_MITMode_ContinuousControl_Deg(&hAKMotorRightKnee, 0.0f, 0.0f, 0.0f, 0.0f, \
                                                     hGravityCompensation.torqueDesiredKnee.f / hAKMotorRightKnee.kt);
+  }
+}
+
+void EXOSKELETON_MuscularTorqueCalculation(ExoskeletonHandle* hexoskeleton)
+{
+  if (hexoskeleton->hmusculartorque->ifEstimating)
+  {
+    float M11, M12, M22, C1, C2, G1, G2;
+    M11 = hexoskeleton->hsysid->sysIDResults_J1.f + 2.0f * hexoskeleton->hsysid->sysIDResults_X2.f * \
+          hexoskeleton->L1.f * cos(hAKMotorRightKnee.realPositionOffsetedRad.f);
+    
+    M12 = hexoskeleton->hsysid->sysIDResults_J2.f + hexoskeleton->hsysid->sysIDResults_X2.f * \
+          hexoskeleton->L1.f * cos(hAKMotorRightKnee.realPositionOffsetedRad.f);
+    
+    M22 = hexoskeleton->hsysid->sysIDResults_J2.f;
+    
+    C1 = -hAKMotorRightKnee.realVelocityPresentRad.f * (2.0f * hAKMotorRightHip.realVelocityPresentRad.f + \
+         hAKMotorRightKnee.realVelocityPresentRad.f) * hexoskeleton->hsysid->sysIDResults_X2.f * \
+         hexoskeleton->L1.f * sin(hAKMotorRightKnee.realPositionOffsetedRad.f);
+    
+    C2 = powf(hAKMotorRightHip.realPositionOffsetedRad.f, 2.0f) * hexoskeleton->hsysid->sysIDResults_X2.f * \
+         hexoskeleton->L1.f * sin(hAKMotorRightKnee.realPositionOffsetedRad.f);
+    
+    G1 = -GRAVITATIONAL_ACCELERATION * (hexoskeleton->hsysid->sysIDResults_X1.f * \
+         sin(hAKMotorRightHip.realPositionOffsetedRad.f) + hexoskeleton->hsysid->sysIDResults_X2.f * \
+         sin(hAKMotorRightHip.realPositionOffsetedRad.f + hAKMotorRightKnee.realPositionOffsetedRad.f));
+    
+    G2 = -GRAVITATIONAL_ACCELERATION * hexoskeleton->hsysid->sysIDResults_X2.f * \
+         sin(hAKMotorRightHip.realPositionOffsetedRad.f + hAKMotorRightKnee.realPositionOffsetedRad.f);
+         
+    
+    hexoskeleton->hmusculartorque->muscularTorqueHip.f = M11 * hAKMotorRightHip.realAccelerationFilteredRad.f + \
+                                                         M12 * hAKMotorRightKnee.realAccelerationFilteredRad.f + \
+                                                         C1 + G1;
+    hexoskeleton->hmusculartorque->muscularTorqueKnee.f = M12 * hAKMotorRightHip.realAccelerationFilteredRad.f + \
+                                                          M22 * hAKMotorRightKnee.realAccelerationFilteredRad.f + \
+                                                          C2 + G2;
   }
 }

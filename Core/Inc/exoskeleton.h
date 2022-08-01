@@ -70,9 +70,18 @@ typedef struct
 
 typedef struct
 {
+  uint8_t          ifEstimating;
+  union FloatUInt8 muscularTorqueHip;
+  union FloatUInt8 muscularTorqueKnee;
+}Exoskeleton_MuscularTorqueEstimationHandle;
+
+typedef struct
+{
+  union FloatUInt8 L1;
   enum EXOSKELETON_Main_Tasks mainTask;
   Exoskeleton_SystemIDHandle* hsysid;
   Exoskeleton_GravityCompensation* hgravitycompensation;
+  Exoskeleton_MuscularTorqueEstimationHandle* hmusculartorque;
 }ExoskeletonHandle;
 
 typedef struct
@@ -161,6 +170,7 @@ void EXOSKELETON_SystemID_UpdateDataSlot(void);
 void EXOSKELETON_GravityCompensation_Init(Exoskeleton_GravityCompensation* hgravitycompensation);
 void EXOSKELETON_CentreControl(void);
 void EXOSKELETON_GravityCompemsationManager(void);
+void EXOSKELETON_MuscularTorqueCalculation(ExoskeletonHandle* hexoskeleton);
 
 extern BNO055Handle hIMURightThigh, hIMURightKnee;
 extern Exoskeleton_SystemIDHandle hSystemID;

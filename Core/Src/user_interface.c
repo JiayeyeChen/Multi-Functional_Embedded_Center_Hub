@@ -12,13 +12,17 @@ ButtonHandle hButtonGoBack, hButtonDataLogStart, hButtonDataLogEnd, \
              hButtonStart, hButtonStop;
 //////////////////
 /* Exoskeleton User Interface */
-PageHandle UIPage_LowerLimb_Exoskeleton, UIPage_LowerLimb_SystemID, UIPage_LowerLimb_GravityCompensation;
-ButtonHandle hButtonPageExoskeletonInterface, hButtonPageSystemID, hButtonPageGravityCompensation, hButtonSystemIDJointMovementStart, \
+PageHandle UIPage_LowerLimb_Exoskeleton, UIPage_LowerLimb_SystemID, UIPage_LowerLimb_GravityCompensation, \
+           UIPage_LowerLimb_ParameterAdjusting;
+ButtonHandle hButtonPageExoskeletonInterface, hButtonPageSystemID, hButtonPageGravityCompensation, \
+             hButtonPageExoskeletonParameterPanel, hButtonSystemIDJointMovementStart, \
              hButtonHipMotorZeroing, hButtonKneeMotorZeroing, hButtonProfilingTimeIncrease, hButtonProfilingTimeDecrease, \
              hButtonMotorEnable, hButtonMotorDisable;
              
 LinearPotentialmeterHandle hPotKneeProfilingFreq, hPotKneeProfilingAmp, hPotHipProfilingFreq, hPotHipProfilingAmp, \
-                           hPotGravityCompensationHipThrottle, hPotGravityCompensationKneeThrottle;
+                           hPotGravityCompensationHipThrottle, hPotGravityCompensationKneeThrottle, \
+                           hPotParameterAdjust_L1, hPotParameterAdjust_J1, hPotParameterAdjust_X1, \
+                           hPotParameterAdjust_J2, hPotParameterAdjust_X2;
 ////////////////////////////////
 /* AK10-9 Manual Control */
 PageHandle UIPage_AK10_9_ManualControlCubeMarsFWServoMode, UIPage_AK10_9_ManualControlCubeMarsFWMITMode, UIPage_AK10_9_ManualControlFirmwareSelection, UIPage_AK10_9_ManualControlDMFW;
@@ -226,6 +230,10 @@ void UI_Init(void)
   UIPage_LowerLimb_GravityCompensation.Page = UI_Page_LowerLimb_Exoskeleton_GravityCompensation;
   UIPage_LowerLimb_GravityCompensation.PageInit = UI_Page_LowerLimb_Exoskeleton_GravityCompensation_Init;
   
+  UIPage_LowerLimb_ParameterAdjusting.ifPageInitialized = 0;
+  UIPage_LowerLimb_ParameterAdjusting.Page = UI_Page_LowerLimb_Exoskeleton_ParameterAdjusting;
+  UIPage_LowerLimb_ParameterAdjusting.PageInit = UI_Page_LowerLimb_Exoskeleton_ParameterAdjusting_Init;
+  
   UIPage_AK10_9_ManualControlCubeMarsFWServoMode.ifPageInitialized = 0;
   UIPage_AK10_9_ManualControlCubeMarsFWServoMode.Page = UI_Page_AK10_9_ManualControlCubeMarsFWServoMode;
   UIPage_AK10_9_ManualControlCubeMarsFWServoMode.PageInit = UI_Page_AK10_9_ManualControlCubeMarsFWServoMode_Init;
@@ -315,6 +323,9 @@ void UI_Page_LowerLimb_Exoskeleton(void)
   ButtonRefresh(&hButtonMotorDisable);
   ButtonScan(&hButtonPageGravityCompensation);
   ButtonRefresh(&hButtonPageGravityCompensation);
+  ButtonScan(&hButtonPageExoskeletonParameterPanel);
+  ButtonRefresh(&hButtonPageExoskeletonParameterPanel);
+  
   
   LCD_SetLayer(1); 
   LCD_SetColor(LCD_BLACK);
@@ -355,6 +366,8 @@ void UI_Page_LowerLimb_Exoskeleton(void)
   }
   else if (ifButtonPressed(&hButtonPageGravityCompensation))
     UI_Page_Change_To(&UIPage_LowerLimb_GravityCompensation);
+  else if (ifButtonPressed(&hButtonPageExoskeletonParameterPanel))
+    UI_Page_Change_To(&UIPage_LowerLimb_ParameterAdjusting);
   
   if (ifButtonPressed(&hButtonGoBack))
     UI_Page_Change_To(&UIPage_Home1);
@@ -370,6 +383,7 @@ void UI_Page_LowerLimb_Exoskeleton_Init(void)
   hButtonMotorEnable = Button_Create(100, 350, 280, 60, "Motor Enable", LIGHT_YELLOW, LCD_RED);
   hButtonMotorDisable = Button_Create(100, 420, 280, 100, "Motor Disable", LIGHT_YELLOW, LCD_RED);
   hButtonPageGravityCompensation = Button_Create(100, 530, 280, 60, "Gravity Compensation", LIGHT_GREEN, LCD_RED);
+  hButtonPageExoskeletonParameterPanel = Button_Create(150, 250, 280, 60, "Parameter Adjusting", LIGHT_GREEN, LCD_RED);
   LCD_DisplayString(0, 100, "Hip  Joint:");
   LCD_DisplayString(250, 100, "Angle:");
   LCD_DisplayString(0, 125, "Knee Joint:");
@@ -587,6 +601,56 @@ void UI_Page_LowerLimb_Exoskeleton_GravityCompensation_Init(void)
   hPotGravityCompensationKneeThrottle = Potentialmeter_Create(300, 250, 30, 400, 130, 70, \
                           LCD_MAGENTA, LCD_RED, LIGHT_GREY, 0.0f, 1.0f, 0.0f, &hGravityCompensation.throttleKnee);
   EXOSKELETON_GravityCompensation_Init(&hGravityCompensation);
+}
+
+void UI_Page_LowerLimb_Exoskeleton_ParameterAdjusting(void)
+{
+  ButtonScan(&hButtonGoBack);
+  ButtonRefresh(&hButtonGoBack);
+  PotentialmeterUpdate(&hPotParameterAdjust_L1);
+  PotentialmeterUpdate(&hPotParameterAdjust_J1);
+  PotentialmeterUpdate(&hPotParameterAdjust_X1);
+  PotentialmeterUpdate(&hPotParameterAdjust_J2);
+  PotentialmeterUpdate(&hPotParameterAdjust_X2);
+  
+  LCD_SetLayer(1); 
+  LCD_SetColor(LCD_BLACK);
+  LCD_DisplayDecimals(0, 75, hExoskeleton.L1.f, 5, 4);
+  LCD_DisplayDecimals(80, 75, hExoskeleton.hsysid->sysIDResults_J1.f, 5, 4);
+  LCD_DisplayDecimals(160, 75, hExoskeleton.hsysid->sysIDResults_X1.f, 5, 4);
+  LCD_DisplayDecimals(240, 75, hExoskeleton.hsysid->sysIDResults_J2.f, 5, 4);
+  LCD_DisplayDecimals(320, 75, hExoskeleton.hsysid->sysIDResults_X2.f, 5, 4);
+  
+  if (ifButtonPressed(&hButtonGoBack))
+    UI_Page_Change_To(&UIPage_LowerLimb_Exoskeleton);
+}
+void UI_Page_LowerLimb_Exoskeleton_ParameterAdjusting_Init(void)
+{
+  hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
+  LCD_DisplayString(30, 100, "L1");
+  LCD_DisplayString(110, 100, "J1");
+  LCD_DisplayString(190, 100, "X1");
+  LCD_DisplayString(270, 100, "J2");
+  LCD_DisplayString(350, 100, "X2");
+  hPotParameterAdjust_L1 = Potentialmeter_Create(30, 100, 30, 630, 130, 70, \
+                          LCD_MAGENTA, LCD_RED, LIGHT_GREY, 0.0f, 0.7f, 0.0f, &hExoskeleton.L1.f);
+  PotentialmeterSliderGoTo(&hPotParameterAdjust_L1, hExoskeleton.L1.f);
+  
+  hPotParameterAdjust_J1 = Potentialmeter_Create(110, 100, 30, 630, 130, 70, \
+                          LCD_MAGENTA, LCD_RED, LIGHT_GREY, 0.0f, 2.0f, 0.0f, &hExoskeleton.hsysid->sysIDResults_J1.f);
+  PotentialmeterSliderGoTo(&hPotParameterAdjust_J1, hExoskeleton.hsysid->sysIDResults_J1.f);
+  
+  hPotParameterAdjust_X1 = Potentialmeter_Create(190, 100, 30, 630, 130, 70, \
+                          LCD_MAGENTA, LCD_RED, LIGHT_GREY, 0.0f, 6.0f, 0.0f, &hExoskeleton.hsysid->sysIDResults_X1.f);
+  PotentialmeterSliderGoTo(&hPotParameterAdjust_X1, hExoskeleton.hsysid->sysIDResults_X1.f);
+  
+  hPotParameterAdjust_J2 = Potentialmeter_Create(270, 100, 30, 630, 130, 70, \
+                          LCD_MAGENTA, LCD_RED, LIGHT_GREY, 0.0f, 0.4f, 0.0f, &hExoskeleton.hsysid->sysIDResults_J2.f);
+  PotentialmeterSliderGoTo(&hPotParameterAdjust_J2, hExoskeleton.hsysid->sysIDResults_J2.f);
+  
+  hPotParameterAdjust_X2 = Potentialmeter_Create(350, 100, 30, 630, 130, 70, \
+                          LCD_MAGENTA, LCD_RED, LIGHT_GREY, 0.0f, 2.0f, 0.0f, &hExoskeleton.hsysid->sysIDResults_X2.f);
+  PotentialmeterSliderGoTo(&hPotParameterAdjust_X2, hExoskeleton.hsysid->sysIDResults_X2.f);
 }
 
 void UI_Page_Home1(void)

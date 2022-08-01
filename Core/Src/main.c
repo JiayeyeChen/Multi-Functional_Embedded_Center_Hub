@@ -33,6 +33,7 @@ int main(void)
   
 	MX_FMC_Init();
   UI_Init();
+  
   EXOSKELETON_MotorInit();
   AD7606_Init(AD7606_RANG_5V, AD7606_OS_RATIO_0);
 
