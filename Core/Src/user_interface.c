@@ -9,14 +9,15 @@ PageHandle UIPage_Home1;
 ButtonHandle hButtonGoBack, hButtonDataLogStart, hButtonDataLogEnd, \
              hButtonMotorProfilingStart, hButtonMotorProfilingEnd, \
              hButtonMotorZeroing, hButtonMotorStart, hButtonMotorStop, \
-             hButtonStart, hButtonStop;
+             hButtonStart, hButtonStop, hButtonOn, hButtonOff;
 //////////////////
 /* Exoskeleton User Interface */
 PageHandle UIPage_LowerLimb_Exoskeleton, UIPage_LowerLimb_SystemID, UIPage_LowerLimb_GravityCompensation, \
-           UIPage_LowerLimb_ParameterAdjusting;
+           UIPage_LowerLimb_ParameterAdjusting, UIPage_LowerLimb_MuscularTorqueMonitor;
 ButtonHandle hButtonPageExoskeletonInterface, hButtonPageSystemID, hButtonPageGravityCompensation, \
-             hButtonPageExoskeletonParameterPanel, hButtonSystemIDJointMovementStart, \
-             hButtonHipMotorZeroing, hButtonKneeMotorZeroing, hButtonProfilingTimeIncrease, hButtonProfilingTimeDecrease, \
+             hButtonPageExoskeletonParameterPanel, hButtonPageExoskeletonMuscularTorqueMonitor, \
+             hButtonSystemIDJointMovementStart, hButtonHipMotorZeroing, \
+             hButtonKneeMotorZeroing, hButtonProfilingTimeIncrease, hButtonProfilingTimeDecrease, \
              hButtonMotorEnable, hButtonMotorDisable;
              
 LinearPotentialmeterHandle hPotKneeProfilingFreq, hPotKneeProfilingAmp, hPotHipProfilingFreq, hPotHipProfilingAmp, \
@@ -234,6 +235,10 @@ void UI_Init(void)
   UIPage_LowerLimb_ParameterAdjusting.Page = UI_Page_LowerLimb_Exoskeleton_ParameterAdjusting;
   UIPage_LowerLimb_ParameterAdjusting.PageInit = UI_Page_LowerLimb_Exoskeleton_ParameterAdjusting_Init;
   
+  UIPage_LowerLimb_MuscularTorqueMonitor.ifPageInitialized = 0;
+  UIPage_LowerLimb_MuscularTorqueMonitor.Page = UI_Page_LowerLimb_Exoskeleton_MuscularTorqueMonitor;
+  UIPage_LowerLimb_MuscularTorqueMonitor.PageInit = UI_Page_LowerLimb_Exoskeleton_MuscularTorqueMonitor_Init;
+  
   UIPage_AK10_9_ManualControlCubeMarsFWServoMode.ifPageInitialized = 0;
   UIPage_AK10_9_ManualControlCubeMarsFWServoMode.Page = UI_Page_AK10_9_ManualControlCubeMarsFWServoMode;
   UIPage_AK10_9_ManualControlCubeMarsFWServoMode.PageInit = UI_Page_AK10_9_ManualControlCubeMarsFWServoMode_Init;
@@ -325,7 +330,8 @@ void UI_Page_LowerLimb_Exoskeleton(void)
   ButtonRefresh(&hButtonPageGravityCompensation);
   ButtonScan(&hButtonPageExoskeletonParameterPanel);
   ButtonRefresh(&hButtonPageExoskeletonParameterPanel);
-  
+  ButtonScan(&hButtonPageExoskeletonMuscularTorqueMonitor);
+  ButtonRefresh(&hButtonPageExoskeletonMuscularTorqueMonitor);
   
   LCD_SetLayer(1); 
   LCD_SetColor(LCD_BLACK);
@@ -368,6 +374,8 @@ void UI_Page_LowerLimb_Exoskeleton(void)
     UI_Page_Change_To(&UIPage_LowerLimb_GravityCompensation);
   else if (ifButtonPressed(&hButtonPageExoskeletonParameterPanel))
     UI_Page_Change_To(&UIPage_LowerLimb_ParameterAdjusting);
+  else if (ifButtonPressed(&hButtonPageExoskeletonMuscularTorqueMonitor))
+    UI_Page_Change_To(&UIPage_LowerLimb_MuscularTorqueMonitor);
   
   if (ifButtonPressed(&hButtonGoBack))
     UI_Page_Change_To(&UIPage_Home1);
@@ -384,6 +392,7 @@ void UI_Page_LowerLimb_Exoskeleton_Init(void)
   hButtonMotorDisable = Button_Create(100, 420, 280, 100, "Motor Disable", LIGHT_YELLOW, LCD_RED);
   hButtonPageGravityCompensation = Button_Create(100, 530, 280, 60, "Gravity Compensation", LIGHT_GREEN, LCD_RED);
   hButtonPageExoskeletonParameterPanel = Button_Create(150, 250, 280, 60, "Parameter Adjusting", LIGHT_GREEN, LCD_RED);
+  hButtonPageExoskeletonMuscularTorqueMonitor = Button_Create(100, 600, 280, 60, "Muscular Torque", LIGHT_GREEN, LCD_RED);
   LCD_DisplayString(0, 100, "Hip  Joint:");
   LCD_DisplayString(250, 100, "Angle:");
   LCD_DisplayString(0, 125, "Knee Joint:");
@@ -651,6 +660,53 @@ void UI_Page_LowerLimb_Exoskeleton_ParameterAdjusting_Init(void)
   hPotParameterAdjust_X2 = Potentialmeter_Create(350, 100, 30, 630, 130, 70, \
                           LCD_MAGENTA, LCD_RED, LIGHT_GREY, 0.0f, 2.0f, 0.0f, &hExoskeleton.hsysid->sysIDResults_X2.f);
   PotentialmeterSliderGoTo(&hPotParameterAdjust_X2, hExoskeleton.hsysid->sysIDResults_X2.f);
+}
+
+void UI_Page_LowerLimb_Exoskeleton_MuscularTorqueMonitor(void)
+{
+  ButtonScan(&hButtonGoBack);
+  ButtonRefresh(&hButtonGoBack);
+  ButtonScan(&hButtonOn);
+  ButtonRefresh(&hButtonOn);
+  ButtonScan(&hButtonOff);
+  ButtonRefresh(&hButtonOff);
+  ButtonScan(&hButtonDataLogStart);
+  ButtonRefresh(&hButtonDataLogStart);
+  ButtonScan(&hButtonDataLogEnd);
+  ButtonRefresh(&hButtonDataLogEnd);
+  
+  LCD_SetLayer(1); 
+  LCD_SetColor(LCD_BLACK);
+  LCD_DisplayDecimals(300, 0, hExoskeleton.hmusculartorque->muscularTorqueHip.f, 5, 1);
+  LCD_DisplayDecimals(300, 25, hExoskeleton.hmusculartorque->muscularTorqueKnee.f, 5, 1);
+  LCD_DisplayString(200, 0, "Hip/Nm:  ");
+  LCD_DisplayString(200, 25,"Knee/Nm: ");
+  
+  if (ifButtonPressed(&hButtonOn))
+    hExoskeleton.hmusculartorque->ifEstimating = 1;
+  else if (ifButtonPressed(&hButtonOff))
+    hExoskeleton.hmusculartorque->ifEstimating = 0;
+  else if (ifButtonPressed(&hButtonDataLogStart))
+  {
+  }
+  else if (ifButtonPressed(&hButtonDataLogEnd))
+  {
+  }
+  
+  
+  if (ifButtonPressed(&hButtonGoBack))
+    UI_Page_Change_To(&UIPage_LowerLimb_Exoskeleton);
+}
+void UI_Page_LowerLimb_Exoskeleton_MuscularTorqueMonitor_Init(void)
+{
+  hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
+  hButtonOn = Button_Create(100, 100, 100, 70, "On", LCD_WHITE, LCD_RED);
+  hButtonOff = Button_Create(100, 200, 100, 70, "Off", LCD_WHITE, LCD_RED);
+  hButtonDataLogStart = Button_Create(100, 300, 200, 70, "Datalog Start", LCD_WHITE, LCD_RED);
+  hButtonDataLogEnd = Button_Create(100, 400, 200, 70, "Datalog End", LCD_WHITE, LCD_RED);
+  
+  LCD_DisplayString(200, 0, "Hip/Nm:  ");
+  LCD_DisplayString(200, 25,"Knee/Nm: ");
 }
 
 void UI_Page_Home1(void)

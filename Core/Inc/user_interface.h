@@ -104,6 +104,8 @@ void         UI_Page_LowerLimb_Exoskeleton_GravityCompensation(void);
 void         UI_Page_LowerLimb_Exoskeleton_GravityCompensation_Init(void);
 void         UI_Page_LowerLimb_Exoskeleton_ParameterAdjusting(void);
 void         UI_Page_LowerLimb_Exoskeleton_ParameterAdjusting_Init(void);
+void         UI_Page_LowerLimb_Exoskeleton_MuscularTorqueMonitor(void);
+void         UI_Page_LowerLimb_Exoskeleton_MuscularTorqueMonitor_Init(void);
 void         UI_Page_Home1(void);
 void         UI_Page_Home1_Init(void);
 void         UI_Page_AK10_9_ManualControlCubeMarsFWServoMode(void);
