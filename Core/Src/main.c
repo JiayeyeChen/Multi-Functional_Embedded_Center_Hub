@@ -35,6 +35,8 @@ int main(void)
   UI_Init();
   
   EXOSKELETON_MotorInit();
+  MotorInit_DMFW();
+//  MotorInit_CubeMarsFW();
   AD7606_Init(AD7606_RANG_5V, AD7606_OS_RATIO_0);
 
   EXOSKELETON_Init();
@@ -150,6 +152,7 @@ void AK10Calibration_Task(void *argument)
     EXOSKELETON_CentreControl();
     EXOSKELETON_CommonDatalogManager();
 //    AK10_9_DataLog_Manager_DM_FW(&hAKMotorRightHip, &hIMURightThigh);
+//    AK10_9_DataLog_Manager_CubeMARS_FW(&hAKMotorSpare1, &hIMURightThigh);
     if (ifMotorProfilingStarted)
       AK10_9_MotorProfiling_Function1_Half_Sin(&hAKMotorRightHip_old, tmotorProfilingSinWaveFrequency);
     
@@ -174,18 +177,18 @@ void AK10Calibration_Task(void *argument)
       }
       else if (hUI.curPage == &UIPage_AK10_9_ManualControlDMFW)
       {
-        if (hAKMotorRightHip.controlMode == AK10_9_DM_FW_MODE_MIT)
+        if (hMotorPtrManualControlDMFW->controlMode == AK10_9_DM_FW_MODE_MIT)
         {
-          AK10_9_DMFW_MITMode_ContinuousControl_Deg(&hAKMotorRightHip, \
+          AK10_9_DMFW_MITMode_ContinuousControl_Deg(hMotorPtrManualControlDMFW, \
                                                     manualControlValue_pos, manualControlValue_vel, \
                                                     manualControlValue_kp, manualControlValue_kd, manualControlValue_cur);
-          AK10_9_DMFW_MITMode_ContinuousControlManager(&hAKMotorRightHip, \
+          AK10_9_DMFW_MITMode_ContinuousControlManager(hMotorPtrManualControlDMFW, \
                                                         30.0f, 180.0f, 1.0f, 100.0f, 0.5f, 0.001f);
         }
-        else if (hAKMotorRightHip.controlMode == AK10_9_DM_FW_MODE_VELOCITY)
-          AK10_9_DMFW_VelocityControl(&hAKMotorRightHip, manualControlValue_vel);
-        else if (hAKMotorRightHip.controlMode == AK10_9_DM_FW_MODE_POSITION)
-          AK10_9_DMFW_PositionVelocityControl(&hAKMotorRightHip, manualControlValue_pos, manualControlValue_vel);
+        else if (hMotorPtrManualControlDMFW->controlMode == AK10_9_DM_FW_MODE_VELOCITY)
+          AK10_9_DMFW_VelocityControl(hMotorPtrManualControlDMFW, manualControlValue_vel);
+        else if (hMotorPtrManualControlDMFW->controlMode == AK10_9_DM_FW_MODE_POSITION)
+          AK10_9_DMFW_PositionVelocityControl(hMotorPtrManualControlDMFW, manualControlValue_pos, manualControlValue_vel);
       }
     }
     

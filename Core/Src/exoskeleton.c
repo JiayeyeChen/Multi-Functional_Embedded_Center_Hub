@@ -465,9 +465,9 @@ void EXOSKELETON_CentreControl(void)
       break;
     case EXOSKELETON_MAIN_TASK_AUGMENTED_CONTROL:
       AK10_9_CubeMarsFW_MITMode_ContinuousControlManager(&hAKMotorRightKnee, \
-                                                         0.0f, 0.0f, 5.0f, 0.0f, 0.0f, 0.001f);
+                                                         0.0f, 0.0f, 100.0f, 0.0f, 0.0f, 0.001f);
       AK10_9_DMFW_MITMode_ContinuousControlManager(&hAKMotorRightHip, \
-                                                   0.0f, 0.0f, 5.0f, 0.0f, 0.0f, 0.001f);
+                                                   0.0f, 0.0f, 100.0f, 0.0f, 0.0f, 0.001f);
       break;
     default:
       break;

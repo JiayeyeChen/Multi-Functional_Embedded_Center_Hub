@@ -29,7 +29,7 @@ LinearPotentialmeterHandle hPotKneeProfilingFreq, hPotKneeProfilingAmp, hPotHipP
 /* AK10-9 Manual Control */
 PageHandle UIPage_AK10_9_ManualControlCubeMarsFWServoMode, UIPage_AK10_9_ManualControlCubeMarsFWMITMode, UIPage_AK10_9_ManualControlFirmwareSelection, UIPage_AK10_9_ManualControlDMFW;
 ButtonHandle hButtonPageAK10_9ManualControl, hButtonManualControlMode, hButtonMotorSelectRightHip, \
-                                             hButtonMotorSelectRightKnee, \
+                                             hButtonMotorSelectRightKnee, hButtonDMMotorSelection, \
                                              hButtonAK10_9_ManualControlCubeMarsFWServoMode, \
                                              hButtonAK10_9_ManualControlCubeMarsFWServoModeMITMode,\
                                              hButtonAK10_9_ManualControlDMFW;
@@ -823,7 +823,7 @@ void UI_Page_AK10_9_ManualControlCubeMarsFWServoMode(void)
   if (ifButtonPressed(&hButtonMotorSelectRightHip))
   {
     ifManualControlStarted = 0;
-    hMotorPtrManualControl = &hAKMotorRightHip_old;
+    hMotorPtrManualControl = &hAKMotorSpare1;
     LCD_ClearRect(0, 370, 400, 30);
     PotentialmeterSliderGoTo(&hTMotorManualControlPot_pos, 0.0f);
     PotentialmeterSliderGoTo(&hTMotorManualControlPot_vel, 0.0f);
@@ -1047,6 +1047,7 @@ void UI_Page_AK10_9_ManualControlDMFW_Init(void)
   hButtonMotorStop = Button_Create(0, 80, 150, 250, "STOP", LCD_RED, LCD_YELLOW);
   hButtonMotorZeroing = Button_Create(0, 620, 200, 40, "Motor Set Zero", LCD_BLUE, LCD_RED);
   hButtonManualControlMode = Button_Create(0, 470, 160, 40, "Control Mode", LCD_WHITE, LCD_RED);
+  hButtonDMMotorSelection = Button_Create(0, 520, 210, 40, "Motor Selection", LCD_WHITE, LCD_RED);
   hTMotorManualControlPot_pos = Potentialmeter_Create(250, 80, 30, 400, 60, 70, LCD_MAGENTA, LCD_RED, LIGHT_GREY, -180.0f, 180.0f, 0.0f, &manualControlValue_pos);
   hTMotorManualControlPot_vel = Potentialmeter_Create(340, 80, 30, 400, 60, 70, LCD_MAGENTA, LCD_RED, LIGHT_GREY, -360.0f, 360.0f, 0.0f, &manualControlValue_vel);
   hTMotorManualControlPot_cur = Potentialmeter_Create(420, 80, 30, 400, 60, 70, LCD_MAGENTA, LCD_RED, LIGHT_GREY, -18.0f, 18.0f, 0.0f, &manualControlValue_cur);
@@ -1074,11 +1075,14 @@ void UI_Page_AK10_9_ManualControlDMFW(void)
   ButtonScan(&hButtonMotorZeroing);
   ButtonScan(&hButtonGoBack);
   ButtonScan(&hButtonManualControlMode);
+  ButtonScan(&hButtonDMMotorSelection);
   ButtonRefresh(&hButtonGoBack);
   ButtonRefresh(&hButtonMotorStart);
   ButtonRefresh(&hButtonMotorStop);
   ButtonRefresh(&hButtonMotorZeroing);
   ButtonRefresh(&hButtonManualControlMode);
+  ButtonRefresh(&hButtonDMMotorSelection);
+  
   PotentialmeterUpdate(&hTMotorManualControlPot_pos);
   PotentialmeterUpdate(&hTMotorManualControlPot_vel);
   PotentialmeterUpdate(&hTMotorManualControlPot_cur);
@@ -1108,22 +1112,33 @@ void UI_Page_AK10_9_ManualControlDMFW(void)
     PotentialmeterSliderGoTo(&hTMotorManualControlPot_vel, 0.0f);
     PotentialmeterSliderGoTo(&hTMotorManualControlPot_cur, 0.0f);
     ifManualControlStarted = 0;
-    hAKMotorRightHip.controlMode++;
-    if ((uint32_t)hAKMotorRightHip.controlMode > 2)
-      hAKMotorRightHip.controlMode = 0;
+    hMotorPtrManualControlDMFW->controlMode++;
+    if ((uint32_t)hMotorPtrManualControlDMFW->controlMode > 2)
+      hMotorPtrManualControlDMFW->controlMode = 0;
+  }
+  if(ifButtonPressed(&hButtonDMMotorSelection))
+  {
+    if (hMotorPtrManualControlDMFW == &hAKMotorDMFW1)
+      hMotorPtrManualControlDMFW = &hAKMotorDMFW2;
+    else if (hMotorPtrManualControlDMFW == &hAKMotorDMFW2)
+      hMotorPtrManualControlDMFW = &hAKMotorDMFW3;
+    else if (hMotorPtrManualControlDMFW == &hAKMotorDMFW3)
+      hMotorPtrManualControlDMFW = &hAKMotorRightHip;
+    else if (hMotorPtrManualControlDMFW == &hAKMotorRightHip)
+      hMotorPtrManualControlDMFW = &hAKMotorDMFW1;
   }
   
   LCD_SetLayer(1); 
   LCD_SetColor(LCD_BLACK);
-  if (hAKMotorRightHip.controlMode == AK10_9_DM_FW_MODE_MIT)
+  if (hMotorPtrManualControlDMFW->controlMode == AK10_9_DM_FW_MODE_MIT)
   {
     LCD_DisplayString(0, 340, "MIT Mode");
   }
-  else if (hAKMotorRightHip.controlMode == AK10_9_DM_FW_MODE_POSITION)
+  else if (hMotorPtrManualControlDMFW->controlMode == AK10_9_DM_FW_MODE_POSITION)
   {
     LCD_DisplayString(0, 340, "Position Control");
   }
-  else if (hAKMotorRightHip.controlMode == AK10_9_DM_FW_MODE_VELOCITY)
+  else if (hMotorPtrManualControlDMFW->controlMode == AK10_9_DM_FW_MODE_VELOCITY)
   {
     LCD_DisplayString(0, 340, "Velocity Control");
   }
@@ -1131,6 +1146,15 @@ void UI_Page_AK10_9_ManualControlDMFW(void)
     LCD_DisplayString(200, 0, "Motor  Online");
   else
     LCD_DisplayString(200, 0, "Motor Offline");
+  
+  if (hMotorPtrManualControlDMFW == &hAKMotorDMFW1)
+    LCD_DisplayString(0, 370, "M1");
+  else if (hMotorPtrManualControlDMFW == &hAKMotorDMFW2)
+    LCD_DisplayString(0, 370, "M2");
+  else if (hMotorPtrManualControlDMFW == &hAKMotorDMFW3)
+    LCD_DisplayString(0, 370, "M3");
+  else if (hMotorPtrManualControlDMFW == &hAKMotorRightHip)
+    LCD_DisplayString(0, 370, "RH");
   
   LCD_DisplayDecimals(400, 735, (double)hAKMotorRightHip.realTorque.f, 3, 2);
   LCD_DisplayDecimals(150, 710, (double)hAKMotorRightHip.realPositionDeg.f, 6, 3);
