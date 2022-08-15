@@ -1091,16 +1091,16 @@ void UI_Page_AK10_9_ManualControlDMFW(void)
   
   if(ifButtonPressed(&hButtonMotorZeroing))
   {
-    AK10_9_DMFW_Zeroing(&hAKMotorRightHip);
+    AK10_9_DMFW_Zeroing(hMotorPtrManualControlDMFW);
   }
   if(ifButtonPressed(&hButtonMotorStart))
   {
     ifManualControlStarted = 1;
-    AK10_9_DMFW_EnableMotor(&hAKMotorRightHip);
+    AK10_9_DMFW_EnableMotor(hMotorPtrManualControlDMFW);
   }
   if(ifButtonPressed(&hButtonMotorStop))
   {
-    AK10_9_DMFW_DisableMotor(&hAKMotorRightHip);
+    AK10_9_DMFW_DisableMotor(hMotorPtrManualControlDMFW);
     ifManualControlStarted = 0;
     PotentialmeterSliderGoTo(&hTMotorManualControlPot_pos, 0.0f);
     PotentialmeterSliderGoTo(&hTMotorManualControlPot_vel, 0.0f);
@@ -1156,13 +1156,13 @@ void UI_Page_AK10_9_ManualControlDMFW(void)
   else if (hMotorPtrManualControlDMFW == &hAKMotorRightHip)
     LCD_DisplayString(0, 370, "RH");
   
-  LCD_DisplayDecimals(400, 735, (double)hAKMotorRightHip.realTorque.f, 3, 2);
-  LCD_DisplayDecimals(150, 710, (double)hAKMotorRightHip.realPositionDeg.f, 6, 3);
-  LCD_DisplayDecimals(150, 735, (double)hAKMotorRightHip.realVelocityPresent.f, 6, 3);
-  LCD_DisplayDecimals(150, 760, (double)hAKMotorRightHip.realCurrent.f, 6, 3);
-  LCD_DisplayDecimals(250, 710, (double)hAKMotorRightHip.setPos.f, 6, 3);
-  LCD_DisplayDecimals(250, 735, (double)hAKMotorRightHip.setVel.f, 6, 3);
-  LCD_DisplayDecimals(250, 760, (double)hAKMotorRightHip.setIq.f, 6, 3);
+  LCD_DisplayDecimals(400, 735, (double)hMotorPtrManualControlDMFW->realTorque.f, 3, 2);
+  LCD_DisplayDecimals(150, 710, (double)hMotorPtrManualControlDMFW->realPositionDeg.f, 6, 3);
+  LCD_DisplayDecimals(150, 735, (double)hMotorPtrManualControlDMFW->realVelocityPresent.f, 6, 3);
+  LCD_DisplayDecimals(150, 760, (double)hMotorPtrManualControlDMFW->realCurrent.f, 6, 3);
+  LCD_DisplayDecimals(250, 710, (double)hMotorPtrManualControlDMFW->setPos.f, 6, 3);
+  LCD_DisplayDecimals(250, 735, (double)hMotorPtrManualControlDMFW->setVel.f, 6, 3);
+  LCD_DisplayDecimals(250, 760, (double)hMotorPtrManualControlDMFW->setIq.f, 6, 3);
   LCD_DisplayDecimals(250, 80, (double)manualControlValue_pos, 3, 1);
   LCD_DisplayDecimals(340, 80, (double)manualControlValue_vel, 3, 1);
   LCD_DisplayDecimals(420, 80, (double)manualControlValue_cur, 3, 1);
