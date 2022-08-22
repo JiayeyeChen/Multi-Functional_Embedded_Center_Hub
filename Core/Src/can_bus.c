@@ -60,8 +60,7 @@ void ConfigCANFilter_STD_ID_16Bit4IDListMode(CAN_HandleTypeDef* hcan,  uint32_t 
 void CAN_ConfigureFilters(void)
 {
   CAN_FilterTypeDef tempFilter;
-  
-  
+
   /*Filter bank 0 & 1*/
   /*******************/
   /*Servo mode*/
@@ -150,6 +149,13 @@ void CAN_ConfigureFilters(void)
 //  HAL_CAN_ConfigFilter(hEncoderRightWheel.hcan, &hEncoderRightWheel.canRxFilter);
   /*Filter bank 9*/
   /***************/
+  tempFilter.FilterMode = CAN_FILTERMODE_IDLIST;
+  tempFilter.FilterScale = CAN_FILTERSCALE_16BIT;
+  tempFilter.FilterFIFOAssignment = CAN_FILTER_FIFO0;
+  tempFilter.FilterBank = 9;
+  tempFilter.FilterIdHigh = CAN_ID_ENCODER_UPPER_LIMB << 5;
+  tempFilter.FilterActivation = ENABLE;
+  HAL_CAN_ConfigFilter(&hcan2, &tempFilter);
 //  hEncoderLeftWheel.canRxFilter.FilterMode = CAN_FILTERMODE_IDLIST;
 //  hEncoderLeftWheel.canRxFilter.FilterScale = CAN_FILTERSCALE_16BIT;
 //  hEncoderLeftWheel.canRxFilter.FilterFIFOAssignment = CAN_FILTER_FIFO0;
@@ -159,14 +165,14 @@ void CAN_ConfigureFilters(void)
 //  HAL_CAN_ConfigFilter(hEncoderLeftWheel.hcan, &hEncoderLeftWheel.canRxFilter);
   /*Filter bank 10*/
   /***************/
-//  CAN_FilterTypeDef hArmEncodersFilter;
-//  hArmEncodersFilter.FilterMode = CAN_FILTERMODE_IDLIST;
-//  hArmEncodersFilter.FilterScale = CAN_FILTERSCALE_16BIT;
-//  hArmEncodersFilter.FilterFIFOAssignment = CAN_FILTER_FIFO0;
-//  hArmEncodersFilter.FilterBank = 10;
-//  hArmEncodersFilter.FilterIdHigh = CAN_ID_ENCODER_RX_DATA << 5;
-//  hArmEncodersFilter.FilterActivation = ENABLE;
-//  HAL_CAN_ConfigFilter(&hcan2, &hArmEncodersFilter);
+  CAN_FilterTypeDef hArmEncodersFilter;
+  hArmEncodersFilter.FilterMode = CAN_FILTERMODE_IDLIST;
+  hArmEncodersFilter.FilterScale = CAN_FILTERSCALE_16BIT;
+  hArmEncodersFilter.FilterFIFOAssignment = CAN_FILTER_FIFO0;
+  hArmEncodersFilter.FilterBank = 10;
+  hArmEncodersFilter.FilterIdHigh = CAN_ID_ENCODER_RX_DATA << 5;
+  hArmEncodersFilter.FilterActivation = ENABLE;
+  HAL_CAN_ConfigFilter(&hcan2, &hArmEncodersFilter);
 }
 
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
@@ -217,6 +223,12 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
       wheelcountsec_left++;
     }
   }
+  else if (temRxHeader.StdId == CAN_ID_ENCODER_UPPER_LIMB)
+  {
+    ENCODER_GetAngle(&hEncoderUpperLimb, temRxData);
+    ENCODER_CalculateSpeed(&hEncoderUpperLimb, 0.001f);
+  }
+  
   
   if (temRxHeader.StdId == CAN_ID_ENCODER_RX_DATA)
   {

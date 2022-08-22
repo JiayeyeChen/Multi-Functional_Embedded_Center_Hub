@@ -57,6 +57,14 @@ void ENCODER_Init(void)
   memset(hEncoderRightWheel.speedCalAngleBuf, 0, SIZE_OF_ANGLE_AVG_BUF);
   hEncoderRightWheel.speedRatio = 1.0f;
   
+  hEncoderUpperLimb.lastLegitRxTimestamp = HAL_GetTick();
+  hEncoderUpperLimb.hcan = &hcan2;
+  hEncoderUpperLimb.canAddress = CAN_ID_ENCODER_UPPER_LIMB;
+  hEncoderUpperLimb.speedCalAngleBufPtr = 0;
+  memset(hEncoderUpperLimb.speedCalAngleBuf, 0, SIZE_OF_ANGLE_AVG_BUF);
+  hEncoderUpperLimb.speedRatio = 1.0f;
+  
+  
   encoderSelectPtr = 0;
   hEncoderPtr = &hEncoderLeftPull;
 }

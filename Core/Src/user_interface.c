@@ -1471,21 +1471,23 @@ void UI_Page_BriterEncoder(void)
   }
   else if (ifButtonPressed(&hButtonBriterEncoderSetCounterClockWiseDirection))
   {
+    ENCODER_SetAutoFeedbackMode(hEncoderPtr);
 //    ENCODER_SetDirection(hEncoderPtr, BRITER_ENCODER_DIRECTION_COUNTERCLOCKWISE);
   }
   else if (ifButtonPressed(&hButtonBriterEncoderSet1MHzCanRate))
   {
-    ENCODER_SetAutoFeedbackRate(hEncoderPtr, 5000);
-//    ENCODER_Set1MHzCanBaudrate(hEncoderPtr);
+//    ENCODER_SetAutoFeedbackRate(hEncoderPtr, 5000);
+    ENCODER_Set1MHzCanBaudrate(hEncoderPtr);
   }
   else if (ifButtonPressed(&hButtonBriterEncoderSetCanID))
   {
-    ENCODER_Set1MHzCanBaudrate(hEncoderPtr);
+    ENCODER_SetCanID(hEncoderPtr, 0x01);
+//    ENCODER_Set1MHzCanBaudrate(hEncoderPtr);
   }
   else if (ifButtonPressed(&hButtonBriterEncoderSelectEncoder))
   {
     encoderSelectPtr++;
-    if (encoderSelectPtr > 5)
+    if (encoderSelectPtr > 6)
       encoderSelectPtr = 0;
     if (encoderSelectPtr == 0)
     {
@@ -1516,6 +1518,11 @@ void UI_Page_BriterEncoder(void)
     {
       hEncoderPtr = &hEncoderRightWheel;
       LCD_DisplayString(10, 500, "RW");
+    }
+    else if (encoderSelectPtr == 6)
+    {
+      hEncoderPtr = &hEncoderUpperLimb;
+      LCD_DisplayString(10, 500, "UL");
     }
   }
   else if (ifButtonPressed(&hButtonBriterEncoderIfRead))

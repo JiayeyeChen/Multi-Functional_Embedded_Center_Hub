@@ -11,6 +11,7 @@
 #define CAN_ID_ENCODER_LEFT_PULL		      0x04
 #define CAN_ID_ENCODER_RIGHT_WHEEL        0x05
 #define CAN_ID_ENCODER_LEFT_WHEEL         0x06
+#define CAN_ID_ENCODER_UPPER_LIMB         0x09
 #define CAN_ID_AK10_9_DMFW_M1_RX                       0x0A
 #define CAN_ID_AK10_9_DMFW_M2_RX                       0x0B
 #define CAN_ID_AK10_9_DMFW_M3_RX                       0x0C
