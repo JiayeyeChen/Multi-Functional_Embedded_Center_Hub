@@ -14,6 +14,7 @@ DMA_HandleTypeDef hdma_spi5_tx;
 
 TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim5;
+TIM_HandleTypeDef htim8;
 TIM_HandleTypeDef htim13;
 TIM_HandleTypeDef htim14;
 
@@ -57,6 +58,7 @@ static void USART3_UART_Init(void);
 static void USART6_UART_Init(void);
 static void TIM3_Init(void);
 static void TIM5_Init(void);
+static void TIM8_Init(void);
 static void TIM13_Init(void);
 static void TIM14_Init(void);
 static void CAN2_Init(void);
@@ -254,6 +256,26 @@ static void TIM5_Init(void)
   HAL_TIM_PWM_ConfigChannel(&htim5, &sConfigOC, TIM_CHANNEL_3);
   HAL_TIM_MspPostInit(&htim5);
 
+}
+
+static void TIM8_Init(void)
+{
+  __HAL_RCC_TIM8_CLK_ENABLE();
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+  htim8.Instance = TIM8;
+  htim8.Init.Prescaler = 120-1;
+  htim8.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim8.Init.Period = 65535-1;
+  htim8.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim8.Init.RepetitionCounter = 0;
+  htim8.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  HAL_TIM_Base_Init(&htim8);
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  HAL_TIM_ConfigClockSource(&htim8, &sClockSourceConfig);
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  HAL_TIMEx_MasterConfigSynchronization(&htim8, &sMasterConfig);
 }
 
 static void TIM13_Init(void)
@@ -1503,6 +1525,8 @@ void SystemPeriphral_Init(void)
   USART1_Init();
   TIM3_Init();
   TIM5_Init();
+  TIM8_Init();
+  HAL_TIM_Base_Start(&htim8);
   TIM13_Init();
   TIM14_Init();
 //  CAN1_Init();
