@@ -58,6 +58,11 @@ ButtonHandle hButtonPageBriterEncoder, hButtonBriterEncoderZeroing, \
 PageHandle UIPage_ADC_Monitor;
 ButtonHandle hButtonPageADCMonitor, hButtonResetAD7606;
 ////////////////////
+/*Combined BNO055 and ADXL355 Customized IMU monitor*/
+PageHandle UIPage_Customized_IMU_Monitor;
+ButtonHandle hButtonPageCustomizedIMUMonitor, hButtonSelectHipIMU, hButtonSelectKneeIMU, \
+             hButtonAveragingStart, hButtonAveragingStop;
+
 
 ButtonHandle Button_Create(uint16_t x, uint16_t y, uint16_t xLen, uint16_t yLen, char label[],\
                            uint32_t colorUnpressed, uint32_t colorPressed)
@@ -271,6 +276,11 @@ void UI_Init(void)
   UIPage_BriterEncoder.ifPageInitialized = 0;
   UIPage_BriterEncoder.Page = UI_Page_BriterEncoder;
   UIPage_BriterEncoder.PageInit = UI_Page_BriterEncoder_Init;
+  
+  UIPage_Customized_IMU_Monitor.ifPageInitialized = 0;
+  UIPage_Customized_IMU_Monitor.Page = UI_Page_CustomizedIMU;
+  UIPage_Customized_IMU_Monitor.PageInit = UI_Page_CustomizedIMU_Init;
+  
 }
 
 JoystickHandle Joystick_Create(uint16_t x, uint16_t y, uint16_t r, char label[])
@@ -753,6 +763,9 @@ void UI_Page_Home1(void)
   ButtonRefresh(&hButtonPageADCMonitor);
   ButtonScan(&hButtonPageBriterEncoder);
   ButtonRefresh(&hButtonPageBriterEncoder);
+  ButtonScan(&hButtonPageCustomizedIMUMonitor);
+  ButtonRefresh(&hButtonPageCustomizedIMUMonitor);
+  
   
   if (ifButtonPressed(&hButtonPageExoskeletonInterface))
     UI_Page_Change_To(&UIPage_LowerLimb_Exoskeleton);
@@ -766,6 +779,8 @@ void UI_Page_Home1(void)
     UI_Page_Change_To(&UIPage_ADC_Monitor);
   if (ifButtonPressed(&hButtonPageBriterEncoder))
     UI_Page_Change_To(&UIPage_BriterEncoder);
+  if (ifButtonPressed(&hButtonPageCustomizedIMUMonitor))
+    UI_Page_Change_To(&UIPage_Customized_IMU_Monitor);
 }
 void UI_Page_Home1_Init(void)
 {
@@ -775,6 +790,7 @@ void UI_Page_Home1_Init(void)
   hButtonPageTMotorAccelerationObserverProject = Button_Create(10, 300, 450, 40, "TMotor Acceleration Observer Project", LIGHT_MAGENTA, LCD_RED);
   hButtonPageADCMonitor = Button_Create(150, 350, 200, 40, "ADC Monitor", LIGHT_MAGENTA, LCD_RED);
   hButtonPageBriterEncoder = Button_Create(150, 400, 200, 40, "Briter Encoder", LIGHT_MAGENTA, LCD_RED);
+  hButtonPageCustomizedIMUMonitor = Button_Create(80, 200, 360, 40, "Customized IMU Monitor", LIGHT_MAGENTA, LCD_RED);
 }
 
 void UI_Page_AK10_9_ManualControlCubeMarsFWServoMode(void)
@@ -1218,32 +1234,32 @@ void UI_Page_BNO055_Monitor(void)
   
   LCD_SetLayer(1); 
   LCD_SetColor(LCD_BLACK);
-  LCD_DisplayDecimals(200, 0, (double)hIMURightThigh.rawData.liaccX.b16, 7, 1);
-  LCD_DisplayDecimals(200, 50, (double)hIMURightThigh.rawData.liaccY.b16, 7, 1);
-  LCD_DisplayDecimals(200, 100, (double)hIMURightThigh.rawData.liaccZ.b16, 7, 1);
-  LCD_DisplayDecimals(200, 150, (double)hIMURightThigh.rawData.AccX.b16, 7, 1);
-  LCD_DisplayDecimals(200, 200, (double)hIMURightThigh.rawData.AccY.b16, 7, 1);
-  LCD_DisplayDecimals(200, 250, (double)hIMURightThigh.rawData.AccZ.b16, 7, 1);
-  LCD_DisplayDecimals(200, 300, (double)hIMURightThigh.rawData.gyroX.b16, 7, 1);
-  LCD_DisplayDecimals(200, 350, (double)hIMURightThigh.rawData.gyroY.b16, 7, 1);
-  LCD_DisplayDecimals(200, 400, (double)hIMURightThigh.rawData.gyroZ.b16, 7, 1);
-  LCD_DisplayDecimals(200, 450, (double)hIMURightThigh.rawData.MagX.b16, 7, 1);
-  LCD_DisplayDecimals(200, 500, (double)hIMURightThigh.rawData.MagY.b16, 7, 1);
-  LCD_DisplayDecimals(200, 550, (double)hIMURightThigh.rawData.MagZ.b16, 7, 1);
+  LCD_DisplayDecimals(200, 0, (double)hIMUTorso.rawData.liaccX.b16, 7, 1);
+  LCD_DisplayDecimals(200, 50, (double)hIMUTorso.rawData.liaccY.b16, 7, 1);
+  LCD_DisplayDecimals(200, 100, (double)hIMUTorso.rawData.liaccZ.b16, 7, 1);
+  LCD_DisplayDecimals(200, 150, (double)hIMUTorso.rawData.AccX.b16, 7, 1);
+  LCD_DisplayDecimals(200, 200, (double)hIMUTorso.rawData.AccY.b16, 7, 1);
+  LCD_DisplayDecimals(200, 250, (double)hIMUTorso.rawData.AccZ.b16, 7, 1);
+  LCD_DisplayDecimals(200, 300, (double)hIMUTorso.rawData.gyroX.b16, 7, 1);
+  LCD_DisplayDecimals(200, 350, (double)hIMUTorso.rawData.gyroY.b16, 7, 1);
+  LCD_DisplayDecimals(200, 400, (double)hIMUTorso.rawData.gyroZ.b16, 7, 1);
+  LCD_DisplayDecimals(200, 450, (double)hIMUTorso.rawData.MagX.b16, 7, 1);
+  LCD_DisplayDecimals(200, 500, (double)hIMUTorso.rawData.MagY.b16, 7, 1);
+  LCD_DisplayDecimals(200, 550, (double)hIMUTorso.rawData.MagZ.b16, 7, 1);
   
-  if (hIMURightThigh.operationModeENUM == IMU_MODE_NDOF)
-    EXOSKELETON_SetIMUMode_9_DOF(&hIMURightThigh);
-  else if (hIMURightThigh.operationModeENUM == IMU_MODE_ACCONLY)
-    EXOSKELETON_SetIMUMode_ACC_Only(&hIMURightThigh);
-  else if (hIMURightThigh.operationModeENUM == IMU_MODE_GYROONLY)
-    EXOSKELETON_SetIMUMode_GYRO_Only(&hIMURightThigh);
+  if (hIMUTorso.operationModeENUM == IMU_MODE_NDOF)
+    EXOSKELETON_SetBNO055Mode_9_DOF(&hIMUTorso);
+  else if (hIMUTorso.operationModeENUM == IMU_MODE_ACCONLY)
+    EXOSKELETON_SetBNO055Mode_ACC_Only(&hIMUTorso);
+  else if (hIMUTorso.operationModeENUM == IMU_MODE_GYROONLY)
+    EXOSKELETON_SetBNO055Mode_GYRO_Only(&hIMUTorso);
   
   if (ifButtonPressed(&hButtonIMUSetModeNDOF))
-    hIMURightThigh.operationModeENUM = IMU_MODE_NDOF;
+    hIMUTorso.operationModeENUM = IMU_MODE_NDOF;
   if (ifButtonPressed(&hButtonIMUSetModeACCONLY))
-    hIMURightThigh.operationModeENUM = IMU_MODE_ACCONLY;
+    hIMUTorso.operationModeENUM = IMU_MODE_ACCONLY;
   if (ifButtonPressed(&hButtonIMUSetModeGYROONLY))
-    hIMURightThigh.operationModeENUM = IMU_MODE_GYROONLY;
+    hIMUTorso.operationModeENUM = IMU_MODE_GYROONLY;
   
   if (ifButtonPressed(&hButtonGoBack))
     UI_Page_Change_To(&UIPage_Home1);
@@ -1328,15 +1344,15 @@ void UI_Page_TMotor_Acceleration_Observer_Project(void)
   LCD_DisplayDecimals(140, 745, (double)hAKMotorRightHip_old.setPos.f, 10, 4);
   LCD_DisplayDecimals(140, 770, (double)hAKMotorRightHip_old.realVelocityPresent.f, 10, 4);
   LCD_SetColor(DARK_RED);
-  LCD_DisplayDecimals(90, 495, (double)hIMURightThigh.rawData.liaccX.b16, 7, 1);
-  LCD_DisplayDecimals(90, 520, (double)hIMURightThigh.rawData.liaccY.b16, 7, 1);
-  LCD_DisplayDecimals(90, 545, (double)hIMURightThigh.rawData.liaccZ.b16, 7, 1);
-  LCD_DisplayDecimals(90, 570, (double)hIMURightThigh.rawData.AccX.b16, 7, 1);
-  LCD_DisplayDecimals(90, 595, (double)hIMURightThigh.rawData.AccY.b16, 7, 1);
-  LCD_DisplayDecimals(90, 620, (double)hIMURightThigh.rawData.AccZ.b16, 7, 1);
-  LCD_DisplayDecimals(90, 645, (double)hIMURightThigh.rawData.gyroX.b16, 7, 1);
-  LCD_DisplayDecimals(90, 670, (double)hIMURightThigh.rawData.gyroY.b16, 7, 1);
-  LCD_DisplayDecimals(90, 695, (double)hIMURightThigh.rawData.gyroZ.b16, 7, 1);
+  LCD_DisplayDecimals(90, 495, (double)hIMUTorso.rawData.liaccX.b16, 7, 1);
+  LCD_DisplayDecimals(90, 520, (double)hIMUTorso.rawData.liaccY.b16, 7, 1);
+  LCD_DisplayDecimals(90, 545, (double)hIMUTorso.rawData.liaccZ.b16, 7, 1);
+  LCD_DisplayDecimals(90, 570, (double)hIMUTorso.rawData.AccX.b16, 7, 1);
+  LCD_DisplayDecimals(90, 595, (double)hIMUTorso.rawData.AccY.b16, 7, 1);
+  LCD_DisplayDecimals(90, 620, (double)hIMUTorso.rawData.AccZ.b16, 7, 1);
+  LCD_DisplayDecimals(90, 645, (double)hIMUTorso.rawData.gyroX.b16, 7, 1);
+  LCD_DisplayDecimals(90, 670, (double)hIMUTorso.rawData.gyroY.b16, 7, 1);
+  LCD_DisplayDecimals(90, 695, (double)hIMUTorso.rawData.gyroZ.b16, 7, 1);
   LCD_DisplayDecimals(200, 470, (double)tmotorProfilingSinWaveFrequency, 3, 4);
   LCD_DisplayDecimals(230, 445, (double)(hAKMotorRightHip_old.realPosition.f - hAKMotorRightHip_old.setPos.f), 3, 4);
   LCD_SetColor(LCD_BLACK);
@@ -1517,4 +1533,89 @@ void UI_Page_BriterEncoder_Init(void)
   hButtonBriterEncoderSetCanID = Button_Create(100, 350, 300, 40, "Set CAN ID", LCD_GREEN, LCD_RED);
   hButtonBriterEncoderSelectEncoder = Button_Create(10, 600, 300, 40, "Change Encoder", LCD_GREEN, LCD_RED);
   hButtonBriterEncoderIfRead = Button_Create(10, 650, 300, 40, "Read/Not Read", LCD_GREEN, LCD_RED);
+}
+
+void UI_Page_CustomizedIMU(void)
+{
+  ButtonScan(&hButtonGoBack);
+  ButtonRefresh(&hButtonGoBack);
+  ButtonScan(&hButtonSelectHipIMU);
+  ButtonRefresh(&hButtonSelectHipIMU);
+  ButtonScan(&hButtonSelectKneeIMU);
+  ButtonRefresh(&hButtonSelectKneeIMU);
+  ButtonScan(&hButtonDataLogStart);
+  ButtonRefresh(&hButtonDataLogStart);
+  ButtonScan(&hButtonDataLogEnd);
+  ButtonRefresh(&hButtonDataLogEnd);
+  ButtonScan(&hButtonAveragingStart);
+  ButtonRefresh(&hButtonAveragingStart);
+  ButtonScan(&hButtonAveragingStop);
+  ButtonRefresh(&hButtonAveragingStop);
+  
+  
+  
+  LCD_SetLayer(1);
+  LCD_SetColor(LCD_BLACK);
+  LCD_DisplayDecimals(300, 75, hCustomizedIMUPtr->grvNorm.f, 5, 4);
+  LCD_DisplayDecimals(300, 100, hCustomizedIMUPtr->xGrv.f, 5, 4);
+  LCD_DisplayDecimals(300, 125, hCustomizedIMUPtr->yGrv.f, 5, 4);
+  LCD_DisplayDecimals(300, 150, hCustomizedIMUPtr->zGrv.f, 5, 4);
+  LCD_DisplayDecimals(300, 175, hCustomizedIMUPtr->xAcc.f, 5, 4);
+  LCD_DisplayDecimals(300, 200, hCustomizedIMUPtr->yAcc.f, 5, 4);
+  LCD_DisplayDecimals(300, 225, hCustomizedIMUPtr->zAcc.f, 5, 4);
+  LCD_DisplayNumber(300, 250, hCustomizedIMUPtr->bno055CalibStatus, 3);
+  LCD_SetColor(LCD_RED);
+  LCD_DisplayDecimals(300, 0, hCustomizedIMUPtr->xLiAcc.f, 5, 4);
+  LCD_DisplayDecimals(300, 25, hCustomizedIMUPtr->yLiAcc.f, 5, 4);
+  LCD_DisplayDecimals(300, 50, hCustomizedIMUPtr->zLiAcc.f, 5, 4);
+  
+  
+  if (ifButtonPressed(&hButtonSelectHipIMU))
+    hCustomizedIMUPtr = &hIMUHip;
+  if (ifButtonPressed(&hButtonSelectKneeIMU))
+    hCustomizedIMUPtr = &hIMUKnee;
+  if (ifButtonPressed(&hButtonDataLogStart))
+    USB_DataLogStart();
+  if (ifButtonPressed(&hButtonDataLogEnd))
+    USB_DataLogEnd();
+  if (ifButtonPressed(&hButtonAveragingStart))
+  {
+    Averager_Start(&hCustomizedIMUPtr->xAccAvg, hCustomizedIMUPtr->xAcc.f);
+    Averager_Start(&hCustomizedIMUPtr->yAccAvg, hCustomizedIMUPtr->yAcc.f);
+    Averager_Start(&hCustomizedIMUPtr->zAccAvg, hCustomizedIMUPtr->zAcc.f);
+  }
+  if (ifButtonPressed(&hButtonAveragingStop))
+  {
+    Averager_Init(&hCustomizedIMUPtr->xAccAvg);
+    Averager_Init(&hCustomizedIMUPtr->yAccAvg);
+    Averager_Init(&hCustomizedIMUPtr->zAccAvg);
+  }
+  
+    
+  if (ifButtonPressed(&hButtonGoBack))
+    UI_Page_Change_To(&UIPage_Home1);
+}
+void UI_Page_CustomizedIMU_Init(void)
+{
+  USB_SetNewDataSlotLen(sizeof(dataSlots_Exoskeleton_Common)/4);
+  
+  hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
+  hButtonSelectHipIMU = Button_Create(10, 300, 130, 40, "Hip IMU", LCD_WHITE, LCD_RED);
+  hButtonSelectKneeIMU = Button_Create(10, 350, 130, 40, "Knee IMU", LCD_WHITE, LCD_RED);
+  hButtonDataLogStart = Button_Create(150, 300, 180, 40, "Datalog Start", LCD_WHITE, LCD_RED);
+  hButtonDataLogEnd = Button_Create(150, 350, 180, 40, "Datalog End", LCD_WHITE, LCD_RED);
+  hButtonAveragingStart = Button_Create(10, 400, 220, 40, "Acc Avg start", LCD_WHITE, LCD_RED);
+  hButtonAveragingStop = Button_Create(250, 400, 220, 40, "Acc Avg Stop ", LCD_WHITE, LCD_RED);
+  
+  LCD_DisplayString(10, 75, "Gravity vector norm: ");
+  LCD_DisplayString(10, 100, "Gravity vector X: ");
+  LCD_DisplayString(10, 125, "Gravity vector Y: ");
+  LCD_DisplayString(10, 150, "Gravity vector Z: ");
+  LCD_DisplayString(10, 175, "Acceleration X:   ");
+  LCD_DisplayString(10, 200, "Acceleration Y:   ");
+  LCD_DisplayString(10, 225, "Acceleration Z:   ");
+  LCD_DisplayString(10, 250, "Calib Status:     ");
+  LCD_DisplayString(80, 0, "Linear Acc:");
+  LCD_DisplayString(80, 25, "Linear Acc:");
+  LCD_DisplayString(80, 50, "Linear Acc:");
 }

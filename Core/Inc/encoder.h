@@ -70,7 +70,8 @@ void ENCODER_SetManualFeedbackMode(EncoderHandle* hencoder);
 
 void ENCODER_SetAutoFeedbackRate(EncoderHandle* hencoder, uint16_t us);
 
-extern EncoderHandle hEncoderRightWheel, hEncoderLeftWheel, hEncoderLeftPull, hEncoderLeftTurn, hEncoderRightPull, hEncoderRightTurn;
+extern EncoderHandle hEncoderRightWheel, hEncoderLeftWheel, hEncoderLeftPull, \
+       hEncoderUpperLimb, hEncoderLeftTurn, hEncoderRightPull, hEncoderRightTurn;
 extern EncoderHandle* hEncoderPtr;
 extern uint8_t encoderSelectPtr;
 extern uint8_t ifRequestRead;

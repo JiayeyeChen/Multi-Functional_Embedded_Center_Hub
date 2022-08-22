@@ -124,6 +124,8 @@ void         UI_Page_ADC_Monitor_Init(void);
 void         UI_Page_ADC_Monitor(void);
 void         UI_Page_BriterEncoder(void);
 void         UI_Page_BriterEncoder_Init(void);
+void         UI_Page_CustomizedIMU(void);
+void         UI_Page_CustomizedIMU_Init(void);
 
 JoystickHandle Joystick_Create(uint16_t x, uint16_t y, uint16_t r, char label[]);
 

@@ -6,7 +6,8 @@
 #include "encoder.h"
 #include "system_periphrals.h"
 
-EncoderHandle hEncoderRightWheel, hEncoderLeftWheel, hEncoderLeftPull, hEncoderLeftTurn, hEncoderRightPull, hEncoderRightTurn;
+EncoderHandle hEncoderRightWheel, hEncoderLeftWheel, hEncoderLeftPull, \
+              hEncoderUpperLimb, hEncoderLeftTurn, hEncoderRightPull, hEncoderRightTurn;
 EncoderHandle* hEncoderPtr;
 uint8_t encoderSelectPtr = 0;
 uint8_t ifRequestRead = 0;

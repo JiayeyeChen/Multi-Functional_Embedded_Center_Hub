@@ -8,7 +8,7 @@
 #include "common.h"
 #include <stdarg.h>
 
-#define USB_USE_CRC
+//#define USB_USE_CRC
 
 enum DatalogType
 {
@@ -73,5 +73,5 @@ extern USBHandle hUSB;
 extern union FloatUInt8 dataSlots_AK10_9_Acceleration_Observer_Testing[12];
 extern union FloatUInt8 dataSlots_AK10_9_TorqueConstantTesting[2];
 extern union FloatUInt8 dataSlots_Exoskeleton_SystemID[9];
-extern union FloatUInt8 dataSlots_Exoskeleton_Common[11];
+extern union FloatUInt8 dataSlots_Exoskeleton_Common[29];
 #endif

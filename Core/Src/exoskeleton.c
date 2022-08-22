@@ -1,24 +1,24 @@
 #include "exoskeleton.h"
 #include "ak10-9_v2_testing.h"
 
-BNO055Handle hIMURightThigh, hIMURightKnee;
-Exoskeleton_SystemIDHandle hSystemID;
-Exoskeleton_GravityCompensation hGravityCompensation;
-ExoskeletonHandle hExoskeleton;
+BNO055Handle                               hIMUTorso;
+JointAccelerationIMUHandle                 hIMUHip;
+JointAccelerationIMUHandle                 hIMUKnee;
+JointAccelerationIMUHandle*                hCustomizedIMUPtr = &hIMUHip;
+Exoskeleton_SystemIDHandle                 hSystemID;
+Exoskeleton_GravityCompensation            hGravityCompensation;
+ExoskeletonHandle                          hExoskeleton;
 Exoskeleton_MuscularTorqueEstimationHandle hMuscularTorque;
-Exoskeleton_AugmentedControlHandle hAugmentedControl;
+Exoskeleton_AugmentedControlHandle         hAugmentedControl;
 
 void EXOSKELETON_Init(void)
 {
-  hIMURightThigh.hcan = &hcan2;
-  hIMURightThigh.operationMode = 0xFF;
-  hIMURightThigh.operationModeENUM = IMU_MODE_ACCONLY;
-  hIMURightThigh.CANID_SET_MODE_NDOF = CAN_ID_IMU_GET_DATA_NDOF_RIGHT_THIGH;
-  hIMURightThigh.CANID_SET_MODE_GYROONLY = CAN_ID_IMU_GET_DATA_GYROONLY_RIGHT_THIGH;
-  hIMURightThigh.CANID_SET_MODE_ACCONLY = CAN_ID_IMU_GET_DATA_ACCONLY_RIGHT_THIGH;
-  hIMURightThigh.lpfCutOffFrequency = 10.0f;
-  hIMURightThigh.lpfDuration = 0.002f;
-  hIMURightThigh.lpfAlpha = 2.0f * pi * hIMURightThigh.lpfCutOffFrequency * hIMURightThigh.lpfDuration / (1.0f + 2.0f * pi * hIMURightThigh.lpfCutOffFrequency * hIMURightThigh.lpfDuration);
+  hIMUTorso.hcan = &hcan2;
+  hIMUTorso.operationMode = 0xFF;
+  hIMUTorso.operationModeENUM = IMU_MODE_NDOF;
+  
+  hIMUHip.hcan = &hcan2;
+  hIMUKnee.hcan = &hcan2;
   
   hMuscularTorque.ifEstimating = 0;
   hMuscularTorque.muscularTorqueHip.f = 0.0f;
@@ -43,8 +43,11 @@ void EXOSKELETON_Init(void)
 
 void EXOSKELETON_Set_Common_Datalog_Label(void)
 {
-  USB_SendDataSlotLabel("11", "theta0", "theta1", "theta1 vel", \
-                        "theta1 acc", "theta2", "theta2 vel", "theta2 acc", "torque1", "torque2", "HipMTq", "KneeMTq");
+  USB_SendDataSlotLabel("29", "theta0", "theta1", "theta1 vel", \
+                        "theta1 acc", "theta2", "theta2 vel", "theta2 acc", "torque1", "torque2", "HipMTq", "KneeMTq", \
+                        "HipIMU xAcc", "HipIMU yAcc", "HipIMU zAcc", "HipIMU xGrv", "HipIMU yGrv", "HipIMU zGrv", \
+                        "KneeIMU xAcc", "KneeIMU yAcc", "KneeIMU zAcc", "KneeIMU xGrv", "KneeIMU yGrv", "KneeIMU zGrv", \
+                        "Hip LiAccX", "Hip LiAccY", "Hip LiAccZ", "Knee LiAccX", "Knee LiAccY", "Knee LiAccZ");
 }
 
 void EXOSKELETON_CommonDatalogManager(void)
@@ -67,6 +70,24 @@ void EXOSKELETON_UpdateCommonDataSlot(void)
   dataSlots_Exoskeleton_Common[ptr++].f = hAKMotorRightKnee.realTorque.f;
   dataSlots_Exoskeleton_Common[ptr++].f = hExoskeleton.hmusculartorque->muscularTorqueHip.f;
   dataSlots_Exoskeleton_Common[ptr++].f = hExoskeleton.hmusculartorque->muscularTorqueKnee.f;
+  dataSlots_Exoskeleton_Common[ptr++].f = hIMUHip.xAcc.f;
+  dataSlots_Exoskeleton_Common[ptr++].f = hIMUHip.yAcc.f;
+  dataSlots_Exoskeleton_Common[ptr++].f = hIMUHip.zAcc.f;
+  dataSlots_Exoskeleton_Common[ptr++].f = hIMUHip.xGrv.f;
+  dataSlots_Exoskeleton_Common[ptr++].f = hIMUHip.yGrv.f;
+  dataSlots_Exoskeleton_Common[ptr++].f = hIMUHip.zGrv.f;
+  dataSlots_Exoskeleton_Common[ptr++].f = hIMUKnee.xAcc.f;
+  dataSlots_Exoskeleton_Common[ptr++].f = hIMUKnee.yAcc.f;
+  dataSlots_Exoskeleton_Common[ptr++].f = hIMUKnee.zAcc.f;
+  dataSlots_Exoskeleton_Common[ptr++].f = hIMUKnee.xGrv.f;
+  dataSlots_Exoskeleton_Common[ptr++].f = hIMUKnee.yGrv.f;
+  dataSlots_Exoskeleton_Common[ptr++].f = hIMUKnee.zGrv.f;
+  dataSlots_Exoskeleton_Common[ptr++].f = hIMUHip.xLiAcc.f;
+  dataSlots_Exoskeleton_Common[ptr++].f = hIMUHip.yLiAcc.f;
+  dataSlots_Exoskeleton_Common[ptr++].f = hIMUHip.zLiAcc.f;
+  dataSlots_Exoskeleton_Common[ptr++].f = hIMUKnee.xLiAcc.f;
+  dataSlots_Exoskeleton_Common[ptr++].f = hIMUKnee.yLiAcc.f;
+  dataSlots_Exoskeleton_Common[ptr++].f = hIMUKnee.zLiAcc.f;
   hUSB.ifNewDataLogPiece2Send = 1;
 }
 
@@ -80,7 +101,7 @@ void EXOSKELETON_SystemID_Init(void)
   hSystemID.ifIdentified = 0;
 }
 
-void EXOSKELETON_GetIMUFeedbackLiAcc(BNO055Handle* himu, uint8_t data[])
+void EXOSKELETON_GetBNO055FeedbackLiAcc(BNO055Handle* himu, uint8_t data[])
 {
   himu->rawData.liaccX.b8[0] = data[0];
   himu->rawData.liaccX.b8[1] = data[1];
@@ -88,9 +109,12 @@ void EXOSKELETON_GetIMUFeedbackLiAcc(BNO055Handle* himu, uint8_t data[])
   himu->rawData.liaccY.b8[1] = data[3];
   himu->rawData.liaccZ.b8[0] = data[4];
   himu->rawData.liaccZ.b8[1] = data[5];
+  himu->parsedData.liaccX.f = (float)himu->rawData.liaccX.b16 * 0.01f;
+  himu->parsedData.liaccY.f = (float)himu->rawData.liaccY.b16 * 0.01f;
+  himu->parsedData.liaccZ.f = (float)himu->rawData.liaccZ.b16 * 0.01f;
 }
 
-void EXOSKELETON_GetIMUFeedbackGyro(BNO055Handle* himu, uint8_t data[])
+void EXOSKELETON_GetBNO055FeedbackGyro(BNO055Handle* himu, uint8_t data[])
 {
   himu->rawData.gyroX.b8[0] = data[0];
   himu->rawData.gyroX.b8[1] = data[1];
@@ -98,20 +122,23 @@ void EXOSKELETON_GetIMUFeedbackGyro(BNO055Handle* himu, uint8_t data[])
   himu->rawData.gyroY.b8[1] = data[3];
   himu->rawData.gyroZ.b8[0] = data[4];
   himu->rawData.gyroZ.b8[1] = data[5];
+  himu->parsedData.gyroX.f = (float)himu->rawData.gyroX.b16 * 0.0625f;
+  himu->parsedData.gyroY.f = (float)himu->rawData.gyroY.b16 * 0.0625f;
+  himu->parsedData.gyroZ.f = (float)himu->rawData.gyroZ.b16 * 0.0625f;
 }
-void EXOSKELETON_GetIMUFeedbackQuaternion(BNO055Handle* himu, uint8_t data[])
+void EXOSKELETON_GetBNO055FeedbackQuaternion(BNO055Handle* himu, uint8_t data[])
 {
   
 }
 
-void EXOSKELETON_GetIMUFeedbackStatus(BNO055Handle* himu, uint8_t data[])
+void EXOSKELETON_GetBNO055FeedbackStatus(BNO055Handle* himu, uint8_t data[])
 {
   himu->calibStatus = data[0];
   himu->operationMode = data[1];
   himu->deadCount = data[2];
 }
 
-void EXOSKELETON_SetIMUMode_9_DOF(BNO055Handle* himu)
+void EXOSKELETON_SetBNO055Mode_9_DOF(BNO055Handle* himu)
 {
   himu->txHeader.StdId = himu->CANID_SET_MODE_NDOF;
   himu->txHeader.RTR = 0;
@@ -119,7 +146,7 @@ void EXOSKELETON_SetIMUMode_9_DOF(BNO055Handle* himu)
   himu->txHeader.DLC = 1;
   HAL_CAN_AddTxMessage(himu->hcan, &himu->txHeader, himu->txBuf, himu->pTxMailbox);
 }
-void EXOSKELETON_SetIMUMode_GYRO_Only(BNO055Handle* himu)
+void EXOSKELETON_SetBNO055Mode_GYRO_Only(BNO055Handle* himu)
 {
   himu->txHeader.StdId = himu->CANID_SET_MODE_GYROONLY;
   himu->txHeader.RTR = 0;
@@ -128,7 +155,7 @@ void EXOSKELETON_SetIMUMode_GYRO_Only(BNO055Handle* himu)
   HAL_CAN_AddTxMessage(himu->hcan, &himu->txHeader, himu->txBuf, himu->pTxMailbox);
 }
 
-void EXOSKELETON_SetIMUMode_ACC_Only(BNO055Handle* himu)
+void EXOSKELETON_SetBNO055Mode_ACC_Only(BNO055Handle* himu)
 {
   himu->txHeader.StdId = himu->CANID_SET_MODE_ACCONLY;
   himu->txHeader.RTR = 0;
@@ -137,7 +164,7 @@ void EXOSKELETON_SetIMUMode_ACC_Only(BNO055Handle* himu)
   HAL_CAN_AddTxMessage(himu->hcan, &himu->txHeader, himu->txBuf, himu->pTxMailbox);
 }
 
-void EXOSKELETON_GetIMUFeedbackAcc(BNO055Handle* himu, uint8_t data[])
+void EXOSKELETON_GetBNO055FeedbackAcc(BNO055Handle* himu, uint8_t data[])
 {
   himu->rawData.AccX.b8[0] = data[0];
   himu->rawData.AccX.b8[1] = data[1];
@@ -145,14 +172,11 @@ void EXOSKELETON_GetIMUFeedbackAcc(BNO055Handle* himu, uint8_t data[])
   himu->rawData.AccY.b8[1] = data[3];
   himu->rawData.AccZ.b8[0] = data[4];
   himu->rawData.AccZ.b8[1] = data[5];
-  himu->parsedData.AccX.f = (1.0f - himu->lpfAlpha) * himu->lpfAccXFilteredPrevious + himu->lpfAlpha * ((float)himu->rawData.AccX.b16) / 100.0f;
-  himu->parsedData.AccY.f = (1.0f - himu->lpfAlpha) * himu->lpfAccYFilteredPrevious + himu->lpfAlpha * ((float)himu->rawData.AccY.b16) / 100.0f;
-  himu->parsedData.AccZ.f = (1.0f - himu->lpfAlpha) * himu->lpfAccZFilteredPrevious + himu->lpfAlpha * ((float)himu->rawData.AccZ.b16) / 100.0f;
-  himu->lpfAccXFilteredPrevious = himu->parsedData.AccX.f;
-  himu->lpfAccYFilteredPrevious = himu->parsedData.AccY.f;
-  himu->lpfAccZFilteredPrevious = himu->parsedData.AccZ.f;
+  himu->parsedData.AccX.f = ((float)himu->rawData.AccX.b16) * 0.01f;
+  himu->parsedData.AccY.f = ((float)himu->rawData.AccY.b16) * 0.01f;
+  himu->parsedData.AccZ.f = ((float)himu->rawData.AccZ.b16) * 0.01f;
 }
-void EXOSKELETON_GetIMUFeedbackMag(BNO055Handle* himu, uint8_t data[])
+void EXOSKELETON_GetBNO055FeedbackMag(BNO055Handle* himu, uint8_t data[])
 {
   himu->rawData.MagX.b8[0] = data[0];
   himu->rawData.MagX.b8[1] = data[1];
@@ -160,6 +184,75 @@ void EXOSKELETON_GetIMUFeedbackMag(BNO055Handle* himu, uint8_t data[])
   himu->rawData.MagY.b8[1] = data[3];
   himu->rawData.MagZ.b8[0] = data[4];
   himu->rawData.MagZ.b8[1] = data[5];
+}
+
+void EXOSKELETON_GetBNO055FeedbackGrv(BNO055Handle* himu, uint8_t data[])
+{
+  himu->rawData.grvX.b8[0] = data[0];
+  himu->rawData.grvX.b8[1] = data[1];
+  himu->rawData.grvY.b8[0] = data[2];
+  himu->rawData.grvY.b8[1] = data[3];
+  himu->rawData.grvZ.b8[0] = data[4];
+  himu->rawData.grvZ.b8[1] = data[5];
+  himu->parsedData.grvX.f = (float)himu->rawData.grvX.b16 * 0.01f;
+  himu->parsedData.grvY.f = (float)himu->rawData.grvY.b16 * 0.01f;
+  himu->parsedData.grvZ.f = (float)himu->rawData.grvZ.b16 * 0.01f;
+}
+
+void EXOSKELETON_GetJointAccelerationIMUFeedback_X_Data(JointAccelerationIMUHandle* himu, uint8_t data[])
+{
+  himu->xAcc.b8[0] = data[0];
+  himu->xAcc.b8[1] = data[1];
+  himu->xAcc.b8[2] = data[2];
+  himu->xAcc.b8[3] = data[3];
+  Averager_Update(&himu->xAccAvg, himu->xAcc.f);
+  himu->xAcc.f -= EXOSKELETON_HIP_IMU_ACC_X_OFFSET;
+  himu->xGrv.b8[0] = data[4];
+  himu->xGrv.b8[1] = data[5];
+  himu->xGrv.b8[2] = data[6];
+  himu->xGrv.b8[3] = data[7];
+  himu->accNorm.f = sqrtf(powf(himu->xAcc.f, 2.0f) + powf(himu->yAcc.f, 2.0f) + powf(himu->zAcc.f, 2.0f));
+  himu->grvNorm.f = sqrtf(powf(himu->xGrv.f, 2.0f) + powf(himu->yGrv.f, 2.0f) + powf(himu->zGrv.f, 2.0f));
+  himu->xGrvNormalized.f = himu->xGrv.f / himu->grvNorm.f;
+  himu->xLiAcc.f = himu->xAcc.f - himu->xGrvNormalized.f * EXOSKELETON_GRAVITATIONAL_ACCELERATION;
+}
+void EXOSKELETON_GetJointAccelerationIMUFeedback_Y_Data(JointAccelerationIMUHandle* himu, uint8_t data[])
+{
+  himu->yAcc.b8[0] = data[0];
+  himu->yAcc.b8[1] = data[1];
+  himu->yAcc.b8[2] = data[2];
+  himu->yAcc.b8[3] = data[3];
+  Averager_Update(&himu->yAccAvg, himu->yAcc.f);
+  himu->yAcc.f -= EXOSKELETON_HIP_IMU_ACC_Y_OFFSET;
+  himu->yGrv.b8[0] = data[4];
+  himu->yGrv.b8[1] = data[5];
+  himu->yGrv.b8[2] = data[6];
+  himu->yGrv.b8[3] = data[7];
+  himu->accNorm.f = sqrtf(powf(himu->xAcc.f, 2.0f) + powf(himu->yAcc.f, 2.0f) + powf(himu->zAcc.f, 2.0f));
+  himu->grvNorm.f = sqrtf(powf(himu->xGrv.f, 2.0f) + powf(himu->yGrv.f, 2.0f) + powf(himu->zGrv.f, 2.0f));
+  himu->yGrvNormalized.f = himu->yGrv.f / himu->grvNorm.f;
+  himu->yLiAcc.f = himu->yAcc.f - himu->yGrvNormalized.f * EXOSKELETON_GRAVITATIONAL_ACCELERATION;
+}
+void EXOSKELETON_GetJointAccelerationIMUFeedback_Z_Data(JointAccelerationIMUHandle* himu, uint8_t data[])
+{
+  himu->zAcc.b8[0] = data[0];
+  himu->zAcc.b8[1] = data[1];
+  himu->zAcc.b8[2] = data[2];
+  himu->zAcc.b8[3] = data[3];
+  Averager_Update(&himu->zAccAvg, himu->zAcc.f);
+  himu->zAcc.f -= EXOSKELETON_HIP_IMU_ACC_Z_OFFSET;
+  himu->zGrv.b8[0] = data[4];
+  himu->zGrv.b8[1] = data[5];
+  himu->zGrv.b8[2] = data[6];
+  himu->zGrv.b8[3] = data[7];
+  himu->accNorm.f = sqrtf(powf(himu->xAcc.f, 2.0f) + powf(himu->yAcc.f, 2.0f) + powf(himu->zAcc.f, 2.0f));
+  himu->grvNorm.f = sqrtf(powf(himu->xGrv.f, 2.0f) + powf(himu->yGrv.f, 2.0f) + powf(himu->zGrv.f, 2.0f));
+  himu->zGrvNormalized.f = himu->zGrv.f / himu->grvNorm.f;
+  himu->zLiAcc.f = himu->zAcc.f - himu->zGrvNormalized.f * EXOSKELETON_GRAVITATIONAL_ACCELERATION;
+}
+void EXOSKELETON_GetJointAccelerationIMUFeedback_BNO055Status(JointAccelerationIMUHandle* himu, uint8_t data[])
+{
+  himu->bno055CalibStatus = data[0];
 }
 
 void EXOSKELETON_SystemIDManager(void)
@@ -197,10 +290,10 @@ void EXOSKELETON_SystemIDManager(void)
     case EXOSKELETON_SYSTEMID_TASK_KNEE_JOINT_MOVEMENT_POSITIONING:
       
       AK10_9_CubaMarsFW_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightKnee, \
-                                                                SYSTEMID_KNEE_JOINT_LEARNING_STARTING_POSITION_KNEE_JOINT, \
+                                                                EXOSKELETON_SYSTEMID_KNEE_JOINT_LEARNING_STARTING_POSITION_KNEE_JOINT, \
                                                                 0.0f, 200.0f, 2.0f, 0.0f);
       AK10_9_DMFW_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightHip, \
-                                                          SYSTEMID_KNEE_JOINT_LEARNING_STARTING_POSITION_HIP_JOINT, \
+                                                          EXOSKELETON_SYSTEMID_KNEE_JOINT_LEARNING_STARTING_POSITION_HIP_JOINT, \
                                                           0.0f, 200.0f, 2.0f, 0.0f);
 //////////    /* for debug */
 //////////    hAKMotorRightHip.ifCustomizedPositionSpeedControlFinished = 1;
@@ -213,28 +306,28 @@ void EXOSKELETON_SystemIDManager(void)
       }
       break;
     case EXOSKELETON_SYSTEMID_TASK_KNEE_JOINT_MOVEMENT_ONGOING:
-      if (HAL_GetTick() - enterProfilingTimeStamp <= SYSTEMID_JOINT_POSITIONING_STABILIZING_TIME)
+      if (HAL_GetTick() - enterProfilingTimeStamp <= EXOSKELETON_SYSTEMID_JOINT_POSITIONING_STABILIZING_TIME)
       {
         
         AK10_9_CubaMarsFW_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightKnee, \
-                                                                SYSTEMID_KNEE_JOINT_LEARNING_STARTING_POSITION_KNEE_JOINT, \
+                                                                EXOSKELETON_SYSTEMID_KNEE_JOINT_LEARNING_STARTING_POSITION_KNEE_JOINT, \
                                                                 0.0f, 200.0f, 2.0f, 0.0f);
         AK10_9_DMFW_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightHip, \
-                                                          SYSTEMID_KNEE_JOINT_LEARNING_STARTING_POSITION_HIP_JOINT, \
+                                                          EXOSKELETON_SYSTEMID_KNEE_JOINT_LEARNING_STARTING_POSITION_HIP_JOINT, \
                                                           0.0f, 200.0f, 2.0f, 0.0f);
       }
       else
       {
-        if (HAL_GetTick() - enterProfilingTimeStamp - SYSTEMID_JOINT_POSITIONING_STABILIZING_TIME <= hSystemID.kneeProfilingTime)
+        if (HAL_GetTick() - enterProfilingTimeStamp - EXOSKELETON_SYSTEMID_JOINT_POSITIONING_STABILIZING_TIME <= hSystemID.kneeProfilingTime)
         {
           EXOSKELETON_SystemID_UpdateDataSlot();
           USB_DataLogSingleCargoTransmit(dataSlots_Exoskeleton_SystemID);
           
           AK10_9_DMFW_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightHip, \
-                                                          SYSTEMID_KNEE_JOINT_LEARNING_STARTING_POSITION_HIP_JOINT, \
+                                                          EXOSKELETON_SYSTEMID_KNEE_JOINT_LEARNING_STARTING_POSITION_HIP_JOINT, \
                                                           0.0f, 200.0f, 2.0f, 0.0f);
           EXOSKELETON_SystemID_KneeJoint_MotorProfilingSinWave(&hAKMotorRightKnee, hSystemID.kneeProfilingAmp, \
-                                                               hSystemID.kneeProfilingFreq, enterProfilingTimeStamp + SYSTEMID_JOINT_POSITIONING_STABILIZING_TIME);
+                                                               hSystemID.kneeProfilingFreq, enterProfilingTimeStamp + EXOSKELETON_SYSTEMID_JOINT_POSITIONING_STABILIZING_TIME);
         }
         else
         {
@@ -255,14 +348,14 @@ void EXOSKELETON_SystemIDManager(void)
     case EXOSKELETON_SYSTEMID_TASK_HIP_JOINT_MOVEMENT_POSITIONING:
       
       AK10_9_CubaMarsFW_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightKnee, \
-                                                                SYSTEMID_HIP_JOINT_LEARNING_STARTING_POSITION_KNEE_JOINT, \
+                                                                EXOSKELETON_SYSTEMID_HIP_JOINT_LEARNING_STARTING_POSITION_KNEE_JOINT, \
                                                                 0.0f, 200.0f, 2.0f, 0.0f);
     #ifdef HIP_JOINT_LEARNING_USE_CURRENT_CONTROL
       AK10_9_DMFW_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightHip, \
                                                           0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
     #else
       AK10_9_DMFW_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightHip, \
-                                                          SYSTEMID_HIP_JOINT_LEARNING_STARTING_POSITION_HIP_JOINT, \
+                                                          EXOSKELETON_SYSTEMID_HIP_JOINT_LEARNING_STARTING_POSITION_HIP_JOINT, \
                                                           0.0f, 200.0f, 2.0f, 0.0f);
     #endif
 //////////      /* for debug */
@@ -276,37 +369,37 @@ void EXOSKELETON_SystemIDManager(void)
       }
       break;
     case EXOSKELETON_SYSTEMID_TASK_HIP_JOINT_MOVEMENT_ONGOING:
-      if (HAL_GetTick() - enterProfilingTimeStamp <= SYSTEMID_JOINT_POSITIONING_STABILIZING_TIME)
+      if (HAL_GetTick() - enterProfilingTimeStamp <= EXOSKELETON_SYSTEMID_JOINT_POSITIONING_STABILIZING_TIME)
       {
         
         AK10_9_CubaMarsFW_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightKnee, \
-                                                                  SYSTEMID_HIP_JOINT_LEARNING_STARTING_POSITION_KNEE_JOINT, \
+                                                                  EXOSKELETON_SYSTEMID_HIP_JOINT_LEARNING_STARTING_POSITION_KNEE_JOINT, \
                                                                   0.0f, 200.0f, 2.0f, 0.0f);
         #ifdef HIP_JOINT_LEARNING_USE_CURRENT_CONTROL
           AK10_9_DMFW_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightHip, \
                                                               0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
         #else
           AK10_9_DMFW_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightHip, \
-                                                              SYSTEMID_HIP_JOINT_LEARNING_STARTING_POSITION_HIP_JOINT, \
+                                                              EXOSKELETON_SYSTEMID_HIP_JOINT_LEARNING_STARTING_POSITION_HIP_JOINT, \
                                                               0.0f, 200.0f, 2.0f, 0.0f);
         #endif
       }
       else
       {
-        if (HAL_GetTick() - enterProfilingTimeStamp - SYSTEMID_JOINT_POSITIONING_STABILIZING_TIME <= hSystemID.hipProfilingTime)
+        if (HAL_GetTick() - enterProfilingTimeStamp - EXOSKELETON_SYSTEMID_JOINT_POSITIONING_STABILIZING_TIME <= hSystemID.hipProfilingTime)
         {
           EXOSKELETON_SystemID_UpdateDataSlot();
           USB_DataLogSingleCargoTransmit(dataSlots_Exoskeleton_SystemID);
           
           AK10_9_CubaMarsFW_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightKnee, \
-                                                                  SYSTEMID_HIP_JOINT_LEARNING_STARTING_POSITION_KNEE_JOINT, \
+                                                                  EXOSKELETON_SYSTEMID_HIP_JOINT_LEARNING_STARTING_POSITION_KNEE_JOINT, \
                                                                   0.0f, 200.0f, 2.0f, 0.0f);
           #ifdef HIP_JOINT_LEARNING_USE_CURRENT_CONTROL
           EXOSKELETON_SystemID_HipJoint_MotorProfilingSinWave_CurrentControl(&hAKMotorRightHip,  hSystemID.hipProfilingAmp, \
-                                                               hSystemID.hipProfilingFreq, enterProfilingTimeStamp + SYSTEMID_JOINT_POSITIONING_STABILIZING_TIME);
+                                                               hSystemID.hipProfilingFreq, enterProfilingTimeStamp + EXOSKELETON_SYSTEMID_JOINT_POSITIONING_STABILIZING_TIME);
           #else
           EXOSKELETON_SystemID_HipJoint_MotorProfilingSinWave_PositionControl(&hAKMotorRightHip, hSystemID.hipProfilingAmp, \
-                                                               hSystemID.hipProfilingFreq, enterProfilingTimeStamp + SYSTEMID_JOINT_POSITIONING_STABILIZING_TIME);
+                                                               hSystemID.hipProfilingFreq, enterProfilingTimeStamp + EXOSKELETON_SYSTEMID_JOINT_POSITIONING_STABILIZING_TIME);
           #endif
         }
         else
@@ -384,14 +477,14 @@ void EXOSKELETON_SystemID_KneeJoint_MotorProfilingSinWave\
      (AK10_9HandleCubaMarsFW* hmotor, float amplitude, float fre, uint32_t time_stamp_shift)
      {
        float t = (float)(HAL_GetTick() - time_stamp_shift) / 1000.0f;
-       float motor_profiling_trajectory = SYSTEMID_KNEE_JOINT_LEARNING_STARTING_POSITION_KNEE_JOINT - amplitude / 2.0f + (amplitude / 2.0f) * (float)cos(fre * 2.0f * pi * t);
+       float motor_profiling_trajectory = EXOSKELETON_SYSTEMID_KNEE_JOINT_LEARNING_STARTING_POSITION_KNEE_JOINT - amplitude / 2.0f + (amplitude / 2.0f) * (float)cos(fre * 2.0f * pi * t);
        AK10_9_CubaMarsFW_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightKnee, motor_profiling_trajectory, 0.0f, 200.0f, 3.0f, 0.0f);
      }
 void EXOSKELETON_SystemID_HipJoint_MotorProfilingSinWave_PositionControl\
      (AK10_9HandleDMFW* hmotor, float amplitude, float fre, uint32_t time_stamp_shift)
      {
        float t = (float)(HAL_GetTick() - time_stamp_shift) / 1000.0f;
-       float motor_profiling_trajectory = SYSTEMID_HIP_JOINT_LEARNING_STARTING_POSITION_HIP_JOINT - \
+       float motor_profiling_trajectory = EXOSKELETON_SYSTEMID_HIP_JOINT_LEARNING_STARTING_POSITION_HIP_JOINT - \
                                           amplitude / 2.0f + (amplitude / 2.0f) * (float)cos(fre * 2.0f * pi * t);
        AK10_9_DMFW_MITMode_ContinuousControlWithOffset_Deg(hmotor, motor_profiling_trajectory, 0.0f, 499.0f, 3.0f, 0.0f);
      }
@@ -481,11 +574,11 @@ void EXOSKELETON_CentreControl(void)
 
 void EXOSKELETON_GravityCompemsationManager(void)
 {
-  hGravityCompensation.torqueDesiredHip.f = -GRAVITATIONAL_ACCELERATION * (hSystemID.sysIDResults_X1.f * \
+  hGravityCompensation.torqueDesiredHip.f = -EXOSKELETON_GRAVITATIONAL_ACCELERATION * (hSystemID.sysIDResults_X1.f * \
                                             sin(hAKMotorRightHip.realPositionOffsetedRad.f) + hSystemID.sysIDResults_X2.f * \
                                             sin(hAKMotorRightHip.realPositionOffsetedRad.f + hAKMotorRightKnee.realPositionOffsetedRad.f));
   hGravityCompensation.torqueDesiredHip.f *= hGravityCompensation.throttleHip;
-  hGravityCompensation.torqueDesiredKnee.f = -GRAVITATIONAL_ACCELERATION * (hSystemID.sysIDResults_X2.f * \
+  hGravityCompensation.torqueDesiredKnee.f = -EXOSKELETON_GRAVITATIONAL_ACCELERATION * (hSystemID.sysIDResults_X2.f * \
                                              sin(hAKMotorRightHip.realPositionOffsetedRad.f + \
                                              hAKMotorRightKnee.realPositionOffsetedRad.f));
   hGravityCompensation.torqueDesiredKnee.f *= hGravityCompensation.throttleKnee;
@@ -519,11 +612,11 @@ void EXOSKELETON_MuscularTorqueCalculation(ExoskeletonHandle* hexoskeleton)
     C2 = powf(hAKMotorRightHip.realPositionOffsetedRad.f, 2.0f) * hexoskeleton->hsysid->sysIDResults_X2.f * \
          hexoskeleton->L1.f * sin(hAKMotorRightKnee.realPositionOffsetedRad.f);
     
-    G1 = -GRAVITATIONAL_ACCELERATION * (hexoskeleton->hsysid->sysIDResults_X1.f * \
+    G1 = -EXOSKELETON_GRAVITATIONAL_ACCELERATION * (hexoskeleton->hsysid->sysIDResults_X1.f * \
          sin(hAKMotorRightHip.realPositionOffsetedRad.f) + hexoskeleton->hsysid->sysIDResults_X2.f * \
          sin(hAKMotorRightHip.realPositionOffsetedRad.f + hAKMotorRightKnee.realPositionOffsetedRad.f));
     
-    G2 = -GRAVITATIONAL_ACCELERATION * hexoskeleton->hsysid->sysIDResults_X2.f * \
+    G2 = -EXOSKELETON_GRAVITATIONAL_ACCELERATION * hexoskeleton->hsysid->sysIDResults_X2.f * \
          sin(hAKMotorRightHip.realPositionOffsetedRad.f + hAKMotorRightKnee.realPositionOffsetedRad.f);
          
     

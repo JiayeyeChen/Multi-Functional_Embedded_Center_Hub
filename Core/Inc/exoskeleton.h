@@ -7,12 +7,16 @@
 
 //#define HIP_JOINT_LEARNING_USE_CURRENT_CONTROL
 
-#define GRAVITATIONAL_ACCELERATION     9.781
-#define SYSTEMID_JOINT_POSITIONING_STABILIZING_TIME 1000
-#define SYSTEMID_KNEE_JOINT_LEARNING_STARTING_POSITION_HIP_JOINT 180.0f
-#define SYSTEMID_KNEE_JOINT_LEARNING_STARTING_POSITION_KNEE_JOINT 110.0f
-#define SYSTEMID_HIP_JOINT_LEARNING_STARTING_POSITION_HIP_JOINT 180.0f
-#define SYSTEMID_HIP_JOINT_LEARNING_STARTING_POSITION_KNEE_JOINT 90.0f
+#define EXOSKELETON_GRAVITATIONAL_ACCELERATION     9.781f
+#define EXOSKELETON_SYSTEMID_JOINT_POSITIONING_STABILIZING_TIME 1000
+#define EXOSKELETON_SYSTEMID_KNEE_JOINT_LEARNING_STARTING_POSITION_HIP_JOINT 180.0f
+#define EXOSKELETON_SYSTEMID_KNEE_JOINT_LEARNING_STARTING_POSITION_KNEE_JOINT 110.0f
+#define EXOSKELETON_SYSTEMID_HIP_JOINT_LEARNING_STARTING_POSITION_HIP_JOINT 180.0f
+#define EXOSKELETON_SYSTEMID_HIP_JOINT_LEARNING_STARTING_POSITION_KNEE_JOINT 90.0f
+
+#define EXOSKELETON_HIP_IMU_ACC_X_OFFSET    -0.165469378f;
+#define EXOSKELETON_HIP_IMU_ACC_Y_OFFSET    -0.0572346263f;
+#define EXOSKELETON_HIP_IMU_ACC_Z_OFFSET    9.77716637f - EXOSKELETON_GRAVITATIONAL_ACCELERATION;
 
 enum IMU_Operation_Mode
 {
@@ -101,6 +105,9 @@ typedef struct
   union Int16UInt8 AccX;
 	union Int16UInt8 AccY;
 	union Int16UInt8 AccZ;
+  union Int16UInt8 grvX;
+  union Int16UInt8 grvY;
+  union Int16UInt8 grvZ;
 	union Int16UInt8 gyroX;
 	union Int16UInt8 gyroY;
 	union Int16UInt8 gyroZ;
@@ -118,6 +125,9 @@ typedef struct
   union FloatUInt8 AccX;
 	union FloatUInt8 AccY;
 	union FloatUInt8 AccZ;
+  union FloatUInt8 grvX;
+  union FloatUInt8 grvY;
+  union FloatUInt8 grvZ;
 	union FloatUInt8 gyroX;
 	union FloatUInt8 gyroY;
 	union FloatUInt8 gyroZ;
@@ -150,28 +160,37 @@ typedef struct
   uint32_t              CANID_SET_MODE_NDOF;
   uint32_t              CANID_SET_MODE_GYROONLY;
   uint32_t              CANID_SET_MODE_ACCONLY;
-  //Low pass filter
-  float                 lpfCutOffFrequency;
-  float                 lpfDuration;
-  float                 lpfAlpha;
-  float                 lpfAccXFilteredPrevious;
-  float                 lpfAccYFilteredPrevious;
-  float                 lpfAccZFilteredPrevious;
 }BNO055Handle;
+
+typedef struct
+{
+  CAN_HandleTypeDef*    hcan;
+  uint8_t							  bno055CalibStatus;
+  union FloatUInt8      xAcc, yAcc, zAcc, accNorm;
+  AveragerHandle        xAccAvg, yAccAvg, zAccAvg;
+  union FloatUInt8      xGrv, yGrv, zGrv, grvNorm;
+  union FloatUInt8      xGrvNormalized, yGrvNormalized, zGrvNormalized;
+  union FloatUInt8      xLiAcc, yLiAcc, zLiAcc;
+}JointAccelerationIMUHandle;
 
 void EXOSKELETON_Init(void);
 void EXOSKELETON_CommonDatalogManager(void);
 void EXOSKELETON_UpdateCommonDataSlot(void);
 void EXOSKELETON_Set_Common_Datalog_Label(void);
-void EXOSKELETON_GetIMUFeedbackLiAcc(BNO055Handle* himu, uint8_t data[]);
-void EXOSKELETON_GetIMUFeedbackGyro(BNO055Handle* himu, uint8_t data[]);
-void EXOSKELETON_GetIMUFeedbackQuaternion(BNO055Handle* himu, uint8_t data[]);
-void EXOSKELETON_GetIMUFeedbackStatus(BNO055Handle* himu, uint8_t data[]);
-void EXOSKELETON_SetIMUMode_9_DOF(BNO055Handle* himu);
-void EXOSKELETON_SetIMUMode_GYRO_Only(BNO055Handle* himu);
-void EXOSKELETON_SetIMUMode_ACC_Only(BNO055Handle* himu);
-void EXOSKELETON_GetIMUFeedbackAcc(BNO055Handle* himu, uint8_t data[]);
-void EXOSKELETON_GetIMUFeedbackMag(BNO055Handle* himu, uint8_t data[]);
+void EXOSKELETON_GetBNO055FeedbackLiAcc(BNO055Handle* himu, uint8_t data[]);
+void EXOSKELETON_GetBNO055FeedbackGyro(BNO055Handle* himu, uint8_t data[]);
+void EXOSKELETON_GetBNO055FeedbackQuaternion(BNO055Handle* himu, uint8_t data[]);
+void EXOSKELETON_GetBNO055FeedbackStatus(BNO055Handle* himu, uint8_t data[]);
+void EXOSKELETON_SetBNO055Mode_9_DOF(BNO055Handle* himu);
+void EXOSKELETON_SetBNO055Mode_GYRO_Only(BNO055Handle* himu);
+void EXOSKELETON_SetBNO055Mode_ACC_Only(BNO055Handle* himu);
+void EXOSKELETON_GetBNO055FeedbackAcc(BNO055Handle* himu, uint8_t data[]);
+void EXOSKELETON_GetBNO055FeedbackMag(BNO055Handle* himu, uint8_t data[]);
+void EXOSKELETON_GetBNO055FeedbackGrv(BNO055Handle* himu, uint8_t data[]);
+void EXOSKELETON_GetJointAccelerationIMUFeedback_X_Data(JointAccelerationIMUHandle* himu, uint8_t data[]);
+void EXOSKELETON_GetJointAccelerationIMUFeedback_Y_Data(JointAccelerationIMUHandle* himu, uint8_t data[]);
+void EXOSKELETON_GetJointAccelerationIMUFeedback_Z_Data(JointAccelerationIMUHandle* himu, uint8_t data[]);
+void EXOSKELETON_GetJointAccelerationIMUFeedback_BNO055Status(JointAccelerationIMUHandle* himu, uint8_t data[]);
 void EXOSKELETON_SystemIDManager(void);
 void EXOSKELETON_SystemID_Init(void);
 void EXOSKELETON_SystemID_KneeJoint_MotorProfilingSinWave(AK10_9HandleCubaMarsFW* hmotor, float amplitude, float fre, uint32_t time_stamp_shift);
@@ -185,7 +204,9 @@ void EXOSKELETON_GravityCompemsationManager(void);
 void EXOSKELETON_MuscularTorqueCalculation(ExoskeletonHandle* hexoskeleton);
 void EXOSKELETON_AugmentedControlManager(void);
 
-extern BNO055Handle hIMURightThigh, hIMURightKnee;
+extern BNO055Handle hIMUTorso;
+extern JointAccelerationIMUHandle hIMUHip, hIMUKnee;
+extern JointAccelerationIMUHandle* hCustomizedIMUPtr;
 extern Exoskeleton_SystemIDHandle hSystemID;
 extern Exoskeleton_GravityCompensation hGravityCompensation;
 extern ExoskeletonHandle hExoskeleton;

@@ -4,7 +4,7 @@ USBHandle hUSB;
 union FloatUInt8 dataSlots_AK10_9_Acceleration_Observer_Testing[12];
 union FloatUInt8 dataSlots_AK10_9_TorqueConstantTesting[2];
 union FloatUInt8 dataSlots_Exoskeleton_SystemID[9];
-union FloatUInt8 dataSlots_Exoskeleton_Common[11];
+union FloatUInt8 dataSlots_Exoskeleton_Common[29];
 
 void USB_Init(uint8_t data_slot_len)
 {
@@ -36,12 +36,19 @@ void USB_TransmitCargo(uint8_t* buf, uint8_t size)
   memcpy(&tx_buf[3], buf, size);
   
   union UInt32UInt8 crc;
-  uint32_t buf32bit[size + 1];//Include the byte number one
-  for (uint8_t i = 0; i <= size; i++)
-  {
-    buf32bit[i] = (uint32_t)tx_buf[i + 2];
-  }
-  crc.b32 = HAL_CRC_Calculate(&hcrc, buf32bit, size + 1);
+////////  uint32_t buf32bit[size + 1];//Include the byte number one
+////////  for (uint8_t i = 0; i <= size; i++)
+////////  {
+////////    buf32bit[i] = (uint32_t)tx_buf[i + 2];
+////////  }
+////////  crc.b32 = HAL_CRC_Calculate(&hcrc, buf32bit, size + 1);
+  uint8_t trueSize = size + 1;
+  uint8_t additionSize = 4 - trueSize % 4;
+  uint32_t crcCalBuf[(trueSize + additionSize)/4];
+  memset(crcCalBuf, 0xFFFFFFFF, sizeof(crcCalBuf));
+  memcpy(crcCalBuf, &tx_buf[2], trueSize);
+  crc.b32 = HAL_CRC_Calculate(&hcrc, crcCalBuf, sizeof(crcCalBuf));
+  
   tx_buf[size + 3] = crc.b8[0];
   tx_buf[size + 4] = crc.b8[1];
   tx_buf[size + 5] = crc.b8[2];
