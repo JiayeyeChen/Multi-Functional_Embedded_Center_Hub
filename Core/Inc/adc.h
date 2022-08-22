@@ -3,6 +3,7 @@
 
 
 #include "stm32f4xx_hal.h"
+#include "system_periphrals.h"
 
 #define AD7606_BUSY_EXTI_IRQn 		    EXTI15_10_IRQn
 

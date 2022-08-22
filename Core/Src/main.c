@@ -37,7 +37,7 @@ int main(void)
   EXOSKELETON_MotorInit();
   MotorInit_DMFW();
 //  MotorInit_CubeMarsFW();
-  AD7606_Init(AD7606_RANG_5V, AD7606_OS_RATIO_0);
+  AD7606_Init(AD7606_RANG_10V, AD7606_OS_RATIO_4);
 
   EXOSKELETON_Init();
   ENCODER_Init();
@@ -219,7 +219,7 @@ void ADC_Task(void *argument)
   for(;;)
   {
     ADC_DataRequest();
-    osDelay(1);
+    osDelay(100);
   }
 }
 
