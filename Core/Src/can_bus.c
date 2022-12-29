@@ -3,6 +3,7 @@
 #include "usb.h"
 #include "exoskeleton.h"
 #include "encoder.h"
+#include "upper_limb.h"
 
 //for testing//
 uint32_t rxfifo0detected = 0;
@@ -83,63 +84,63 @@ void CAN_ConfigureFilters(void)
 	HAL_CAN_ConfigFilter(hAKMotorRightKnee.hcan, &hAKMotorRightKnee.rxFilter);
   /*Filter bank 2*/
   /***************/
-  hAKMotorDMFW1.rxFilter.FilterMode = CAN_FILTERMODE_IDLIST;
-	hAKMotorDMFW1.rxFilter.FilterScale = CAN_FILTERSCALE_16BIT;
-	hAKMotorDMFW1.rxFilter.FilterFIFOAssignment = CAN_FILTER_FIFO1;
-	hAKMotorDMFW1.rxFilter.FilterBank = 2;
-	hAKMotorDMFW1.rxFilter.FilterIdHigh = CAN_ID_AK10_9_DMFW_M1_RX << 5;
-	hAKMotorDMFW1.rxFilter.FilterActivation = ENABLE;
-	HAL_CAN_ConfigFilter(hAKMotorDMFW1.hcan, &hAKMotorDMFW1.rxFilter);
+//  hAKMotorDMFW1.rxFilter.FilterMode = CAN_FILTERMODE_IDLIST;
+//	hAKMotorDMFW1.rxFilter.FilterScale = CAN_FILTERSCALE_16BIT;
+//	hAKMotorDMFW1.rxFilter.FilterFIFOAssignment = CAN_FILTER_FIFO1;
+//	hAKMotorDMFW1.rxFilter.FilterBank = 2;
+//	hAKMotorDMFW1.rxFilter.FilterIdHigh = CAN_ID_AK10_9_DMFW_M1_RX << 5;
+//	hAKMotorDMFW1.rxFilter.FilterActivation = ENABLE;
+//	HAL_CAN_ConfigFilter(hAKMotorDMFW1.hcan, &hAKMotorDMFW1.rxFilter);
   /*Filter bank 3*/
   /***************/
-  hAKMotorDMFW2.rxFilter.FilterMode = CAN_FILTERMODE_IDLIST;
-	hAKMotorDMFW2.rxFilter.FilterScale = CAN_FILTERSCALE_16BIT;
-	hAKMotorDMFW2.rxFilter.FilterFIFOAssignment = CAN_FILTER_FIFO1;
-	hAKMotorDMFW2.rxFilter.FilterBank = 3;
-	hAKMotorDMFW2.rxFilter.FilterIdHigh = CAN_ID_AK10_9_DMFW_M2_RX << 5;
-	hAKMotorDMFW2.rxFilter.FilterActivation = ENABLE;
-	HAL_CAN_ConfigFilter(hAKMotorDMFW2.hcan, &hAKMotorDMFW2.rxFilter);
+//  hAKMotorDMFW2.rxFilter.FilterMode = CAN_FILTERMODE_IDLIST;
+//	hAKMotorDMFW2.rxFilter.FilterScale = CAN_FILTERSCALE_16BIT;
+//	hAKMotorDMFW2.rxFilter.FilterFIFOAssignment = CAN_FILTER_FIFO1;
+//	hAKMotorDMFW2.rxFilter.FilterBank = 3;
+//	hAKMotorDMFW2.rxFilter.FilterIdHigh = CAN_ID_AK10_9_DMFW_M2_RX << 5;
+//	hAKMotorDMFW2.rxFilter.FilterActivation = ENABLE;
+//	HAL_CAN_ConfigFilter(hAKMotorDMFW2.hcan, &hAKMotorDMFW2.rxFilter);
   /*Filter bank 4*/
   /***************/
-  hAKMotorDMFW3.rxFilter.FilterMode = CAN_FILTERMODE_IDLIST;
-	hAKMotorDMFW3.rxFilter.FilterScale = CAN_FILTERSCALE_16BIT;
-	hAKMotorDMFW3.rxFilter.FilterFIFOAssignment = CAN_FILTER_FIFO1;
-	hAKMotorDMFW3.rxFilter.FilterBank = 4;
-	hAKMotorDMFW3.rxFilter.FilterIdHigh = CAN_ID_AK10_9_DMFW_M3_RX << 5;
-	hAKMotorDMFW3.rxFilter.FilterActivation = ENABLE;
-	HAL_CAN_ConfigFilter(hAKMotorDMFW3.hcan, &hAKMotorDMFW3.rxFilter);
+//  hAKMotorDMFW3.rxFilter.FilterMode = CAN_FILTERMODE_IDLIST;
+//	hAKMotorDMFW3.rxFilter.FilterScale = CAN_FILTERSCALE_16BIT;
+//	hAKMotorDMFW3.rxFilter.FilterFIFOAssignment = CAN_FILTER_FIFO1;
+//	hAKMotorDMFW3.rxFilter.FilterBank = 4;
+//	hAKMotorDMFW3.rxFilter.FilterIdHigh = CAN_ID_AK10_9_DMFW_M3_RX << 5;
+//	hAKMotorDMFW3.rxFilter.FilterActivation = ENABLE;
+//	HAL_CAN_ConfigFilter(hAKMotorDMFW3.hcan, &hAKMotorDMFW3.rxFilter);
   /*Filter bank 5*/
   /***************/
-  hIMUTorso.rxFilter.FilterMode = CAN_FILTERMODE_IDLIST;
-	hIMUTorso.rxFilter.FilterScale = CAN_FILTERSCALE_16BIT;
-	hIMUTorso.rxFilter.FilterFIFOAssignment = CAN_FILTER_FIFO0;
-	hIMUTorso.rxFilter.FilterBank = 5;
-	hIMUTorso.rxFilter.FilterIdHigh = CAN_ID_IMU_TORSO_ANGLE_EXOSKELETON << 5;
-	hIMUTorso.rxFilter.FilterActivation = ENABLE;
-	HAL_CAN_ConfigFilter(hIMUTorso.hcan, &hIMUTorso.rxFilter);
+//  hIMUTorso.rxFilter.FilterMode = CAN_FILTERMODE_IDLIST;
+//	hIMUTorso.rxFilter.FilterScale = CAN_FILTERSCALE_16BIT;
+//	hIMUTorso.rxFilter.FilterFIFOAssignment = CAN_FILTER_FIFO0;
+//	hIMUTorso.rxFilter.FilterBank = 5;
+//	hIMUTorso.rxFilter.FilterIdHigh = CAN_ID_IMU_TORSO_ANGLE_EXOSKELETON << 5;
+//	hIMUTorso.rxFilter.FilterActivation = ENABLE;
+//	HAL_CAN_ConfigFilter(hIMUTorso.hcan, &hIMUTorso.rxFilter);
   /*Filter bank 6*/
   /***************/
-  tempFilter.FilterMode = CAN_FILTERMODE_IDLIST;
-	tempFilter.FilterScale = CAN_FILTERSCALE_16BIT;
-	tempFilter.FilterFIFOAssignment = CAN_FILTER_FIFO0;
-	tempFilter.FilterBank = 6;
-	tempFilter.FilterIdHigh = CAN_ID_IMU_X_DATA_EXOSKELETON_RIGHT_THIGH << 5;
-	tempFilter.FilterActivation = ENABLE;
-	HAL_CAN_ConfigFilter(hIMUHip.hcan, &tempFilter);
+//  tempFilter.FilterMode = CAN_FILTERMODE_IDLIST;
+//	tempFilter.FilterScale = CAN_FILTERSCALE_16BIT;
+//	tempFilter.FilterFIFOAssignment = CAN_FILTER_FIFO0;
+//	tempFilter.FilterBank = 6;
+//	tempFilter.FilterIdHigh = CAN_ID_IMU_X_DATA_EXOSKELETON_RIGHT_THIGH << 5;
+//	tempFilter.FilterActivation = ENABLE;
+//	HAL_CAN_ConfigFilter(hIMUHip.hcan, &tempFilter);
   /*Filter bank 7*/
   /***************/
-  ConfigCANFilter_STD_ID_16Bit4IDListMode(hIMUHip.hcan, 7, CAN_FILTER_FIFO0, \
-                                          CAN_ID_IMU_X_DATA_EXOSKELETON_RIGHT_THIGH, \
-                                          CAN_ID_IMU_Y_DATA_EXOSKELETON_RIGHT_THIGH, \
-                                          CAN_ID_IMU_Z_DATA_EXOSKELETON_RIGHT_THIGH, \
-                                          CAN_ID_IMU_STATUS_EXOSKELETON_RIGHT_THIGH);
+//  ConfigCANFilter_STD_ID_16Bit4IDListMode(hIMUHip.hcan, 7, CAN_FILTER_FIFO0, \
+//                                          CAN_ID_IMU_X_DATA_EXOSKELETON_RIGHT_THIGH, \
+//                                          CAN_ID_IMU_Y_DATA_EXOSKELETON_RIGHT_THIGH, \
+//                                          CAN_ID_IMU_Z_DATA_EXOSKELETON_RIGHT_THIGH, \
+//                                          CAN_ID_IMU_STATUS_EXOSKELETON_RIGHT_THIGH);
   /*Filter bank 8*/
   /***************/
-  ConfigCANFilter_STD_ID_16Bit4IDListMode(hIMUKnee.hcan, 8, CAN_FILTER_FIFO0, \
-                                          CAN_ID_IMU_X_DATA_EXOSKELETON_RIGHT_SHANK, \
-                                          CAN_ID_IMU_Y_DATA_EXOSKELETON_RIGHT_SHANK, \
-                                          CAN_ID_IMU_Z_DATA_EXOSKELETON_RIGHT_SHANK, \
-                                          CAN_ID_IMU_STATUS_EXOSKELETON_RIGHT_SHANK);
+//  ConfigCANFilter_STD_ID_16Bit4IDListMode(hIMUKnee.hcan, 8, CAN_FILTER_FIFO0, \
+//                                          CAN_ID_IMU_X_DATA_EXOSKELETON_RIGHT_SHANK, \
+//                                          CAN_ID_IMU_Y_DATA_EXOSKELETON_RIGHT_SHANK, \
+//                                          CAN_ID_IMU_Z_DATA_EXOSKELETON_RIGHT_SHANK, \
+//                                          CAN_ID_IMU_STATUS_EXOSKELETON_RIGHT_SHANK);
 //  hEncoderRightWheel.canRxFilter.FilterMode = CAN_FILTERMODE_IDLIST;
 //  hEncoderRightWheel.canRxFilter.FilterScale = CAN_FILTERSCALE_16BIT;
 //  hEncoderRightWheel.canRxFilter.FilterFIFOAssignment = CAN_FILTER_FIFO0;
@@ -149,13 +150,13 @@ void CAN_ConfigureFilters(void)
 //  HAL_CAN_ConfigFilter(hEncoderRightWheel.hcan, &hEncoderRightWheel.canRxFilter);
   /*Filter bank 9*/
   /***************/
-  tempFilter.FilterMode = CAN_FILTERMODE_IDLIST;
-  tempFilter.FilterScale = CAN_FILTERSCALE_16BIT;
-  tempFilter.FilterFIFOAssignment = CAN_FILTER_FIFO0;
-  tempFilter.FilterBank = 9;
-  tempFilter.FilterIdHigh = CAN_ID_ENCODER_UPPER_LIMB << 5;
-  tempFilter.FilterActivation = ENABLE;
-  HAL_CAN_ConfigFilter(&hcan2, &tempFilter);
+//  tempFilter.FilterMode = CAN_FILTERMODE_IDLIST;
+//  tempFilter.FilterScale = CAN_FILTERSCALE_16BIT;
+//  tempFilter.FilterFIFOAssignment = CAN_FILTER_FIFO0;
+//  tempFilter.FilterBank = 9;
+//  tempFilter.FilterIdHigh = CAN_ID_ENCODER_UPPER_LIMB_1 << 5;
+//  tempFilter.FilterActivation = ENABLE;
+//  HAL_CAN_ConfigFilter(&hcan2, &tempFilter);
 //  hEncoderLeftWheel.canRxFilter.FilterMode = CAN_FILTERMODE_IDLIST;
 //  hEncoderLeftWheel.canRxFilter.FilterScale = CAN_FILTERSCALE_16BIT;
 //  hEncoderLeftWheel.canRxFilter.FilterFIFOAssignment = CAN_FILTER_FIFO0;
@@ -165,14 +166,21 @@ void CAN_ConfigureFilters(void)
 //  HAL_CAN_ConfigFilter(hEncoderLeftWheel.hcan, &hEncoderLeftWheel.canRxFilter);
   /*Filter bank 10*/
   /***************/
-  CAN_FilterTypeDef hArmEncodersFilter;
-  hArmEncodersFilter.FilterMode = CAN_FILTERMODE_IDLIST;
-  hArmEncodersFilter.FilterScale = CAN_FILTERSCALE_16BIT;
-  hArmEncodersFilter.FilterFIFOAssignment = CAN_FILTER_FIFO0;
-  hArmEncodersFilter.FilterBank = 10;
-  hArmEncodersFilter.FilterIdHigh = CAN_ID_ENCODER_RX_DATA << 5;
-  hArmEncodersFilter.FilterActivation = ENABLE;
-  HAL_CAN_ConfigFilter(&hcan2, &hArmEncodersFilter);
+//  CAN_FilterTypeDef hArmEncodersFilter;
+//  hArmEncodersFilter.FilterMode = CAN_FILTERMODE_IDLIST;
+//  hArmEncodersFilter.FilterScale = CAN_FILTERSCALE_16BIT;
+//  hArmEncodersFilter.FilterFIFOAssignment = CAN_FILTER_FIFO0;
+//  hArmEncodersFilter.FilterBank = 10;
+//  hArmEncodersFilter.FilterIdHigh = CAN_ID_ENCODER_RX_DATA << 5;
+//  hArmEncodersFilter.FilterActivation = ENABLE;
+//  HAL_CAN_ConfigFilter(&hcan2, &hArmEncodersFilter);
+//  tempFilter.FilterMode = CAN_FILTERMODE_IDLIST;
+//  tempFilter.FilterScale = CAN_FILTERSCALE_16BIT;
+//  tempFilter.FilterFIFOAssignment = CAN_FILTER_FIFO1;
+//  tempFilter.FilterBank = 10;
+//  tempFilter.FilterIdHigh = CAN_ID_UPPER_LIMB_FORCE_SENSOR_RX << 5;
+//  tempFilter.FilterActivation = ENABLE;
+//  HAL_CAN_ConfigFilter(&hcan2, &tempFilter);
 }
 
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
@@ -223,10 +231,10 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
       wheelcountsec_left++;
     }
   }
-  else if (temRxHeader.StdId == CAN_ID_ENCODER_UPPER_LIMB)
+  else if (temRxHeader.StdId == CAN_ID_ENCODER_UPPER_LIMB_1)
   {
-    ENCODER_GetAngle(&hEncoderUpperLimb, temRxData);
-    ENCODER_CalculateSpeed(&hEncoderUpperLimb, 0.001f);
+    ENCODER_GetAngle(&hEncoderUpperLimb1, temRxData);
+    ENCODER_CalculateSpeed(&hEncoderUpperLimb1, 0.001f);
   }
   
   
@@ -266,7 +274,8 @@ void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
     AK10_9_DMFW_GetFeedbackMsg(&temRxHeader, &hAKMotorDMFW2, temRxData);
   else if (temRxHeader.StdId == CAN_ID_AK10_9_DMFW_M3_RX)
     AK10_9_DMFW_GetFeedbackMsg(&temRxHeader, &hAKMotorDMFW3, temRxData);
-
+  else if (temRxHeader.StdId == CAN_ID_UPPER_LIMB_FORCE_SENSOR_RX)
+    UPPERLIMB_CANGetForceFeedback(&hUpperLimb, temRxData);
   
   
 ////////////////  if (temRxHeader.StdId == CAN_ID_ENCODER_RX_DATA)

@@ -732,6 +732,13 @@ void AK10_9_DMFW_GetFeedbackMsg(CAN_RxHeaderTypeDef* rxheader, AK10_9HandleDMFW*
   hmotor->lastReceivedTime = HAL_GetTick();
 }
 
+float AK10_9_DMFW_MITMode_CustomizedVelocityPIDControlCalSetIq_Deg(AK10_9HandleDMFW* hmotor, PIDHandle* hpid, float desVal)
+{
+  float setIq;
+  PID(&setIq, hmotor->realVelocityPresent.f, desVal, hpid);
+  return setIq;
+}
+
 /*Dump Dump Dump Dump Dump Dump Dump Dump Dump Dump Dump Dump Dump Dump Dump Dump Dump Dump */
 #ifdef DONT_USE_DUMP
 void AK10_9_MITMode_PositionSpeedControlCustomized_Deg(AK10_9HandleCubaMarsFW* hmotor, float position, float speed, float kp, float kd, float loop_duration)

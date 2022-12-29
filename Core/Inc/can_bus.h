@@ -11,10 +11,13 @@
 #define CAN_ID_ENCODER_LEFT_PULL		      0x04
 #define CAN_ID_ENCODER_RIGHT_WHEEL        0x05
 #define CAN_ID_ENCODER_LEFT_WHEEL         0x06
-#define CAN_ID_ENCODER_UPPER_LIMB         0x09
+#define CAN_ID_ENCODER_UPPER_LIMB_2       0x08
+#define CAN_ID_ENCODER_UPPER_LIMB_1       0x22
 #define CAN_ID_AK10_9_DMFW_M1_RX                       0x0A
 #define CAN_ID_AK10_9_DMFW_M2_RX                       0x0B
 #define CAN_ID_AK10_9_DMFW_M3_RX                       0x0C
+#define CAN_ID_UPPER_LIMB_FORCE_SENSOR_TX              0x05
+#define CAN_ID_UPPER_LIMB_FORCE_SENSOR_RX              0x06
 
 #define CAN_ID_IMU_X_DATA_EXOSKELETON_RIGHT_THIGH      21U
 #define CAN_ID_IMU_Y_DATA_EXOSKELETON_RIGHT_THIGH      22U

@@ -566,7 +566,7 @@ void EXOSKELETON_CentreControl(void)
       break;
   }
   
-//  EXOSKELETON_SystemIDManager();
+  EXOSKELETON_SystemIDManager();
   EXOSKELETON_GravityCompemsationManager();
   EXOSKELETON_MuscularTorqueCalculation(&hExoskeleton);
   EXOSKELETON_AugmentedControlManager();

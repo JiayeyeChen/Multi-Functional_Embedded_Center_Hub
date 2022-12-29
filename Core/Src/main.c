@@ -17,6 +17,7 @@
 #include "os_threads.h"
 #include "adc.h"
 #include "exoskeleton.h"
+#include "upper_limb.h"
 
 void SystemClock_Config(void);
 
@@ -29,18 +30,19 @@ int main(void)
   MX_FATFS_Init();
   
   SystemPeriphral_Init();
-  USB_Init(sizeof(dataSlots_AK10_9_Acceleration_Observer_Testing)/4);
+  USB_Init(sizeof(dataSlots_Exoskeleton_Common)/4);
   
 	MX_FMC_Init();
   UI_Init();
   
   EXOSKELETON_MotorInit();
-  MotorInit_DMFW();
+//  MotorInit_DMFW();
 //  MotorInit_CubeMarsFW();
   AD7606_Init(AD7606_RANG_10V, AD7606_OS_RATIO_4);
 
   EXOSKELETON_Init();
-  ENCODER_Init();
+//  ENCODER_Init();
+//  UPPERLIMB_Init();
   CAN_ConfigureFilters();
   
   osKernelInitialize();
@@ -149,10 +151,10 @@ void AK10Calibration_Task(void *argument)
   
   for(;;)
   {
-//    EXOSKELETON_CentreControl();
-    EXOSKELETON_CommonDatalogManager();
-//    AK10_9_DataLog_Manager_DM_FW(&hAKMotorRightHip, &hIMURightThigh);
-//    AK10_9_DataLog_Manager_CubeMARS_FW(&hAKMotorSpare1, &hIMURightThigh);
+    EXOSKELETON_CentreControl();
+//    if (hExoskeleton.mainTask != EXOSKELETON_MAIN_TASK_SYSTEM_ID)
+//      EXOSKELETON_CommonDatalogManager();
+
     if (ifMotorProfilingStarted)
       AK10_9_MotorProfiling_Function1_Half_Sin(&hAKMotorRightHip_old, tmotorProfilingSinWaveFrequency);
     
@@ -183,7 +185,7 @@ void AK10Calibration_Task(void *argument)
                                                     manualControlValue_pos, manualControlValue_vel, \
                                                     manualControlValue_kp, manualControlValue_kd, manualControlValue_cur);
           AK10_9_DMFW_MITMode_ContinuousControlManager(hMotorPtrManualControlDMFW, \
-                                                        30.0f, 180.0f, 1.0f, 100.0f, 0.5f, 0.001f);
+                                                        30.0f, 180.0f, 30.0f, 100.0f, 0.5f, 0.001f);
         }
         else if (hMotorPtrManualControlDMFW->controlMode == AK10_9_DM_FW_MODE_VELOCITY)
           AK10_9_DMFW_VelocityControl(hMotorPtrManualControlDMFW, manualControlValue_vel);
@@ -198,6 +200,16 @@ void AK10Calibration_Task(void *argument)
     AK10_9_CubeMarsFW_MotorStatusMonitor(&hAKMotorRightKnee, 100);
     AK10_9_DMFW_MotorStatusMonitor(&hAKMotorRightHip, 100);
     
+    osDelay(1);
+  }
+}
+
+void UpperLimb_Task(void *argument)
+{
+  for(;;)
+  {
+//    UPPERLIMB_ControlCenter();
+//    UPPERLIMB_CANRequestForceData(&hUpperLimb);
     osDelay(1);
   }
 }
@@ -218,8 +230,8 @@ void ADC_Task(void *argument)
 {
   for(;;)
   {
-    ADC_DataRequest();
-    osDelay(100);
+//    ADC_DataRequest();
+    osDelay(1000);
   }
 }
 

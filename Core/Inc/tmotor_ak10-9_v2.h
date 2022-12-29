@@ -190,7 +190,7 @@ void AK10_9_DMFW_MITMode_ContinuousControl_Deg(AK10_9HandleDMFW* hmotor, float g
                                                  float goal_kp, float goal_kd, float goal_iq);
 void AK10_9_DMFW_MITMode_ContinuousControlWithOffset_Deg(AK10_9HandleDMFW* hmotor, float goal_pos, float goal_vel, \
                                                          float goal_kp, float goal_kd, float goal_iq);
-                                           
+float AK10_9_DMFW_MITMode_CustomizedVelocityPIDControlCalSetIq_Deg(AK10_9HandleDMFW* hmotor, PIDHandle*hpid, float desVal);
 uint16_t FloatToUint(float x, float x_min, float x_max, uint16_t bits);
 float    UintToFloat(uint16_t x_int, float x_min, float x_max, uint16_t bits);
 

@@ -11,6 +11,7 @@
 #include "exoskeleton.h"
 #include "adc.h"
 #include "encoder.h"
+#include "upper_limb.h"
 
 typedef struct
 {
@@ -26,13 +27,6 @@ typedef struct
   uint16_t xLen;
   uint16_t yLen;
 }VirtualButtonPosition;
-
-typedef struct
-{
-  uint16_t x;
-  uint16_t y;
-  uint16_t r;
-}VirtualJoystickPosition;
 
 typedef struct
 {
@@ -73,8 +67,23 @@ typedef struct
 
 typedef struct
 {
+  uint16_t x;
+  uint16_t y;
+  uint16_t r;
+}VirtualJoystickPosition;
+
+typedef struct
+{
   VirtualJoystickPosition pos;
-  
+  VirtualJoystickPosition stickPos;
+  uint32_t backgroundColor, stickColor;
+  uint8_t ifTouched;
+  uint16_t fingerDetectR;
+  float xAxisPos, yAxisPos;
+  float* outputValX;
+  float* outputValY;
+  float outputValCenter, outputValMagnitude;
+  float xDirectionCorrection, yDirectionCorrection;
 }JoystickHandle;
 
 typedef struct
@@ -84,6 +93,10 @@ typedef struct
 }UIHandle;
 
 void UI_Init(void);
+JoystickHandle Joystick_Create(uint16_t x, uint16_t y, uint16_t r, uint32_t background_color, \
+                               uint32_t stick_color, uint16_t stick_r, uint16_t finger_detect_r, \
+                               float* output_x, float* output_y, float center_val, float mag_val, float x_direction_correction, float y_direction_correction);
+void JoystickUpdate(JoystickHandle* hjoy);
 ButtonHandle Button_Create(uint16_t x, uint16_t y, uint16_t xLen, uint16_t yLen, char label[], uint32_t colorUnpressed, uint32_t colorPressed);
 LinearPotentialmeterHandle  Potentialmeter_Create(uint16_t x, uint16_t y, uint16_t xLen, \
                                                   uint16_t yLen, uint16_t sliderLen, uint16_t sliderWidth, \
@@ -126,8 +139,14 @@ void         UI_Page_BriterEncoder(void);
 void         UI_Page_BriterEncoder_Init(void);
 void         UI_Page_CustomizedIMU(void);
 void         UI_Page_CustomizedIMU_Init(void);
-
-JoystickHandle Joystick_Create(uint16_t x, uint16_t y, uint16_t r, char label[]);
+void         UI_Page_UpperLimbExoskeleton_Init(void);
+void         UI_Page_UpperLimbExoskeleton(void);
+void         UI_Page_UpperLimbExoskeleton_AdmittanceVelocityControl_Init(void);
+void         UI_Page_UpperLimbExoskeleton_AdmittanceVelocityControl(void);
+void         UI_Page_UpperLimbExoskeleton_ManualControl_Init(void);
+void         UI_Page_UpperLimbExoskeleton_ManualControl(void);
+void         UI_Page_UpperLimbExoskeleton_PIDVelocityManualControl_Init(void);
+void         UI_Page_UpperLimbExoskeleton_PIDVelocityManualControl(void);
 
 extern UIHandle hUI;
 extern PageHandle UIPage_AK10_9_ManualControlCubeMarsFWServoMode, UIPage_AK10_9_ManualControlCubeMarsFWMITMode, UIPage_AK10_9_ManualControlDMFW;

@@ -9,7 +9,8 @@ PageHandle UIPage_Home1;
 ButtonHandle hButtonGoBack, hButtonDataLogStart, hButtonDataLogEnd, \
              hButtonMotorProfilingStart, hButtonMotorProfilingEnd, \
              hButtonMotorZeroing, hButtonMotorStart, hButtonMotorStop, \
-             hButtonStart, hButtonStop, hButtonOn, hButtonOff;
+             hButtonStart, hButtonStop, hButtonOn, hButtonOff,\
+             hButtonSelectSomething;
 //////////////////
 /* Exoskeleton User Interface */
 PageHandle UIPage_LowerLimb_Exoskeleton, UIPage_LowerLimb_SystemID, UIPage_LowerLimb_GravityCompensation, \
@@ -62,6 +63,16 @@ ButtonHandle hButtonPageADCMonitor, hButtonResetAD7606;
 PageHandle UIPage_Customized_IMU_Monitor;
 ButtonHandle hButtonPageCustomizedIMUMonitor, hButtonSelectHipIMU, hButtonSelectKneeIMU, \
              hButtonAveragingStart, hButtonAveragingStop;
+/*Upper Limb Exoskeleton*/
+PageHandle UIPage_UpperLimbExoskeleton, UIPage_UpperLimbExoskeleton_AdmittanceVelocityControl, \
+           UIPage_UpperLimbExoskeleton_ManualControl, UIPage_UpperLimbExoskeleton_PIDVelocityManualControl;
+ButtonHandle hButtonPageUpperLimbExoskeleton, hButtonPageUpperLimbExoskeletonAdmittanceVelocityControl, \
+             hButtonPageUpperLimbExoskeletonManualControl, hButtonPageUpperLimbExoskeletonPIDVelocityManualControl;
+JoystickHandle hJoyUpperLimbManualControl_XY;
+LinearPotentialmeterHandle hPotUpperLimbManualControl_Z, hPotUpperLimbPIDVelocityControl_Kp, \
+                           hPotUpperLimbPIDVelocityControl_Kd, hPotUpperLimbPIDVelocityControl_Ki, \
+                           hPotUpperLimbPIDVelocityControl_SetVel;
+//////////////////////////
 
 
 ButtonHandle Button_Create(uint16_t x, uint16_t y, uint16_t xLen, uint16_t yLen, char label[],\
@@ -129,7 +140,7 @@ LinearPotentialmeterHandle  Potentialmeter_Create(uint16_t x, uint16_t y, uint16
   hpotentialmeter.pos.yLen = yLen;
   hpotentialmeter.pos.sliderLen = sliderLen;
   hpotentialmeter.pos.sliderWidth = sliderWidth;
-  hpotentialmeter.pos.ySlider = y + yLen - sliderLen - (yLen - sliderLen)*(uint16_t)(startVal - minVal)/(uint16_t)(maxVal - minVal);
+  hpotentialmeter.pos.ySlider = y + yLen - sliderLen - (uint16_t)(((float)yLen - (float)sliderLen)*(startVal - minVal)/(maxVal - minVal));
   hpotentialmeter.pos.xSlider = x + (xLen - sliderWidth) / 2;
   hpotentialmeter.minVal = minVal;
   hpotentialmeter.maxVal = maxVal;
@@ -281,21 +292,97 @@ void UI_Init(void)
   UIPage_Customized_IMU_Monitor.Page = UI_Page_CustomizedIMU;
   UIPage_Customized_IMU_Monitor.PageInit = UI_Page_CustomizedIMU_Init;
   
+  UIPage_UpperLimbExoskeleton.ifPageInitialized = 0;
+  UIPage_UpperLimbExoskeleton.Page = UI_Page_UpperLimbExoskeleton;
+  UIPage_UpperLimbExoskeleton.PageInit = UI_Page_UpperLimbExoskeleton_Init;
+  
+  UIPage_UpperLimbExoskeleton_AdmittanceVelocityControl.ifPageInitialized = 0;
+  UIPage_UpperLimbExoskeleton_AdmittanceVelocityControl.Page = UI_Page_UpperLimbExoskeleton_AdmittanceVelocityControl;
+  UIPage_UpperLimbExoskeleton_AdmittanceVelocityControl.PageInit = UI_Page_UpperLimbExoskeleton_AdmittanceVelocityControl_Init;
+  
+  UIPage_UpperLimbExoskeleton_ManualControl.ifPageInitialized = 0;
+  UIPage_UpperLimbExoskeleton_ManualControl.Page = UI_Page_UpperLimbExoskeleton_ManualControl;
+  UIPage_UpperLimbExoskeleton_ManualControl.PageInit = UI_Page_UpperLimbExoskeleton_ManualControl_Init;
+  
+  UIPage_UpperLimbExoskeleton_PIDVelocityManualControl.ifPageInitialized = 0;
+  UIPage_UpperLimbExoskeleton_PIDVelocityManualControl.Page = UI_Page_UpperLimbExoskeleton_PIDVelocityManualControl;
+  UIPage_UpperLimbExoskeleton_PIDVelocityManualControl.PageInit = UI_Page_UpperLimbExoskeleton_PIDVelocityManualControl_Init;
 }
 
-JoystickHandle Joystick_Create(uint16_t x, uint16_t y, uint16_t r, char label[])
+JoystickHandle Joystick_Create(uint16_t x, uint16_t y, uint16_t r, uint32_t background_color, \
+                               uint32_t stick_color, uint16_t stick_r, uint16_t finger_detect_r, \
+                               float* output_x, float* output_y, float center_val, float mag_val \
+                               , float x_direction_correction, float y_direction_correction)
 {
   JoystickHandle hjoy;
   hjoy.pos.x = x;
   hjoy.pos.y = y;
+  hjoy.pos.r = r;
+  hjoy.stickPos.x = x;
+  hjoy.stickPos.y = y;
+  hjoy.stickPos.r = stick_r;
+  hjoy.fingerDetectR = finger_detect_r;
+  hjoy.ifTouched = 0;
+  hjoy.backgroundColor = background_color;
+  hjoy.stickColor = stick_color;
+  hjoy.outputValX = output_x;
+  hjoy.outputValY = output_y;
+  hjoy.outputValCenter = center_val;
+  hjoy.outputValMagnitude = mag_val;
+  hjoy.xDirectionCorrection = x_direction_correction;
+  hjoy.yDirectionCorrection = y_direction_correction;
+  LCD_SetLayer(1);
+  LCD_SetColor(hjoy.stickColor);
+  LCD_FillCircle(hjoy.stickPos.x, hjoy.stickPos.y, hjoy.stickPos.r);
   LCD_SetLayer(0);
-  LCD_SetColor(DARK_CYAN);
+  LCD_SetColor(hjoy.backgroundColor);
   LCD_FillCircle(hjoy.pos.x, hjoy.pos.y, hjoy.pos.r);
-  LCD_SetColor(LCD_BLACK);
-  LCD_DrawCircle(hjoy.pos.x, hjoy.pos.y, hjoy.pos.r);
-  LCD_DisplayString(hjoy.pos.x, hjoy.pos.y - 30, (char*)label);
-  
   return hjoy;
+}
+
+void JoystickUpdate(JoystickHandle* hjoy)
+{
+  for (uint8_t i = 0; i <= 4; i++)
+  {
+    float x = (float)touchInfo.xVertical[i] - (float)hjoy->pos.x;
+    float y = (float)touchInfo.yVertical[i] - (float)hjoy->pos.y;
+    float xy_length = sqrtf(powf(x, 2.0f) + powf(y, 2.0f));
+    if (xy_length < (float)hjoy->fingerDetectR)
+    {
+      LCD_SetLayer(1);
+      LCD_SetColor(hjoy->backgroundColor);
+      LCD_FillCircle(hjoy->stickPos.x, hjoy->stickPos.y, hjoy->stickPos.r);
+      hjoy->ifTouched = 1;
+      if (xy_length <= fabs((float)hjoy->pos.r - (float)hjoy->stickPos.r))
+      {
+        hjoy->stickPos.x = touchInfo.xVertical[i];
+        hjoy->stickPos.y = touchInfo.yVertical[i];
+      }
+      else
+      {
+        hjoy->stickPos.x = (uint16_t)((float)hjoy->pos.x + (((float)hjoy->pos.r - (float)hjoy->stickPos.r) / xy_length) * x);
+        hjoy->stickPos.y = (uint16_t)((float)hjoy->pos.y + (((float)hjoy->pos.r - (float)hjoy->stickPos.r) / xy_length) * y);
+      }
+      
+      break;
+    }
+    if (i == 4)
+    {
+      hjoy->ifTouched = 0;
+      LCD_SetLayer(1);
+      LCD_SetColor(hjoy->backgroundColor);
+      LCD_FillCircle(hjoy->stickPos.x, hjoy->stickPos.y, hjoy->stickPos.r);
+      hjoy->stickPos.x = hjoy->pos.x;
+      hjoy->stickPos.y = hjoy->pos.y;
+    }
+  }
+  hjoy->xAxisPos = ((float)hjoy->stickPos.x - (float)hjoy->pos.x) / ((float)hjoy->pos.r - (float)hjoy->stickPos.r);
+  hjoy->yAxisPos = ((float)hjoy->stickPos.y - (float)hjoy->pos.y) / ((float)hjoy->pos.r - (float)hjoy->stickPos.r);
+  *hjoy->outputValX = hjoy->xDirectionCorrection * (hjoy->xAxisPos * hjoy->outputValMagnitude + hjoy->outputValCenter);
+  *hjoy->outputValY = hjoy->yDirectionCorrection * (hjoy->yAxisPos * hjoy->outputValMagnitude + hjoy->outputValCenter);
+  LCD_SetLayer(1);
+  LCD_SetColor(hjoy->stickColor);
+  LCD_FillCircle(hjoy->stickPos.x, hjoy->stickPos.y, hjoy->stickPos.r);
 }
 
 void ButtonRefresh(ButtonHandle* hbutton)
@@ -343,6 +430,12 @@ void UI_Page_LowerLimb_Exoskeleton(void)
   ButtonRefresh(&hButtonPageExoskeletonParameterPanel);
   ButtonScan(&hButtonPageExoskeletonMuscularTorqueMonitor);
   ButtonRefresh(&hButtonPageExoskeletonMuscularTorqueMonitor);
+  ButtonScan(&hButtonDataLogStart);
+  ButtonRefresh(&hButtonDataLogStart);
+  ButtonScan(&hButtonDataLogEnd);
+  ButtonRefresh(&hButtonDataLogEnd);
+  
+  
   
   LCD_SetLayer(1); 
   LCD_SetColor(LCD_BLACK);
@@ -387,6 +480,10 @@ void UI_Page_LowerLimb_Exoskeleton(void)
     UI_Page_Change_To(&UIPage_LowerLimb_ParameterAdjusting);
   else if (ifButtonPressed(&hButtonPageExoskeletonMuscularTorqueMonitor))
     UI_Page_Change_To(&UIPage_LowerLimb_MuscularTorqueMonitor);
+  else if (ifButtonPressed(&hButtonDataLogStart))
+    USB_DataLogStart();
+  else if (ifButtonPressed(&hButtonDataLogEnd))
+    USB_DataLogEnd();
   
   if (ifButtonPressed(&hButtonGoBack))
     UI_Page_Change_To(&UIPage_Home1);
@@ -399,11 +496,14 @@ void UI_Page_LowerLimb_Exoskeleton_Init(void)
   hButtonPageSystemID = Button_Create(100, 50, 280, 40, "System Identification", LCD_WHITE, LCD_RED);
   hButtonHipMotorZeroing = Button_Create(100, 150, 280, 40, "Hip Joint Zeroing", LCD_WHITE, LCD_RED);
   hButtonKneeMotorZeroing = Button_Create(100, 200, 280, 40, "Knee Joint Zeroing", LCD_WHITE, LCD_RED);
-  hButtonMotorEnable = Button_Create(100, 350, 280, 60, "Motor Enable", LIGHT_YELLOW, LCD_RED);
-  hButtonMotorDisable = Button_Create(100, 420, 280, 100, "Motor Disable", LIGHT_YELLOW, LCD_RED);
+  hButtonMotorEnable = Button_Create(170, 350, 280, 60, "Motor Enable", LIGHT_YELLOW, LCD_RED);
+  hButtonMotorDisable = Button_Create(170, 420, 280, 100, "Motor Disable", LIGHT_YELLOW, LCD_RED);
   hButtonPageGravityCompensation = Button_Create(100, 530, 280, 60, "Gravity Compensation", LIGHT_GREEN, LCD_RED);
   hButtonPageExoskeletonParameterPanel = Button_Create(150, 250, 280, 60, "Parameter Adjusting", LIGHT_GREEN, LCD_RED);
   hButtonPageExoskeletonMuscularTorqueMonitor = Button_Create(100, 600, 280, 60, "Muscular Torque", LIGHT_GREEN, LCD_RED);
+  hButtonDataLogStart = Button_Create(10, 350, 150, 60, "DatalogStart", LIGHT_YELLOW, LCD_RED);
+  hButtonDataLogEnd = Button_Create(10, 420, 150, 60, "DatalogEnd", LIGHT_YELLOW, LCD_RED);
+  
   LCD_DisplayString(0, 100, "Hip  Joint:");
   LCD_DisplayString(250, 100, "Angle:");
   LCD_DisplayString(0, 125, "Knee Joint:");
@@ -765,6 +865,9 @@ void UI_Page_Home1(void)
   ButtonRefresh(&hButtonPageBriterEncoder);
   ButtonScan(&hButtonPageCustomizedIMUMonitor);
   ButtonRefresh(&hButtonPageCustomizedIMUMonitor);
+  ButtonScan(&hButtonPageUpperLimbExoskeleton);
+  ButtonRefresh(&hButtonPageUpperLimbExoskeleton);
+  
   
   
   if (ifButtonPressed(&hButtonPageExoskeletonInterface))
@@ -781,6 +884,9 @@ void UI_Page_Home1(void)
     UI_Page_Change_To(&UIPage_BriterEncoder);
   if (ifButtonPressed(&hButtonPageCustomizedIMUMonitor))
     UI_Page_Change_To(&UIPage_Customized_IMU_Monitor);
+  if (ifButtonPressed(&hButtonPageUpperLimbExoskeleton))
+    UI_Page_Change_To(&UIPage_UpperLimbExoskeleton);
+  
 }
 void UI_Page_Home1_Init(void)
 {
@@ -791,6 +897,7 @@ void UI_Page_Home1_Init(void)
   hButtonPageADCMonitor = Button_Create(150, 350, 200, 40, "ADC Monitor", LIGHT_MAGENTA, LCD_RED);
   hButtonPageBriterEncoder = Button_Create(150, 400, 200, 40, "Briter Encoder", LIGHT_MAGENTA, LCD_RED);
   hButtonPageCustomizedIMUMonitor = Button_Create(80, 200, 360, 40, "Customized IMU Monitor", LIGHT_MAGENTA, LCD_RED);
+  hButtonPageUpperLimbExoskeleton = Button_Create(120, 600, 300, 40, "Upper Limb Exoskeleton", LIGHT_MAGENTA, LCD_RED);
 }
 
 void UI_Page_AK10_9_ManualControlCubeMarsFWServoMode(void)
@@ -1476,12 +1583,12 @@ void UI_Page_BriterEncoder(void)
   }
   else if (ifButtonPressed(&hButtonBriterEncoderSet1MHzCanRate))
   {
-//    ENCODER_SetAutoFeedbackRate(hEncoderPtr, 5000);
+//    ENCODER_SetAutoFeedbackRate(hEncoderPtr, 500);
     ENCODER_Set1MHzCanBaudrate(hEncoderPtr);
   }
   else if (ifButtonPressed(&hButtonBriterEncoderSetCanID))
   {
-    ENCODER_SetCanID(hEncoderPtr, 0x01);
+    ENCODER_SetCanID(hEncoderPtr, 0x08);
 //    ENCODER_Set1MHzCanBaudrate(hEncoderPtr);
   }
   else if (ifButtonPressed(&hButtonBriterEncoderSelectEncoder))
@@ -1521,7 +1628,7 @@ void UI_Page_BriterEncoder(void)
     }
     else if (encoderSelectPtr == 6)
     {
-      hEncoderPtr = &hEncoderUpperLimb;
+      hEncoderPtr = &hEncoderUpperLimb1;
       LCD_DisplayString(10, 500, "UL");
     }
   }
@@ -1625,4 +1732,231 @@ void UI_Page_CustomizedIMU_Init(void)
   LCD_DisplayString(80, 0, "Linear Acc:");
   LCD_DisplayString(80, 25, "Linear Acc:");
   LCD_DisplayString(80, 50, "Linear Acc:");
+}
+
+void UI_Page_UpperLimbExoskeleton_Init(void)
+{
+  hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
+  hButtonPageUpperLimbExoskeletonAdmittanceVelocityControl = \
+  Button_Create(70, 50, 370, 40, "Admittance-Velocity Control", LCD_WHITE, LCD_RED);
+  hButtonMotorStart = Button_Create(10, 100, 200, 100, "EnableMotors", LCD_YELLOW, LCD_RED);
+  hButtonMotorStop = Button_Create(10, 210, 200, 100, "DisableMotors", LCD_YELLOW, LCD_RED);
+  hButtonMotorZeroing = Button_Create(10, 320, 100, 50, "Zeroing", LCD_WHITE, LCD_RED);
+  hButtonPageUpperLimbExoskeletonManualControl = Button_Create(220, 100, 200, 80, "Manual Control", LIGHT_GREY, LCD_RED);
+  hButtonPageUpperLimbExoskeletonPIDVelocityManualControl = Button_Create \
+                                  (220, 200, 200, 80, "PIDSpeedControl", LIGHT_GREY, LCD_RED);
+  
+  
+  LCD_DisplayString(0, 775, "q21 pos: "); LCD_DisplayString(240, 775, "q21 vel: ");
+  LCD_DisplayString(0, 750, "q31 pos: "); LCD_DisplayString(240, 750, "q31 vel: ");
+  LCD_DisplayString(0, 725, "q1 pos: "); LCD_DisplayString(240, 725, "q1 vel: ");
+  LCD_DisplayString(0, 700, "Encoder: ");
+  LCD_DisplayString(0, 675, "Mes X:");
+  LCD_DisplayString(150, 675, "Mes Y:");
+  LCD_DisplayString(300, 675, "Mes Z:");
+}
+void UI_Page_UpperLimbExoskeleton(void)
+{
+  ButtonScan(&hButtonGoBack);
+  ButtonRefresh(&hButtonGoBack);
+  ButtonScan(&hButtonPageUpperLimbExoskeletonAdmittanceVelocityControl);
+  ButtonRefresh(&hButtonPageUpperLimbExoskeletonAdmittanceVelocityControl);
+  ButtonScan(&hButtonMotorStart);
+  ButtonRefresh(&hButtonMotorStart);
+  ButtonScan(&hButtonMotorStop);
+  ButtonRefresh(&hButtonMotorStop);
+  ButtonScan(&hButtonMotorZeroing);
+  ButtonRefresh(&hButtonMotorZeroing);
+  ButtonScan(&hButtonPageUpperLimbExoskeletonManualControl);
+  ButtonRefresh(&hButtonPageUpperLimbExoskeletonManualControl);
+  ButtonScan(&hButtonPageUpperLimbExoskeletonPIDVelocityManualControl);
+  ButtonRefresh(&hButtonPageUpperLimbExoskeletonPIDVelocityManualControl);
+  
+  
+  
+  LCD_SetLayer(1);
+  LCD_SetColor(LCD_BLACK);
+  LCD_DisplayDecimals(100, 775, hUpperLimb.q21Deg.f, 5, 1);
+  LCD_DisplayDecimals(100, 750, hUpperLimb.q31Deg.f, 5, 1);
+  LCD_DisplayDecimals(100, 725, hUpperLimb.q1Deg.f, 5, 1);
+  LCD_DisplayDecimals(340, 775, hUpperLimb.q21DotDeg.f, 5, 1);
+  LCD_DisplayDecimals(340, 750, hUpperLimb.q31DotDeg.f, 5, 1);
+  LCD_DisplayDecimals(340, 725, hUpperLimb.q1DotDeg.f, 5, 1);
+  LCD_DisplayDecimals(100, 700, hUpperLimb.encoderAngleDeg.f, 5, 1);
+  LCD_DisplayDecimals(70, 675, hUpperLimb.endPosX.f, 5,1);
+  LCD_DisplayDecimals(220, 675, hUpperLimb.endPosY.f, 5,1);
+  LCD_DisplayDecimals(370, 675, hUpperLimb.endPosZ.f, 5,1);
+  
+  if (ifButtonPressed(&hButtonPageUpperLimbExoskeletonAdmittanceVelocityControl))
+    UI_Page_Change_To(&UIPage_UpperLimbExoskeleton_AdmittanceVelocityControl);
+  if (ifButtonPressed(&hButtonGoBack))
+    UI_Page_Change_To(&UIPage_Home1);
+  if (ifButtonPressed(&hButtonPageUpperLimbExoskeletonManualControl))
+    UI_Page_Change_To(&UIPage_UpperLimbExoskeleton_ManualControl);
+  if (ifButtonPressed(&hButtonMotorStart))
+  {
+    AK10_9_DMFW_EnableMotor(&hAKMotorDMFW1);
+    MicroSecDelay(&htim8, 50);
+    AK10_9_DMFW_EnableMotor(&hAKMotorDMFW2);
+    MicroSecDelay(&htim8, 50);
+    AK10_9_DMFW_EnableMotor(&hAKMotorDMFW3);
+  }
+  if (ifButtonPressed(&hButtonMotorStop))
+  {
+    AK10_9_DMFW_DisableMotor(&hAKMotorDMFW1);
+    MicroSecDelay(&htim8, 50);
+    AK10_9_DMFW_DisableMotor(&hAKMotorDMFW2);
+    MicroSecDelay(&htim8, 50);
+    AK10_9_DMFW_DisableMotor(&hAKMotorDMFW3);
+  }
+  if (ifButtonPressed(&hButtonMotorZeroing))
+  {
+    AK10_9_DMFW_Zeroing(&hAKMotorDMFW1);
+    MicroSecDelay(&htim8, 50);
+    AK10_9_DMFW_Zeroing(&hAKMotorDMFW2);
+    MicroSecDelay(&htim8, 50);
+    AK10_9_DMFW_Zeroing(&hAKMotorDMFW3);
+  }
+  if (ifButtonPressed(&hButtonPageUpperLimbExoskeletonPIDVelocityManualControl))
+    UI_Page_Change_To(&UIPage_UpperLimbExoskeleton_PIDVelocityManualControl);
+  
+  
+}
+void UI_Page_UpperLimbExoskeleton_AdmittanceVelocityControl_Init(void)
+{
+  hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
+}
+void UI_Page_UpperLimbExoskeleton_AdmittanceVelocityControl(void)
+{
+  ButtonScan(&hButtonGoBack);
+  ButtonRefresh(&hButtonGoBack);
+  
+  if (ifButtonPressed(&hButtonGoBack))
+    UI_Page_Change_To(&UIPage_UpperLimbExoskeleton);
+}
+
+void UI_Page_UpperLimbExoskeleton_ManualControl_Init(void)
+{
+  hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
+  hJoyUpperLimbManualControl_XY = Joystick_Create(300, 550, 150, LIGHT_GREY, \
+                               LCD_BLUE, 40, 200, &hUpperLimb.endPosDesY.f, \
+                               &hUpperLimb.endPosDesX.f, 0.0f, 0.3f, -1.0f, -1.0f);
+  hPotUpperLimbManualControl_Z = Potentialmeter_Create(30, 250, 16, 500, 150, 65, LIGHT_YELLOW, \
+                                                       LIGHT_RED, LIGHT_GREEN, -0.3f, 0.3f, 0.0f, &hUpperLimb.endPosDesZ.f);
+  hUpperLimb.mainTask = UPPERLIMB_MAIN_TASK_MANUAL_CONTROL;
+  LCD_DisplayString(0, 70, "Mes X:");
+  LCD_DisplayString(150, 70, "Mes Y:");
+  LCD_DisplayString(300, 70, "Mes Z:");
+  LCD_DisplayString(0, 100, "Des X:");
+  LCD_DisplayString(150, 100, "Des Y:");
+  LCD_DisplayString(300, 100, "Des Z:");
+  LCD_DisplayString(0,130, "Jacobian:");
+  LCD_DisplayString(80,220, "det(J):");
+}
+
+void UI_Page_UpperLimbExoskeleton_ManualControl(void)
+{
+  ButtonScan(&hButtonGoBack);
+  ButtonRefresh(&hButtonGoBack);
+  ButtonScan(&hButtonSelectSomething);
+  ButtonRefresh(&hButtonSelectSomething);
+  JoystickUpdate(&hJoyUpperLimbManualControl_XY);
+  PotentialmeterUpdate(&hPotUpperLimbManualControl_Z);
+  
+  LCD_SetLayer(1);
+  LCD_SetColor(LCD_BLACK);
+  LCD_DisplayDecimals(70, 70, hUpperLimb.endPosX.f, 5,4);
+  LCD_DisplayDecimals(220, 70, hUpperLimb.endPosY.f, 5,4);
+  LCD_DisplayDecimals(370, 70, hUpperLimb.endPosZ.f, 5,4);
+  LCD_DisplayDecimals(70, 100, hUpperLimb.endPosDesX.f, 5,4);
+  LCD_DisplayDecimals(220, 100, hUpperLimb.endPosDesY.f, 5,4);
+  LCD_DisplayDecimals(370, 100, hUpperLimb.endPosDesZ.f, 5,4);
+  LCD_DisplayDecimals(100, 130, hUpperLimb.J[0][0], 5,4);
+  LCD_DisplayDecimals(200, 130, hUpperLimb.J[0][1], 5,4);
+  LCD_DisplayDecimals(300, 130, hUpperLimb.J[0][2], 5,4);
+  
+  LCD_DisplayDecimals(100, 160, hUpperLimb.J[1][0], 5,4);
+  LCD_DisplayDecimals(200, 160, hUpperLimb.J[1][1], 5,4);
+  LCD_DisplayDecimals(300, 160, hUpperLimb.J[1][2], 5,4);
+  
+  
+  LCD_DisplayDecimals(100, 190, hUpperLimb.J[2][0], 5,4);
+  LCD_DisplayDecimals(200, 190, hUpperLimb.J[2][1], 5,4);
+  LCD_DisplayDecimals(300, 190, hUpperLimb.J[2][2], 5,4);
+  LCD_SetColor(LCD_RED);
+  LCD_DisplayDecimals(210, 220, hUpperLimb.detJ, 8,7);
+
+  LCD_SetColor(LCD_BLACK);
+  if (ifButtonPressed(&hButtonGoBack))
+    UI_Page_Change_To(&UIPage_UpperLimbExoskeleton);
+}
+
+void UI_Page_UpperLimbExoskeleton_PIDVelocityManualControl_Init(void)
+{
+  hUpperLimb.mainTask = UPPERLIMB_MAIN_TASK_PID_VELOCITY_CONTROL;
+  hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
+  hButtonSelectSomething = Button_Create(10, 650, 200, 80, "Select Motor", LCD_WHITE, LCD_RED);
+  hPotUpperLimbPIDVelocityControl_Kp = Potentialmeter_Create(100, 100, 16, 500, 200, 65, LIGHT_YELLOW, \
+                      LIGHT_RED, LIGHT_GREEN, 0.0f, 0.1f, 0.0f, &hPIDPtrSpeedControl->kp);
+  hPotUpperLimbPIDVelocityControl_Ki = Potentialmeter_Create(200, 100, 16, 500, 200, 65, LIGHT_YELLOW, \
+                      LIGHT_RED, LIGHT_GREEN, 0.0f, 0.3f, 0.0f, &hPIDPtrSpeedControl->ki);
+  hPotUpperLimbPIDVelocityControl_Kd = Potentialmeter_Create(300, 100, 16, 500, 200, 65, LIGHT_YELLOW, \
+                      LIGHT_RED, LIGHT_GREEN, 0.0f, 0.01f, 0.0f, &hPIDPtrSpeedControl->kd);
+  hPotUpperLimbPIDVelocityControl_SetVel = Potentialmeter_Create(400, 100, 16, 500, 200, 65, LIGHT_YELLOW, \
+                      LIGHT_RED, LIGHT_GREEN, -30.0f, 30.0f, 0.0f, &pid_speed_control_set_val);
+  
+  LCD_DisplayString(100, 75, "kp");
+  LCD_DisplayString(200, 75, "ki");
+  LCD_DisplayString(300, 75, "kd");
+  LCD_DisplayString(400, 75, "setSpd");
+  LCD_DisplayString(400, 0, "mesSpd");
+}
+
+void UI_Page_UpperLimbExoskeleton_PIDVelocityManualControl(void)
+{
+  ButtonScan(&hButtonGoBack);
+  ButtonRefresh(&hButtonGoBack);
+  ButtonScan(&hButtonSelectSomething);
+  ButtonRefresh(&hButtonSelectSomething);
+  PotentialmeterUpdate(&hPotUpperLimbPIDVelocityControl_Kp);
+  PotentialmeterUpdate(&hPotUpperLimbPIDVelocityControl_Ki);
+  PotentialmeterUpdate(&hPotUpperLimbPIDVelocityControl_Kd);
+  PotentialmeterUpdate(&hPotUpperLimbPIDVelocityControl_SetVel);
+  LCD_SetLayer(1);
+  LCD_SetColor(LCD_BLACK);
+  LCD_DisplayDecimals(100,100,hPIDPtrSpeedControl->kp, 5, 3);
+  LCD_DisplayDecimals(200,100,hPIDPtrSpeedControl->ki, 5, 3);
+  LCD_DisplayDecimals(300,100,hPIDPtrSpeedControl->kd, 5, 3);
+  LCD_DisplayDecimals(400,100,pid_speed_control_set_val, 5, 2);
+  LCD_DisplayDecimals(400,25,hMotorPtrManualControlDMFW->realVelocityPresent.f, 5, 2);
+  if (ifButtonPressed(&hButtonSelectSomething))
+  {
+    if (hMotorPtrManualControlDMFW == &hAKMotorDMFW1)
+    {
+      hMotorPtrManualControlDMFW = &hAKMotorDMFW2;
+      hPIDPtrSpeedControl = &hPIDDMMotor2;
+    }
+    else if (hMotorPtrManualControlDMFW == &hAKMotorDMFW2)
+    {
+      hMotorPtrManualControlDMFW = &hAKMotorDMFW3;
+      hPIDPtrSpeedControl = &hPIDDMMotor3;
+    }
+    else if (hMotorPtrManualControlDMFW == &hAKMotorDMFW3)
+    {
+      hMotorPtrManualControlDMFW = &hAKMotorDMFW1;
+      hPIDPtrSpeedControl = &hPIDDMMotor1;
+    }
+    hPotUpperLimbPIDVelocityControl_Kp.controlledValue = &hPIDPtrSpeedControl->kp;
+    hPotUpperLimbPIDVelocityControl_Kd.controlledValue = &hPIDPtrSpeedControl->kd;
+    hPotUpperLimbPIDVelocityControl_Ki.controlledValue = &hPIDPtrSpeedControl->ki;
+  }
+  if (hMotorPtrManualControlDMFW == &hAKMotorDMFW1)
+    LCD_DisplayString(10, 625, "M1");
+  else if (hMotorPtrManualControlDMFW == &hAKMotorDMFW2)
+    LCD_DisplayString(10, 625, "M2");
+  else if (hMotorPtrManualControlDMFW == &hAKMotorDMFW3)
+    LCD_DisplayString(10, 625, "M3");
+  
+  if (ifButtonPressed(&hButtonGoBack))
+    UI_Page_Change_To(&UIPage_UpperLimbExoskeleton);
 }

@@ -7,7 +7,7 @@
 #include "system_periphrals.h"
 
 EncoderHandle hEncoderRightWheel, hEncoderLeftWheel, hEncoderLeftPull, \
-              hEncoderUpperLimb, hEncoderLeftTurn, hEncoderRightPull, hEncoderRightTurn;
+              hEncoderUpperLimb1, hEncoderUpperLimb2, hEncoderLeftTurn, hEncoderRightPull, hEncoderRightTurn;
 EncoderHandle* hEncoderPtr;
 uint8_t encoderSelectPtr = 0;
 uint8_t ifRequestRead = 0;
@@ -57,12 +57,12 @@ void ENCODER_Init(void)
   memset(hEncoderRightWheel.speedCalAngleBuf, 0, SIZE_OF_ANGLE_AVG_BUF);
   hEncoderRightWheel.speedRatio = 1.0f;
   
-  hEncoderUpperLimb.lastLegitRxTimestamp = HAL_GetTick();
-  hEncoderUpperLimb.hcan = &hcan2;
-  hEncoderUpperLimb.canAddress = CAN_ID_ENCODER_UPPER_LIMB;
-  hEncoderUpperLimb.speedCalAngleBufPtr = 0;
-  memset(hEncoderUpperLimb.speedCalAngleBuf, 0, SIZE_OF_ANGLE_AVG_BUF);
-  hEncoderUpperLimb.speedRatio = 1.0f;
+  hEncoderUpperLimb1.lastLegitRxTimestamp = HAL_GetTick();
+  hEncoderUpperLimb1.hcan = &hcan2;
+  hEncoderUpperLimb1.canAddress = CAN_ID_ENCODER_UPPER_LIMB_1;
+  hEncoderUpperLimb1.speedCalAngleBufPtr = 0;
+  memset(hEncoderUpperLimb1.speedCalAngleBuf, 0, SIZE_OF_ANGLE_AVG_BUF);
+  hEncoderUpperLimb1.speedRatio = 1.0f;
   
   
   encoderSelectPtr = 0;
@@ -215,11 +215,11 @@ void ENCODER_SetAutoFeedbackRate(EncoderHandle* hencoder, uint16_t us)
 	hencoder->txBuf[1] = hencoder->canTxHeader.StdId;
 	hencoder->txBuf[2] = BRITER_ENCODER_CAN_COMMAND_SET_AUTO_FEEDBACK_TIME;
   //for wheels//
-//	hencoder->txBuf[4] = us & 0x00FF;
-//  hencoder->txBuf[3] = (us >> 8) & 0x00FF;
+	hencoder->txBuf[4] = us & 0x00FF;
+  hencoder->txBuf[3] = (us >> 8) & 0x00FF;
   //for arms//
-  hencoder->txBuf[3] = us & 0x00FF;
-  hencoder->txBuf[4] = (us >> 8) & 0x00FF;
+//  hencoder->txBuf[3] = us & 0x00FF;
+//  hencoder->txBuf[4] = (us >> 8) & 0x00FF;
 	
 	HAL_CAN_AddTxMessage(hencoder->hcan, &(hencoder->canTxHeader), hencoder->txBuf, &(hencoder->canMailbox));
 }
