@@ -1,5 +1,6 @@
 #include "exoskeleton.h"
 #include "ak10-9_v2_testing.h"
+#include "my_math.h"
 
 BNO055Handle                               hIMUTorso;
 JointAccelerationIMUHandle                 hIMUHip;
@@ -566,7 +567,7 @@ void EXOSKELETON_CentreControl(void)
       break;
   }
   
-  EXOSKELETON_SystemIDManager();
+//  EXOSKELETON_SystemIDManager();
   EXOSKELETON_GravityCompemsationManager();
   EXOSKELETON_MuscularTorqueCalculation(&hExoskeleton);
   EXOSKELETON_AugmentedControlManager();
@@ -633,11 +634,16 @@ void EXOSKELETON_AugmentedControlManager(void)
 {
   if (hExoskeleton.haugmentedcontrol->ifAugmentedControl)
   {
+    float sigmoidHip, sigmoidKnee;
+    sigmoidHip = (1.0f / (1 + powf(e, -3.0f * (fabs(hExoskeleton.hmusculartorque->muscularTorqueHip.f) - 5.0f)))) - 0.5f;
+    sigmoidKnee = (1.0f / (1 + powf(e, -3.0f * (fabs(hExoskeleton.hmusculartorque->muscularTorqueKnee.f) - 5.0f)))) - 0.5f;
+    
+    
     AK10_9_DMFW_MITMode_ContinuousControl_Rad(&hAKMotorRightHip, 0.0f, 0.0f, 0.0f, 0.0f, \
-                                              hExoskeleton.haugmentedcontrol->hipJointAugmentedControlThrottle * \
+                                              sigmoidHip * hExoskeleton.haugmentedcontrol->hipJointAugmentedControlThrottle * \
                                               hExoskeleton.hmusculartorque->muscularTorqueHip.f / hAKMotorRightHip.kt);
     AK10_9_CubaMarsFW_MITMode_ContinuousControl_Deg(&hAKMotorRightKnee, 0.0f, 0.0f, 0.0f, 0.0f, \
-                                                    hExoskeleton.haugmentedcontrol->kneeJointAugmentedControlThrottle * \
+                                                    sigmoidKnee * hExoskeleton.haugmentedcontrol->kneeJointAugmentedControlThrottle * \
                                                     hExoskeleton.hmusculartorque->muscularTorqueKnee.f/ hAKMotorRightKnee.kt);
   }
 }

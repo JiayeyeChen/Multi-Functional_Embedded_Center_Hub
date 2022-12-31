@@ -152,8 +152,8 @@ void AK10Calibration_Task(void *argument)
   for(;;)
   {
     EXOSKELETON_CentreControl();
-//    if (hExoskeleton.mainTask != EXOSKELETON_MAIN_TASK_SYSTEM_ID)
-//      EXOSKELETON_CommonDatalogManager();
+    if (hExoskeleton.mainTask != EXOSKELETON_MAIN_TASK_SYSTEM_ID)
+      EXOSKELETON_CommonDatalogManager();
 
     if (ifMotorProfilingStarted)
       AK10_9_MotorProfiling_Function1_Half_Sin(&hAKMotorRightHip_old, tmotorProfilingSinWaveFrequency);
