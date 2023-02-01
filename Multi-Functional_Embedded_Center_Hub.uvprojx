@@ -385,7 +385,7 @@
             <File>
               <FileName>startup_stm32f429xx.s</FileName>
               <FileType>2</FileType>
-              <FilePath>..\Core\Src\startup_stm32f429xx.s</FilePath>
+              <FilePath>startup_stm32f429xx.s</FilePath>
             </File>
           </Files>
         </Group>
@@ -511,6 +511,26 @@
               <FileName>adc.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Core\Src\adc.c</FilePath>
+            </File>
+            <File>
+              <FileName>exoskeleton.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\exoskeleton.c</FilePath>
+            </File>
+            <File>
+              <FileName>encoder.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\encoder.c</FilePath>
+            </File>
+            <File>
+              <FileName>common.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\MY_STM_Common\Src\common.c</FilePath>
+            </File>
+            <File>
+              <FileName>upper_limb.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\upper_limb.c</FilePath>
             </File>
           </Files>
         </Group>
