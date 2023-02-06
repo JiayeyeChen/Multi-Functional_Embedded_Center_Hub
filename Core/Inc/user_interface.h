@@ -10,8 +10,6 @@
 #include "ak10-9_v2_testing.h"
 #include "exoskeleton.h"
 #include "adc.h"
-#include "encoder.h"
-#include "upper_limb.h"
 
 typedef struct
 {
@@ -125,29 +123,15 @@ void         UI_Page_AK10_9_ManualControlCubeMarsFWServoMode(void);
 void         UI_Page_AK10_9_ManualControlCubeMarsFWServoMode_Init(void);
 void         UI_Page_AK10_9_ManualControlCubeMarsFWMITMode(void);
 void         UI_Page_AK10_9_ManualControlCubeMarsFWMITMode_Init(void);
-void         UI_Page_AK10_9_ManualControlFirmwareSelection(void);
-void         UI_Page_AK10_9_ManualControlFirmwareSelection_Init(void);
-void         UI_Page_AK10_9_ManualControlDMFW_Init(void);
-void         UI_Page_AK10_9_ManualControlDMFW(void);
 void         UI_Page_BNO055_Monitor(void);
 void         UI_Page_BNO055_Monitor_Init(void);
 void         UI_Page_TMotor_Acceleration_Observer_Project(void);
 void         UI_Page_TMotor_Acceleration_Observer_Project_Init(void);
 void         UI_Page_ADC_Monitor_Init(void);
 void         UI_Page_ADC_Monitor(void);
-void         UI_Page_BriterEncoder(void);
-void         UI_Page_BriterEncoder_Init(void);
 void         UI_Page_CustomizedIMU(void);
 void         UI_Page_CustomizedIMU_Init(void);
-void         UI_Page_UpperLimbExoskeleton_Init(void);
-void         UI_Page_UpperLimbExoskeleton(void);
-void         UI_Page_UpperLimbExoskeleton_AdmittanceVelocityControl_Init(void);
-void         UI_Page_UpperLimbExoskeleton_AdmittanceVelocityControl(void);
-void         UI_Page_UpperLimbExoskeleton_ManualControl_Init(void);
-void         UI_Page_UpperLimbExoskeleton_ManualControl(void);
-void         UI_Page_UpperLimbExoskeleton_PIDVelocityManualControl_Init(void);
-void         UI_Page_UpperLimbExoskeleton_PIDVelocityManualControl(void);
 
 extern UIHandle hUI;
-extern PageHandle UIPage_AK10_9_ManualControlCubeMarsFWServoMode, UIPage_AK10_9_ManualControlCubeMarsFWMITMode, UIPage_AK10_9_ManualControlDMFW;
+extern PageHandle UIPage_AK10_9_ManualControlCubeMarsFWServoMode, UIPage_AK10_9_ManualControlCubeMarsFWMITMode;
 #endif

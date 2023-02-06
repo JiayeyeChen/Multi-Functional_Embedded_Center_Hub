@@ -17,7 +17,6 @@
 #include "os_threads.h"
 #include "adc.h"
 #include "exoskeleton.h"
-#include "upper_limb.h"
 
 void SystemClock_Config(void);
 
@@ -36,13 +35,10 @@ int main(void)
   UI_Init();
   
   EXOSKELETON_MotorInit();
-//  MotorInit_DMFW();
 //  MotorInit_CubeMarsFW();
   AD7606_Init(AD7606_RANG_10V, AD7606_OS_RATIO_4);
 
   EXOSKELETON_Init();
-//  ENCODER_Init();
-//  UPPERLIMB_Init();
   CAN_ConfigureFilters();
   
   osKernelInitialize();
@@ -177,21 +173,6 @@ void AK10Calibration_Task(void *argument)
         AK10_9_CubeMarsFW_MITMode_ContinuousControlManager(hMotorPtrManualControl, \
                                                            30.0f, 180.0f, 1.0f, 100.0f, 0.5f, 0.001f);
       }
-      else if (hUI.curPage == &UIPage_AK10_9_ManualControlDMFW)
-      {
-        if (hMotorPtrManualControlDMFW->controlMode == AK10_9_DM_FW_MODE_MIT)
-        {
-          AK10_9_DMFW_MITMode_ContinuousControl_Deg(hMotorPtrManualControlDMFW, \
-                                                    manualControlValue_pos, manualControlValue_vel, \
-                                                    manualControlValue_kp, manualControlValue_kd, manualControlValue_cur);
-          AK10_9_DMFW_MITMode_ContinuousControlManager(hMotorPtrManualControlDMFW, \
-                                                        30.0f, 180.0f, 30.0f, 100.0f, 0.5f, 0.001f);
-        }
-        else if (hMotorPtrManualControlDMFW->controlMode == AK10_9_DM_FW_MODE_VELOCITY)
-          AK10_9_DMFW_VelocityControl(hMotorPtrManualControlDMFW, manualControlValue_vel);
-        else if (hMotorPtrManualControlDMFW->controlMode == AK10_9_DM_FW_MODE_POSITION)
-          AK10_9_DMFW_PositionVelocityControl(hMotorPtrManualControlDMFW, manualControlValue_pos, manualControlValue_vel);
-      }
     }
     
     if (ifIMUFeedbackStarted)
@@ -200,16 +181,6 @@ void AK10Calibration_Task(void *argument)
     AK10_9_CubeMarsFW_MotorStatusMonitor(&hAKMotorRightKnee, 100);
     AK10_9_DMFW_MotorStatusMonitor(&hAKMotorRightHip, 100);
     
-    osDelay(1);
-  }
-}
-
-void UpperLimb_Task(void *argument)
-{
-  for(;;)
-  {
-//    UPPERLIMB_ControlCenter();
-//    UPPERLIMB_CANRequestForceData(&hUpperLimb);
     osDelay(1);
   }
 }

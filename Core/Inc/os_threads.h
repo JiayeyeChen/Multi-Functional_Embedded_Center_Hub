@@ -6,7 +6,6 @@
 void AK10Calibration_Task(void *argument);
 void UI_Task(void *argument);
 void ADC_Task(void *argument);
-void UpperLimb_Task(void *argument);
 void OSThreads_Init(void);
 
 
