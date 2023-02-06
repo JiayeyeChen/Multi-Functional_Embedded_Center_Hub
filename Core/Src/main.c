@@ -17,6 +17,7 @@
 #include "os_threads.h"
 #include "adc.h"
 #include "exoskeleton.h"
+#include "BenMoKeJi_M15.h"
 
 void SystemClock_Config(void);
 
