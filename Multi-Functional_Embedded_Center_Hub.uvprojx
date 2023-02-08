@@ -522,6 +522,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\MY_STM_Common\Src\common.c</FilePath>
             </File>
+            <File>
+              <FileName>BenMoKeJi_M15.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\BenMoKeJi_M15.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
