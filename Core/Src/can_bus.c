@@ -2,6 +2,7 @@
 #include "ak10-9_v2_testing.h"
 #include "usb.h"
 #include "exoskeleton.h"
+#include "BenMoKeJi_M15.h"
 
 //for testing//
 uint32_t rxfifo0detected = 0;
@@ -77,6 +78,7 @@ void CAN_ConfigureFilters(void)
 	hAKMotorRightKnee.rxFilter.FilterActivation = ENABLE;
 	HAL_CAN_ConfigFilter(hAKMotorRightKnee.hcan, &hAKMotorRightKnee.rxFilter);
   /*Filter bank 2*/
+	ConfigCANFilter_STD_ID_16Bit4IDListMode(hBENMOKEJI.hcan, 2, CAN_FILTER_FIFO0, hBENMOKEJI.canIDFeedback, 0x00, 0x00, 0x00);
   /***************/
 
   /*Filter bank 3*/
@@ -156,6 +158,9 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
     EXOSKELETON_GetJointAccelerationIMUFeedback_BNO055Status(&hIMUKnee, temRxData);
   else if (temRxHeader.StdId == CAN_ID_IMU_TORSO_ANGLE_EXOSKELETON)
     EXOSKELETON_GetBNO055FeedbackGrv(&hIMUTorso, temRxData);
+	
+	if (temRxHeader.StdId == hBENMOKEJI.canIDFeedback)
+		BENMOKEJI_M15_GetFeedback(&hBENMOKEJI, &temRxHeader, temRxData);
   
   //End
   rxfifo0detected++;

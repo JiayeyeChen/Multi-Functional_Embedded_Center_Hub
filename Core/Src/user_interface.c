@@ -10,6 +10,8 @@ ButtonHandle hButtonGoBack, hButtonDataLogStart, hButtonDataLogEnd, \
              hButtonMotorProfilingStart, hButtonMotorProfilingEnd, \
              hButtonMotorZeroing, hButtonMotorStart, hButtonMotorStop, \
              hButtonStart, hButtonStop, hButtonOn, hButtonOff,\
+						 hButtonPositionControl, hButtonVelocityControl, hButtonCurrentControl, \
+						 hButtonMotorEnable, hButtonMotorDisable, \
              hButtonSelectSomething;
 //////////////////
 /* Exoskeleton User Interface */
@@ -56,6 +58,16 @@ ButtonHandle hButtonPageADCMonitor, hButtonResetAD7606;
 PageHandle UIPage_Customized_IMU_Monitor;
 ButtonHandle hButtonPageCustomizedIMUMonitor, hButtonSelectHipIMU, hButtonSelectKneeIMU, \
              hButtonAveragingStart, hButtonAveragingStop;
+//////////////////////////////////////////////////////
+
+/*Ben Mo Ke Ji motor testing */
+PageHandle 	 									UIPage_BenMoKeJiM15_Testing;
+ButtonHandle 									hButtonPageBenMoKeJiM15Testing;
+LinearPotentialmeterHandle 		hPotPositionControl;
+JoystickHandle 								hJoyVelCurControl;
+float													controlValue1Velocity, controlValueCurrent;
+///////////////////////////////
+
 
 
 ButtonHandle Button_Create(uint16_t x, uint16_t y, uint16_t xLen, uint16_t yLen, char label[],\
@@ -262,6 +274,10 @@ void UI_Init(void)
   UIPage_Customized_IMU_Monitor.ifPageInitialized = 0;
   UIPage_Customized_IMU_Monitor.Page = UI_Page_CustomizedIMU;
   UIPage_Customized_IMU_Monitor.PageInit = UI_Page_CustomizedIMU_Init;
+	
+	UIPage_BenMoKeJiM15_Testing.ifPageInitialized = 0;
+	UIPage_BenMoKeJiM15_Testing.Page = UI_Page_BenMoKeJiM15Testing;
+  UIPage_BenMoKeJiM15_Testing.PageInit = UI_Page_BenMoKeJiM15Testing_Init;
 }
 
 JoystickHandle Joystick_Create(uint16_t x, uint16_t y, uint16_t r, uint32_t background_color, \
@@ -818,6 +834,8 @@ void UI_Page_Home1(void)
   ButtonRefresh(&hButtonPageADCMonitor);
   ButtonScan(&hButtonPageCustomizedIMUMonitor);
   ButtonRefresh(&hButtonPageCustomizedIMUMonitor);
+	ButtonScan(&hButtonPageBenMoKeJiM15Testing);
+  ButtonRefresh(&hButtonPageBenMoKeJiM15Testing);
   
   
   if (ifButtonPressed(&hButtonPageExoskeletonInterface))
@@ -832,6 +850,8 @@ void UI_Page_Home1(void)
     UI_Page_Change_To(&UIPage_ADC_Monitor);
   if (ifButtonPressed(&hButtonPageCustomizedIMUMonitor))
     UI_Page_Change_To(&UIPage_Customized_IMU_Monitor);
+	if (ifButtonPressed(&hButtonPageBenMoKeJiM15Testing))
+    UI_Page_Change_To(&UIPage_BenMoKeJiM15_Testing);
   
 }
 void UI_Page_Home1_Init(void)
@@ -842,6 +862,7 @@ void UI_Page_Home1_Init(void)
   hButtonPageTMotorAccelerationObserverProject = Button_Create(10, 300, 450, 40, "TMotor Acceleration Observer Project", LIGHT_MAGENTA, LCD_RED);
   hButtonPageADCMonitor = Button_Create(150, 350, 200, 40, "ADC Monitor", LIGHT_MAGENTA, LCD_RED);
   hButtonPageCustomizedIMUMonitor = Button_Create(80, 200, 360, 40, "Customized IMU Monitor", LIGHT_MAGENTA, LCD_RED);
+	hButtonPageBenMoKeJiM15Testing = Button_Create(150, 400, 200, 40, "BenMoKeJiM15", LIGHT_MAGENTA, LCD_RED);
 }
 
 void UI_Page_AK10_9_ManualControlCubeMarsFWServoMode(void)
@@ -1406,4 +1427,78 @@ void UI_Page_CustomizedIMU_Init(void)
   LCD_DisplayString(80, 0, "Linear Acc:");
   LCD_DisplayString(80, 25, "Linear Acc:");
   LCD_DisplayString(80, 50, "Linear Acc:");
+}
+
+void UI_Page_BenMoKeJiM15Testing(void)
+{
+	ButtonScan(&hButtonGoBack);
+  ButtonRefresh(&hButtonGoBack);
+	ButtonScan(&hButtonMotorEnable);
+  ButtonRefresh(&hButtonMotorEnable);
+	ButtonScan(&hButtonMotorDisable);
+  ButtonRefresh(&hButtonMotorDisable);
+	ButtonScan(&hButtonVelocityControl);
+  ButtonRefresh(&hButtonVelocityControl);
+	ButtonScan(&hButtonPositionControl);
+  ButtonRefresh(&hButtonPositionControl);
+	ButtonScan(&hButtonCurrentControl);
+  ButtonRefresh(&hButtonCurrentControl);
+	PotentialmeterUpdate(&hPotPositionControl);
+	JoystickUpdate(&hJoyVelCurControl);
+	
+	if (ifButtonPressed(&hButtonMotorEnable))
+	{
+		BENMOKEJI_M15_SetMode(&hBENMOKEJI, BENMOKEJI_M15_MODE_ENABLED);
+		hBENMOKEJI.mode = BENMOKEJI_MODE_ENABLED;
+	}
+	else if (ifButtonPressed(&hButtonMotorDisable))
+	{
+		BENMOKEJI_M15_SetMode(&hBENMOKEJI, BENMOKEJI_M15_MODE_DISABLED);
+		hBENMOKEJI.mode = BENMOKEJI_MODE_DISABLED;
+	}
+	else if (ifButtonPressed(&hButtonVelocityControl))
+	{
+		BENMOKEJI_M15_SetMode(&hBENMOKEJI, BENMOKEJI_M15_MODE_SPEED_CONTROL);
+		hBENMOKEJI.mode = BENMOKEJI_MODE_VELOCITY;
+	}
+	else if (ifButtonPressed(&hButtonPositionControl))
+	{
+		BENMOKEJI_M15_SetMode(&hBENMOKEJI, BENMOKEJI_M15_MODE_POSITION_CONTROL);
+		hBENMOKEJI.mode = BENMOKEJI_MODE_POSITION;
+	}
+	else if (ifButtonPressed(&hButtonCurrentControl))
+	{
+		BENMOKEJI_M15_SetMode(&hBENMOKEJI, BENMOKEJI_M15_MODE_CURRENT_CONTROL);
+		hBENMOKEJI.mode = BENMOKEJI_MODE_CURRENT;
+	}
+	
+	hBENMOKEJI.speedSetDeg.f = controlValue1Velocity * 10.0f * 60.0f;
+	hBENMOKEJI.currentSet.f = controlValueCurrent * 2.0f;
+	
+	LCD_SetLayer(1);
+  LCD_SetColor(LCD_BLACK);
+	LCD_DisplayDecimals(200, 200, hBENMOKEJI.positionRealDeg.f, 4, 1);
+	LCD_DisplayDecimals(200, 230, hBENMOKEJI.speedRealDeg.f, 4, 1);
+	LCD_DisplayDecimals(200, 260, hBENMOKEJI.currentReal.f, 4, 1);
+	
+	if (ifButtonPressed(&hButtonGoBack))
+    UI_Page_Change_To(&UIPage_Home1);
+}
+
+void UI_Page_BenMoKeJiM15Testing_Init(void)
+{
+	hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
+	hButtonMotorEnable = Button_Create(5, 80, 100, 40, "Enable", LCD_WHITE, LCD_RED);
+	hButtonMotorDisable = Button_Create(5, 160, 100, 150, "Disable", LCD_YELLOW, LCD_RED);
+	hButtonVelocityControl = Button_Create(120, 50, 180, 40, "Vel Control", LCD_GREEN, LCD_RED);
+	hButtonPositionControl = Button_Create(120, 100, 180, 40, "Pos Control", LCD_GREEN, LCD_RED);
+	hButtonCurrentControl = Button_Create(120, 150, 180, 40, "Cur Control", LCD_GREEN, LCD_RED);
+	hPotPositionControl = Potentialmeter_Create(400, 50, 30, 400, 60, 70, LCD_MAGENTA, LCD_RED, LIGHT_GREY, 0.0f, 360.0f, 0.0f, &hBENMOKEJI.positionSetDeg.f);
+	hJoyVelCurControl = Joystick_Create(220, 580, 160, LCD_WHITE, LCD_BLACK, 50, 180, &controlValue1Velocity, &controlValueCurrent, 0.0f, 1.0f, 1.0f, -1.0f);
+	
+	LCD_SetLayer(1);
+  LCD_SetColor(LCD_BLACK);
+	LCD_DisplayString(120, 200, "Pos:");
+	LCD_DisplayString(120, 230, "Vel:");
+	LCD_DisplayString(120, 260, "Cur:");
 }

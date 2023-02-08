@@ -38,7 +38,8 @@ int main(void)
   EXOSKELETON_MotorInit();
 //  MotorInit_CubeMarsFW();
   AD7606_Init(AD7606_RANG_10V, AD7606_OS_RATIO_4);
-
+	
+	BENMOKEJI_M15_Init(&hBENMOKEJI, &hcan2, 1);
   EXOSKELETON_Init();
   CAN_ConfigureFilters();
   
@@ -148,7 +149,7 @@ void AK10Calibration_Task(void *argument)
   
   for(;;)
   {
-    EXOSKELETON_CentreControl();
+//    EXOSKELETON_CentreControl();
     if (hExoskeleton.mainTask != EXOSKELETON_MAIN_TASK_SYSTEM_ID)
       EXOSKELETON_CommonDatalogManager();
 
@@ -183,6 +184,20 @@ void AK10Calibration_Task(void *argument)
     AK10_9_DMFW_MotorStatusMonitor(&hAKMotorRightHip, 100);
     
     osDelay(1);
+  }
+}
+
+void MotorTesting_Task(void *argument)
+{
+	for(;;)
+  {
+		if (hBENMOKEJI.mode == BENMOKEJI_MODE_POSITION)
+			BENMODEJI_M15_PositionControl(&hBENMOKEJI, hBENMOKEJI.positionSetDeg.f);
+		else if (hBENMOKEJI.mode == BENMOKEJI_MODE_VELOCITY)
+			BENMODEJI_M15_VelocityControlDeg(&hBENMOKEJI, hBENMOKEJI.speedSetDeg.f);
+		else if (hBENMOKEJI.mode == BENMOKEJI_MODE_CURRENT)
+			BENMODEJI_M15_CurrentControl(&hBENMOKEJI, hBENMOKEJI.currentSet.f);
+    osDelay(2);
   }
 }
 

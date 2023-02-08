@@ -21,9 +21,17 @@ const osThreadAttr_t ADCTask_attributes = {
   .priority = (osPriority_t) osPriorityRealtime,
 };
 
+osThreadId_t MotorTestingHandle;
+const osThreadAttr_t MotorTestingTask_attributes = {
+  .name = "Motor Testing",
+  .stack_size = 1024,
+  .priority = (osPriority_t) osPriorityRealtime,
+};
+
 void OSThreads_Init(void)
 {
   AK10_CalibrationnTaskHandle = osThreadNew(AK10Calibration_Task, NULL, &AK10_Calibration_attributes);
   UITaskHandle = osThreadNew(UI_Task, NULL, &UITask_attributes);
   ADCTaskHandle = osThreadNew(ADC_Task, NULL, &ADCTask_attributes);
+	MotorTestingHandle = osThreadNew(MotorTesting_Task, NULL, &MotorTestingTask_attributes);
 }
