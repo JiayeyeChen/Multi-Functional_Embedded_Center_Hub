@@ -18,6 +18,7 @@
 #include "adc.h"
 #include "exoskeleton.h"
 #include "BenMoKeJi_M15.h"
+#include "lktech_mg_motor.h"
 
 void SystemClock_Config(void);
 
@@ -191,12 +192,16 @@ void MotorTesting_Task(void *argument)
 {
 	for(;;)
   {
+    /* Ben Mo Ke Ji M15 */
 		if (hBENMOKEJI.mode == BENMOKEJI_MODE_POSITION)
 			BENMODEJI_M15_PositionControl(&hBENMOKEJI, hBENMOKEJI.positionSetDeg.f);
 		else if (hBENMOKEJI.mode == BENMOKEJI_MODE_VELOCITY)
 			BENMODEJI_M15_VelocityControlDeg(&hBENMOKEJI, hBENMOKEJI.speedSetDeg.f);
 		else if (hBENMOKEJI.mode == BENMOKEJI_MODE_CURRENT)
 			BENMODEJI_M15_CurrentControl(&hBENMOKEJI, hBENMOKEJI.currentSet.f);
+    //////////////////////
+    
+    
     osDelay(2);
   }
 }
