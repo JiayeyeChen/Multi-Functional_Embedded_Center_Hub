@@ -49,5 +49,4 @@ void BENMODEJI_M15_VelocityControlDeg(BENMOKEJI_M15_Handle* hmotor, float val);
 void BENMODEJI_M15_CurrentControl(BENMOKEJI_M15_Handle* hmotor, float val);
 void BENMOKEJI_M15_SetMode(BENMOKEJI_M15_Handle* hmotor, uint8_t mode);
 
-extern BENMOKEJI_M15_Handle hBENMOKEJI;
 #endif

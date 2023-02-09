@@ -1,7 +1,5 @@
 #include "BenMoKeJi_M15.h"
 
-BENMOKEJI_M15_Handle hBENMOKEJI;
-
 void BENMOKEJI_M15_Init(BENMOKEJI_M15_Handle* hmotor, CAN_HandleTypeDef* hcan, uint8_t motor_id)
 {
 	hmotor->hcan = hcan;

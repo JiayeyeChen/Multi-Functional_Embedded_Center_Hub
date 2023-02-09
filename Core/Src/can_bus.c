@@ -2,7 +2,7 @@
 #include "ak10-9_v2_testing.h"
 #include "usb.h"
 #include "exoskeleton.h"
-#include "BenMoKeJi_M15.h"
+#include "bldc_actuators_testing.h"
 
 //for testing//
 uint32_t rxfifo0detected = 0;

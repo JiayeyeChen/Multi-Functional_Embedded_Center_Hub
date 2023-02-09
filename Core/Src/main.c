@@ -19,6 +19,7 @@
 #include "exoskeleton.h"
 #include "BenMoKeJi_M15.h"
 #include "lktech_mg_motor.h"
+#include "bldc_actuators_testing.h"
 
 void SystemClock_Config(void);
 

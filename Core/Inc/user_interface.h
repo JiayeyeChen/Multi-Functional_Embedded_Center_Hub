@@ -10,7 +10,7 @@
 #include "ak10-9_v2_testing.h"
 #include "exoskeleton.h"
 #include "adc.h"
-#include "BenMoKeJi_M15.h"
+#include "bldc_actuators_testing.h"
 
 typedef struct
 {
@@ -134,6 +134,8 @@ void         UI_Page_CustomizedIMU(void);
 void         UI_Page_CustomizedIMU_Init(void);
 void 				 UI_Page_BenMoKeJiM15Testing(void);
 void 				 UI_Page_BenMoKeJiM15Testing_Init(void);
+void 				 UI_Page_LinKongKeJiTesting(void);
+void 				 UI_Page_LinKongKeJiTesting_Init(void);
 
 extern UIHandle hUI;
 extern PageHandle UIPage_AK10_9_ManualControlCubeMarsFWServoMode, UIPage_AK10_9_ManualControlCubeMarsFWMITMode;

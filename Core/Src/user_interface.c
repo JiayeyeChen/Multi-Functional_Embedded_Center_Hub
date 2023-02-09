@@ -68,6 +68,12 @@ JoystickHandle 								hJoyVelCurControl;
 float													controlValue1Velocity, controlValueCurrent;
 ///////////////////////////////
 
+/* Lin Kong Ke Ji Testing */
+PageHandle                    UIPage_LinKongKeJi_Testing;
+ButtonHandle                  hButtonPageLinKongKeJiTesting;
+JoystickHandle 								hJoyLKTECHTesting;
+float                         LKTECHTestingPositionControl, LKTECHTestingVelocityControl, LKTECHTestingCurrentControl, LKTECHBlank;
+////////////////////////////
 
 
 ButtonHandle Button_Create(uint16_t x, uint16_t y, uint16_t xLen, uint16_t yLen, char label[],\
@@ -278,6 +284,10 @@ void UI_Init(void)
 	UIPage_BenMoKeJiM15_Testing.ifPageInitialized = 0;
 	UIPage_BenMoKeJiM15_Testing.Page = UI_Page_BenMoKeJiM15Testing;
   UIPage_BenMoKeJiM15_Testing.PageInit = UI_Page_BenMoKeJiM15Testing_Init;
+  
+  UIPage_LinKongKeJi_Testing.ifPageInitialized = 0;
+	UIPage_LinKongKeJi_Testing.Page = UI_Page_LinKongKeJiTesting;
+  UIPage_LinKongKeJi_Testing.PageInit = UI_Page_LinKongKeJiTesting_Init;
 }
 
 JoystickHandle Joystick_Create(uint16_t x, uint16_t y, uint16_t r, uint32_t background_color, \
@@ -836,6 +846,8 @@ void UI_Page_Home1(void)
   ButtonRefresh(&hButtonPageCustomizedIMUMonitor);
 	ButtonScan(&hButtonPageBenMoKeJiM15Testing);
   ButtonRefresh(&hButtonPageBenMoKeJiM15Testing);
+  ButtonScan(&hButtonPageLinKongKeJiTesting);
+  ButtonRefresh(&hButtonPageLinKongKeJiTesting);
   
   
   if (ifButtonPressed(&hButtonPageExoskeletonInterface))
@@ -852,6 +864,8 @@ void UI_Page_Home1(void)
     UI_Page_Change_To(&UIPage_Customized_IMU_Monitor);
 	if (ifButtonPressed(&hButtonPageBenMoKeJiM15Testing))
     UI_Page_Change_To(&UIPage_BenMoKeJiM15_Testing);
+  if (ifButtonPressed(&hButtonPageLinKongKeJiTesting))
+    UI_Page_Change_To(&UIPage_LinKongKeJi_Testing);
   
 }
 void UI_Page_Home1_Init(void)
@@ -863,6 +877,7 @@ void UI_Page_Home1_Init(void)
   hButtonPageADCMonitor = Button_Create(150, 350, 200, 40, "ADC Monitor", LIGHT_MAGENTA, LCD_RED);
   hButtonPageCustomizedIMUMonitor = Button_Create(80, 200, 360, 40, "Customized IMU Monitor", LIGHT_MAGENTA, LCD_RED);
 	hButtonPageBenMoKeJiM15Testing = Button_Create(150, 400, 200, 40, "BenMoKeJiM15", LIGHT_MAGENTA, LCD_RED);
+  hButtonPageLinKongKeJiTesting = Button_Create(100, 450, 300, 40, "LinKongKeJi MG Motor", LIGHT_MAGENTA, LCD_RED);
 }
 
 void UI_Page_AK10_9_ManualControlCubeMarsFWServoMode(void)
@@ -1495,6 +1510,64 @@ void UI_Page_BenMoKeJiM15Testing_Init(void)
 	hButtonCurrentControl = Button_Create(120, 150, 180, 40, "Cur Control", LCD_GREEN, LCD_RED);
 	hPotPositionControl = Potentialmeter_Create(400, 50, 30, 400, 60, 70, LCD_MAGENTA, LCD_RED, LIGHT_GREY, 0.0f, 360.0f, 0.0f, &hBENMOKEJI.positionSetDeg.f);
 	hJoyVelCurControl = Joystick_Create(220, 580, 160, LCD_WHITE, LCD_BLACK, 50, 180, &controlValue1Velocity, &controlValueCurrent, 0.0f, 1.0f, 1.0f, -1.0f);
+	
+	LCD_SetLayer(1);
+  LCD_SetColor(LCD_BLACK);
+	LCD_DisplayString(120, 200, "Pos:");
+	LCD_DisplayString(120, 230, "Vel:");
+	LCD_DisplayString(120, 260, "Cur:");
+}
+
+void UI_Page_LinKongKeJiTesting(void)
+{
+  ButtonScan(&hButtonGoBack);
+  ButtonRefresh(&hButtonGoBack);
+  ButtonScan(&hButtonMotorEnable);
+  ButtonRefresh(&hButtonMotorEnable);
+	ButtonScan(&hButtonMotorDisable);
+  ButtonRefresh(&hButtonMotorDisable);
+	ButtonScan(&hButtonVelocityControl);
+  ButtonRefresh(&hButtonVelocityControl);
+	ButtonScan(&hButtonPositionControl);
+  ButtonRefresh(&hButtonPositionControl);
+	ButtonScan(&hButtonCurrentControl);
+  ButtonRefresh(&hButtonCurrentControl);
+	JoystickUpdate(&hJoyLKTECHTesting);
+  
+  if (ifButtonPressed(&hButtonMotorEnable))
+  {
+  }
+  if (ifButtonPressed(&hButtonMotorDisable))
+  {
+  }
+  if (ifButtonPressed(&hButtonVelocityControl))
+  {
+  }
+  if (ifButtonPressed(&hButtonPositionControl))
+  {
+  }
+  if (ifButtonPressed(&hButtonCurrentControl))
+  {
+  }
+  if (ifButtonPressed(&hButtonMotorZeroing))
+  {
+  }
+  
+  if (ifButtonPressed(&hButtonGoBack))
+    UI_Page_Change_To(&UIPage_Home1);
+}
+
+void UI_Page_LinKongKeJiTesting_Init(void)
+{
+  hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
+  hButtonMotorEnable = Button_Create(5, 80, 100, 40, "Enable", LCD_WHITE, LCD_RED);
+	hButtonMotorDisable = Button_Create(5, 160, 100, 150, "Disable", LCD_YELLOW, LCD_RED);
+	hButtonVelocityControl = Button_Create(120, 50, 180, 40, "Vel Control", LCD_GREEN, LCD_RED);
+	hButtonPositionControl = Button_Create(120, 100, 180, 40, "Pos Control", LCD_GREEN, LCD_RED);
+	hButtonCurrentControl = Button_Create(120, 150, 180, 40, "Cur Control", LCD_GREEN, LCD_RED);
+  hButtonMotorZeroing = Button_Create(330, 50, 140, 40, "Zeroing", LCD_GREEN, LCD_RED);
+	hJoyLKTECHTesting = Joystick_Create(220, 580, 160, LCD_WHITE, LCD_BLACK, 50, 180, &LKTECHTestingPositionControl, &LKTECHBlank, 0.0f, 1.0f, 1.0f, -1.0f);
+  
 	
 	LCD_SetLayer(1);
   LCD_SetColor(LCD_BLACK);
