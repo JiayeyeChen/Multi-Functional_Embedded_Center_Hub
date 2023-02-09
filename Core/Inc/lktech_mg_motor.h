@@ -41,6 +41,7 @@ enum LKTECH_MG_CAN_BUS_TASK
   LETECH_MG_CAN_BUS_TASK_SET_ACCELERATION_TO_RAM,
   LETECH_MG_CAN_BUS_TASK_ZEROING_BY_CURRENT_POSITION,
   LETECH_MG_CAN_BUS_TASK_READ_ANGLE_SINGLE_TURN,
+  LETECH_MG_CAN_BUS_TASK_READ_ANGLE_MULTI_TURN,
   LETECH_MG_CAN_BUS_TASK_READ_CONDITION1_AND_ERROR,
   LETECH_MG_CAN_BUS_TASK_READ_CONDITION2,
   LETECH_MG_CAN_BUS_TASK_READ_CONDITION3,
@@ -48,7 +49,13 @@ enum LKTECH_MG_CAN_BUS_TASK
   LETECH_MG_CAN_BUS_TASK_DISABLE,
   LETECH_MG_CAN_BUS_TASK_ENABLE,
   LETECH_MG_CAN_BUS_TASK_CURRENT_CONTROL,
-  LETECH_MG_CAN_BUS_TASK_SPEED_CONTROL
+  LETECH_MG_CAN_BUS_TASK_SPEED_CONTROL,
+  LETECH_MG_CAN_BUS_TASK_POSITION_CONTROL_1_MULTI_TURN,
+  LETECH_MG_CAN_BUS_TASK_POSITION_CONTROL_2_MULTI_TURN,
+  LETECH_MG_CAN_BUS_TASK_POSITION_CONTROL_3_SINGLE_TURN,
+  LETECH_MG_CAN_BUS_TASK_POSITION_CONTROL_4_SINGLE_TURN,
+  LETECH_MG_CAN_BUS_TASK_POSITION_CONTROL_5_INCREMENT,
+  LETECH_MG_CAN_BUS_TASK_POSITION_CONTROL_6_INCREMENT
 };
 
 typedef struct
@@ -72,6 +79,8 @@ typedef struct
   union Int32UInt8             accelerationDeg;
   union UInt32UInt8            angleRaw;
   union FloatUInt8             angle;
+  union Int64UInt8             angleMultiTurnRaw;
+  union FloatUInt8             angleMultiTurn;
   union Int16UInt8             currentRaw;
   union FloatUInt8             current;
   union Int16UInt8             speedRawDeg;
@@ -81,6 +90,10 @@ typedef struct
   union FloatUInt8             temperature;
   union FloatUInt8             voltage;
   uint8_t                      errorCode;
+  union FloatUInt8             positionControlSingleTurnSet;
+  union FloatUInt8             positionControlMultiTurnSet;
+  union FloatUInt8             velocityControlSet;
+  union FloatUInt8             currentControlSet;
 }LKTECH_MG_Handle;
 
 void LKTECH_MG_Init(LKTECH_MG_Handle* hmotor, CAN_HandleTypeDef* hcan, uint32_t motor_id);
@@ -94,6 +107,7 @@ void LKTECH_MG_ReadAcceleration(LKTECH_MG_Handle* hmotor);
 void LETECH_MG_SetAccelerationToRAM(LKTECH_MG_Handle* hmotor, int32_t acceleration_deg);
 void LETECH_MG_ZeroingByCurrentPosition(LKTECH_MG_Handle* hmotor);
 void LETECH_MG_ReadAngleSingleTurn(LKTECH_MG_Handle* hmotor);
+void LETECH_MG_ReadAngleMultiTurn(LKTECH_MG_Handle* hmotor);
 void LETECH_MG_ReadCondition1andError(LKTECH_MG_Handle* hmotor);
 void LETECH_MG_ReadCondition2(LKTECH_MG_Handle* hmotor);
 void LETECH_MG_ReadCondition3(LKTECH_MG_Handle* hmotor);
@@ -102,5 +116,9 @@ void LETECH_MG_Disable(LKTECH_MG_Handle* hmotor);
 void LETECH_MG_Enable(LKTECH_MG_Handle* hmotor);
 void LETECH_MG_CurrentControl(LKTECH_MG_Handle* hmotor, float iq);
 void LETECH_MG_SpeedControl(LKTECH_MG_Handle* hmotor, float spd);
-void LETECH_MG_PositionControl(LKTECH_MG_Handle* hmotor, float pos);
+void LETECH_MG_PositionControl1MultiTurn(LKTECH_MG_Handle* hmotor, float pos_multi);
+void LETECH_MG_PositionControl2MultiTurn(LKTECH_MG_Handle* hmotor, float pos_multi, float vel_limit);
+void LETECH_MG_PositionControl5Increment(LKTECH_MG_Handle* hmotor, float pos_incre);
+void LETECH_MG_PositionControl6Increment(LKTECH_MG_Handle* hmotor, float pos_incre, float vel_limit);
+//void LETECH_MG_MultiMotorsCurrentControl();
 #endif

@@ -54,6 +54,19 @@ void LKTECH_MG_GetFeedback(LKTECH_MG_Handle* hmotor, CAN_RxHeaderTypeDef* rxhead
         hmotor->angle.f = ((float)hmotor->angleRaw.b32) * 0.01f;
       }
       break;
+      case LETECH_MG_CAN_BUS_TASK_READ_ANGLE_MULTI_TURN:
+      if (rxbuf[0] == LKTECH_MG_COMMAND_READ_ANGLE_MULTI_TURN)
+      {
+        hmotor->angleMultiTurnRaw.b8[0] = rxbuf[1];
+        hmotor->angleMultiTurnRaw.b8[1] = rxbuf[2];
+        hmotor->angleMultiTurnRaw.b8[2] = rxbuf[3];
+        hmotor->angleMultiTurnRaw.b8[3] = rxbuf[4];
+        hmotor->angleMultiTurnRaw.b8[4] = rxbuf[5];
+        hmotor->angleMultiTurnRaw.b8[5] = rxbuf[6];
+        hmotor->angleMultiTurnRaw.b8[6] = rxbuf[7];
+        hmotor->angleMultiTurn.f = ((float)hmotor->angleMultiTurnRaw.b64) * 0.01f;
+      }
+      break;
       case LETECH_MG_CAN_BUS_TASK_READ_CONDITION1_AND_ERROR:
       if (rxbuf[0] == LKTECH_MG_COMMAND_READ_CONDITION1_N_ERROR)
       {
@@ -63,6 +76,12 @@ void LKTECH_MG_GetFeedback(LKTECH_MG_Handle* hmotor, CAN_RxHeaderTypeDef* rxhead
       }
       break;
       case LETECH_MG_CAN_BUS_TASK_READ_CONDITION2:
+      case LETECH_MG_CAN_BUS_TASK_CURRENT_CONTROL:
+      case LETECH_MG_CAN_BUS_TASK_SPEED_CONTROL:
+      case LETECH_MG_CAN_BUS_TASK_POSITION_CONTROL_1_MULTI_TURN:
+      case LETECH_MG_CAN_BUS_TASK_POSITION_CONTROL_2_MULTI_TURN:
+      case LETECH_MG_CAN_BUS_TASK_POSITION_CONTROL_5_INCREMENT:
+      case LETECH_MG_CAN_BUS_TASK_POSITION_CONTROL_6_INCREMENT:
       if (rxbuf[0] == LKTECH_MG_COMMAND_READ_CONDITION2)
       {
         hmotor->temperature.f = (float)((int8_t)rxbuf[1]);
@@ -80,34 +99,6 @@ void LKTECH_MG_GetFeedback(LKTECH_MG_Handle* hmotor, CAN_RxHeaderTypeDef* rxhead
       if (rxbuf[0] == LKTECH_MG_COMMAND_READ_CONDITION3)
       {
         hmotor->temperature.f = (float)((int8_t)rxbuf[1]);
-      }
-      break;
-      case LETECH_MG_CAN_BUS_TASK_CURRENT_CONTROL:
-      if (rxbuf[0] == LKTECH_MG_COMMAND_CURRENT_CONTROL)
-      {
-        hmotor->temperature.f = (float)((int8_t)rxbuf[1]);
-        hmotor->currentRaw.b8[0] = rxbuf[2];
-        hmotor->currentRaw.b8[1] = rxbuf[3];
-        hmotor->current.f = ((float)hmotor->currentRaw.b16) * 33.0f / 2048.0f;
-        hmotor->speedRawDeg.b8[0] = rxbuf[4];
-        hmotor->speedRawDeg.b8[1] = rxbuf[5];
-        hmotor->speedDeg.f = (float)hmotor->currentRaw.b16;
-        hmotor->encoderRaw.b8[0] = rxbuf[6];
-        hmotor->encoderRaw.b8[1] = rxbuf[7];
-      }
-      break;
-      case LETECH_MG_CAN_BUS_TASK_SPEED_CONTROL:
-      if (rxbuf[0] == LKTECH_MG_COMMAND_VELOCITY_CONTROL)
-      {
-        hmotor->temperature.f = (float)((int8_t)rxbuf[1]);
-        hmotor->currentRaw.b8[0] = rxbuf[2];
-        hmotor->currentRaw.b8[1] = rxbuf[3];
-        hmotor->current.f = ((float)hmotor->currentRaw.b16) * 33.0f / 2048.0f;
-        hmotor->speedRawDeg.b8[0] = rxbuf[4];
-        hmotor->speedRawDeg.b8[1] = rxbuf[5];
-        hmotor->speedDeg.f = (float)hmotor->currentRaw.b16;
-        hmotor->encoderRaw.b8[0] = rxbuf[6];
-        hmotor->encoderRaw.b8[1] = rxbuf[7];
       }
       break;
   	default:
@@ -163,6 +154,11 @@ void LETECH_MG_ReadAngleSingleTurn(LKTECH_MG_Handle* hmotor)
   LKTECH_MG_SendSingleCommand(hmotor, LKTECH_MG_COMMAND_READ_ANGLE_SINGLE_TURN, LETECH_MG_CAN_BUS_TASK_READ_ANGLE_SINGLE_TURN);
 }
 
+void LETECH_MG_ReadAngleMultiTurn(LKTECH_MG_Handle* hmotor)
+{
+  LKTECH_MG_SendSingleCommand(hmotor, LKTECH_MG_COMMAND_READ_ANGLE_MULTI_TURN, LETECH_MG_CAN_BUS_TASK_READ_ANGLE_MULTI_TURN);
+}
+
 void LETECH_MG_ReadCondition1andError(LKTECH_MG_Handle* hmotor)
 {
   LKTECH_MG_SendSingleCommand(hmotor, LKTECH_MG_COMMAND_READ_CONDITION1_N_ERROR, LETECH_MG_CAN_BUS_TASK_READ_CONDITION1_AND_ERROR);
@@ -216,6 +212,70 @@ void LETECH_MG_SpeedControl(LKTECH_MG_Handle* hmotor, float spd)
   hmotor->txBuf[7] = vel.b8[3];
   HAL_CAN_AddTxMessage(hmotor->hcan, &(hmotor->txHeader), hmotor->txBuf, hmotor->pTxMailbox);
 }
-void LETECH_MG_PositionControl(LKTECH_MG_Handle* hmotor, float pos)
+
+void LETECH_MG_PositionControl1MultiTurn(LKTECH_MG_Handle* hmotor, float pos_multi)
 {
+  hmotor->positionControlMultiTurnSet.f = pos_multi;
+  union Int32UInt8 pos;
+  pos.b32 = (int32_t)(pos_multi * 100.0f);
+  hmotor->task = LETECH_MG_CAN_BUS_TASK_POSITION_CONTROL_1_MULTI_TURN;
+  memset(hmotor->txBuf, 0, 8);
+  hmotor->txBuf[0] = LKTECH_MG_COMMAND_POSITION_CONTROL1;
+  hmotor->txBuf[4] = pos.b8[0];
+  hmotor->txBuf[5] = pos.b8[1];
+  hmotor->txBuf[6] = pos.b8[2];
+  hmotor->txBuf[7] = pos.b8[3];
+  HAL_CAN_AddTxMessage(hmotor->hcan, &(hmotor->txHeader), hmotor->txBuf, hmotor->pTxMailbox);
+}
+
+void LETECH_MG_PositionControl2MultiTurn(LKTECH_MG_Handle* hmotor, float pos_multi, float vel_limit)
+{
+  hmotor->positionControlMultiTurnSet.f = pos_multi;
+  union Int32UInt8 pos;
+  union UInt16UInt8 vel;
+  vel.b16 = (uint16_t)vel_limit;
+  pos.b32 = (int32_t)(pos_multi * 100.0f);
+  hmotor->task = LETECH_MG_CAN_BUS_TASK_POSITION_CONTROL_2_MULTI_TURN;
+  memset(hmotor->txBuf, 0, 8);
+  hmotor->txBuf[0] = LKTECH_MG_COMMAND_POSITION_CONTROL2;
+  hmotor->txBuf[2] = vel.b8[0];
+  hmotor->txBuf[3] = vel.b8[1];
+  hmotor->txBuf[4] = pos.b8[0];
+  hmotor->txBuf[5] = pos.b8[1];
+  hmotor->txBuf[6] = pos.b8[2];
+  hmotor->txBuf[7] = pos.b8[3];
+  HAL_CAN_AddTxMessage(hmotor->hcan, &(hmotor->txHeader), hmotor->txBuf, hmotor->pTxMailbox);
+}
+
+void LETECH_MG_PositionControl5Increment(LKTECH_MG_Handle* hmotor, float pos_incre)
+{
+  hmotor->positionControlMultiTurnSet.f = pos_incre;
+  union Int32UInt8 pos;
+  pos.b32 = (int32_t)(pos_incre * 100.0f);
+  hmotor->task = LETECH_MG_CAN_BUS_TASK_POSITION_CONTROL_5_INCREMENT;
+  memset(hmotor->txBuf, 0, 8);
+  hmotor->txBuf[0] = LKTECH_MG_COMMAND_POSITION_CONTROL5;
+  hmotor->txBuf[4] = pos.b8[0];
+  hmotor->txBuf[5] = pos.b8[1];
+  hmotor->txBuf[6] = pos.b8[2];
+  hmotor->txBuf[7] = pos.b8[3];
+  HAL_CAN_AddTxMessage(hmotor->hcan, &(hmotor->txHeader), hmotor->txBuf, hmotor->pTxMailbox);
+}
+void LETECH_MG_PositionControl6Increment(LKTECH_MG_Handle* hmotor, float pos_incre, float vel_limit)
+{
+  hmotor->positionControlMultiTurnSet.f = pos_incre;
+  union Int32UInt8 pos;
+  union UInt16UInt8 vel;
+  vel.b16 = (uint16_t)vel_limit;
+  pos.b32 = (int32_t)(pos_incre * 100.0f);
+  hmotor->task = LETECH_MG_CAN_BUS_TASK_POSITION_CONTROL_2_MULTI_TURN;
+  memset(hmotor->txBuf, 0, 8);
+  hmotor->txBuf[0] = LKTECH_MG_COMMAND_POSITION_CONTROL2;
+  hmotor->txBuf[2] = vel.b8[0];
+  hmotor->txBuf[3] = vel.b8[1];
+  hmotor->txBuf[4] = pos.b8[0];
+  hmotor->txBuf[5] = pos.b8[1];
+  hmotor->txBuf[6] = pos.b8[2];
+  hmotor->txBuf[7] = pos.b8[3];
+  HAL_CAN_AddTxMessage(hmotor->hcan, &(hmotor->txHeader), hmotor->txBuf, hmotor->pTxMailbox);
 }

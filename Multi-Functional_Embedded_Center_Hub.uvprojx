@@ -16,8 +16,8 @@
         <TargetCommonOption>
           <Device>STM32F429BITx</Device>
           <Vendor>STMicroelectronics</Vendor>
-          <PackID>Keil.STM32F4xx_DFP.2.17.0</PackID>
-          <PackURL>https://www.keil.com/pack/</PackURL>
+          <PackID>Keil.STM32F4xx_DFP.2.14.0</PackID>
+          <PackURL>http://www.keil.com/pack/</PackURL>
           <Cpu>IRAM(0x20000000-0x2002FFFF) IRAM2(0x10000000-0x1000FFFF) IROM(0x8000000-0x81FFFFF)  CLOCK(25000000) FPU2 CPUTYPE("Cortex-M4") TZ</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
           <StartupFile></StartupFile>
@@ -526,6 +526,11 @@
               <FileName>BenMoKeJi_M15.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Core\Src\BenMoKeJi_M15.c</FilePath>
+            </File>
+            <File>
+              <FileName>lktech_mg_motor.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\lktech_mg_motor.c</FilePath>
             </File>
           </Files>
         </Group>
