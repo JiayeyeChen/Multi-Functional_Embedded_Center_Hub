@@ -53,6 +53,19 @@ void ConfigCANFilter_STD_ID_16Bit4IDListMode(CAN_HandleTypeDef* hcan,  uint32_t 
 	HAL_CAN_ConfigFilter(hcan, &filter);
 }
 
+void ConfigCANFilter_STD_ID_32Bit2IDListMode(CAN_HandleTypeDef* hcan,  uint32_t FilterBank, uint32_t FilterFIFOAssignment, uint8_t ID1, uint8_t ID2)
+{
+	CAN_FilterTypeDef filter;
+	filter.FilterMode = CAN_FILTERMODE_IDLIST;;
+	filter.FilterScale = CAN_FILTERSCALE_32BIT;
+	filter.FilterFIFOAssignment = FilterFIFOAssignment;
+	filter.FilterBank = FilterBank;
+	filter.FilterIdHigh = ID1 << 5;
+	filter.FilterIdLow = ID2 << 5;
+	filter.FilterActivation = ENABLE;
+	HAL_CAN_ConfigFilter(hcan, &filter);
+}
+
 void CAN_ConfigureFilters(void)
 {
   CAN_FilterTypeDef tempFilter;
@@ -82,6 +95,13 @@ void CAN_ConfigureFilters(void)
   /***************/
 
   /*Filter bank 3*/
+	tempFilter.FilterMode = CAN_FILTERMODE_IDLIST;;
+	tempFilter.FilterScale = CAN_FILTERSCALE_32BIT;
+	tempFilter.FilterFIFOAssignment = CAN_FILTER_FIFO0;
+	tempFilter.FilterBank = 3;
+	tempFilter.FilterIdHigh = hLKTECH.canID << 5;
+	tempFilter.FilterActivation = ENABLE;
+	HAL_CAN_ConfigFilter(hLKTECH.hcan, &tempFilter);
   /***************/
   
   /*Filter bank 4*/
@@ -161,6 +181,9 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 	
 	if (temRxHeader.StdId == hBENMOKEJI.canIDFeedback)
 		BENMOKEJI_M15_GetFeedback(&hBENMOKEJI, &temRxHeader, temRxData);
+	
+	if (temRxHeader.StdId == hLKTECH.canID)
+		LKTECH_MG_GetFeedback(&hLKTECH, &temRxHeader, temRxData);
   
   //End
   rxfifo0detected++;

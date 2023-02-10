@@ -137,6 +137,10 @@ void 				 UI_Page_BenMoKeJiM15Testing_Init(void);
 void 				 UI_Page_LinKongKeJiTesting(void);
 void 				 UI_Page_LinKongKeJiTesting_Init(void);
 
+/* Lin Kong Ke Ji Testing */
+extern uint8_t ifKeepReadingAngle;
+////////////////////////////
+
 extern UIHandle hUI;
 extern PageHandle UIPage_AK10_9_ManualControlCubeMarsFWServoMode, UIPage_AK10_9_ManualControlCubeMarsFWMITMode;
 #endif

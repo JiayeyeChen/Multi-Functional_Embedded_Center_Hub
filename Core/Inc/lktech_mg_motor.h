@@ -62,8 +62,9 @@ typedef struct
 {
   CAN_HandleTypeDef*           hcan;
   uint8_t                      motorID;
-  uint16_t                     canID;
+  uint32_t                     canID;
   enum LKTECH_MG_CAN_BUS_TASK  task;
+	float												 gearRatio;
   //CAN BUS transmit
   uint8_t                      txBuf[8];
   uint32_t*                    pTxMailbox;
@@ -92,11 +93,12 @@ typedef struct
   uint8_t                      errorCode;
   union FloatUInt8             positionControlSingleTurnSet;
   union FloatUInt8             positionControlMultiTurnSet;
+	union FloatUInt8             positionControlIncrementSet;
   union FloatUInt8             velocityControlSet;
   union FloatUInt8             currentControlSet;
 }LKTECH_MG_Handle;
 
-void LKTECH_MG_Init(LKTECH_MG_Handle* hmotor, CAN_HandleTypeDef* hcan, uint32_t motor_id);
+void LKTECH_MG_Init(LKTECH_MG_Handle* hmotor, CAN_HandleTypeDef* hcan, uint32_t motor_id, float gear_ratio);
 void LKTECH_MG_SendSingleCommand(LKTECH_MG_Handle* hmotor, uint8_t command, uint8_t task_name);
 void LKTECH_MG_ReadPID(LKTECH_MG_Handle* hmotor);
 void LKTECH_MG_GetFeedback(LKTECH_MG_Handle* hmotor, CAN_RxHeaderTypeDef* rxheader, uint8_t rxbuf[]);

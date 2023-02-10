@@ -42,6 +42,8 @@ int main(void)
   AD7606_Init(AD7606_RANG_10V, AD7606_OS_RATIO_4);
 	
 	BENMOKEJI_M15_Init(&hBENMOKEJI, &hcan2, 1);
+	LKTECH_MG_Init(&hLKTECH, &hcan2, 1, 36.0f);
+	
   EXOSKELETON_Init();
   CAN_ConfigureFilters();
   
@@ -201,9 +203,15 @@ void MotorTesting_Task(void *argument)
 		else if (hBENMOKEJI.mode == BENMOKEJI_MODE_CURRENT)
 			BENMODEJI_M15_CurrentControl(&hBENMOKEJI, hBENMOKEJI.currentSet.f);
     //////////////////////
+		/* Lin Kong Ke Ji MG */
+		if (hLKTECH.task == LETECH_MG_CAN_BUS_TASK_SPEED_CONTROL)
+			LETECH_MG_SpeedControl(&hLKTECH, hLKTECH.velocityControlSet.f);
+		else if (hLKTECH.task == LETECH_MG_CAN_BUS_TASK_CURRENT_CONTROL)
+			LETECH_MG_CurrentControl(&hLKTECH, hLKTECH.currentControlSet.f);
+		else if (hLKTECH.task == LETECH_MG_CAN_BUS_TASK_POSITION_CONTROL_6_INCREMENT)
+			LETECH_MG_PositionControl6Increment(&hLKTECH, hLKTECH.positionControlIncrementSet.f, 600.0f);
     
-    
-    osDelay(2);
+    osDelay(10);
   }
 }
 

@@ -70,9 +70,10 @@ float													controlValue1Velocity, controlValueCurrent;
 
 /* Lin Kong Ke Ji Testing */
 PageHandle                    UIPage_LinKongKeJi_Testing;
-ButtonHandle                  hButtonPageLinKongKeJiTesting;
+ButtonHandle                  hButtonPageLinKongKeJiTesting, hButtonReadAngle;
 JoystickHandle 								hJoyLKTECHTesting;
-float                         LKTECHTestingPositionControl, LKTECHTestingVelocityControl, LKTECHTestingCurrentControl, LKTECHBlank;
+float                         LKTECHJoyStickValue, LKTECHBlank;
+uint8_t												ifKeepReadingAngle = 0;
 ////////////////////////////
 
 
@@ -1524,34 +1525,71 @@ void UI_Page_LinKongKeJiTesting(void)
   ButtonRefresh(&hButtonGoBack);
   ButtonScan(&hButtonMotorEnable);
   ButtonRefresh(&hButtonMotorEnable);
-	ButtonScan(&hButtonMotorDisable);
-  ButtonRefresh(&hButtonMotorDisable);
+	ButtonScan(&hButtonStop);
+  ButtonRefresh(&hButtonStop);
 	ButtonScan(&hButtonVelocityControl);
   ButtonRefresh(&hButtonVelocityControl);
 	ButtonScan(&hButtonPositionControl);
   ButtonRefresh(&hButtonPositionControl);
 	ButtonScan(&hButtonCurrentControl);
   ButtonRefresh(&hButtonCurrentControl);
+	ButtonScan(&hButtonMotorZeroing);
+  ButtonRefresh(&hButtonMotorZeroing);
+	ButtonScan(&hButtonReadAngle);
+  ButtonRefresh(&hButtonReadAngle);
 	JoystickUpdate(&hJoyLKTECHTesting);
   
   if (ifButtonPressed(&hButtonMotorEnable))
-  {
-  }
-  if (ifButtonPressed(&hButtonMotorDisable))
-  {
-  }
+	{
+		LETECH_MG_Enable(&hLKTECH);
+		hLKTECH.task = LETECH_MG_CAN_BUS_TASK_ENABLE;
+	}
+  if (ifButtonPressed(&hButtonStop))
+	{
+		LETECH_MG_Shutdown(&hLKTECH);
+		hLKTECH.task = LKTECH_MG_CAN_BUS_TASK_NONE;
+	}
   if (ifButtonPressed(&hButtonVelocityControl))
   {
+		hLKTECH.task = LETECH_MG_CAN_BUS_TASK_SPEED_CONTROL;
+		hLKTECH.velocityControlSet.f = 0.0f;
   }
   if (ifButtonPressed(&hButtonPositionControl))
   {
+		hLKTECH.task = LETECH_MG_CAN_BUS_TASK_POSITION_CONTROL_6_INCREMENT;
+		hLKTECH.positionControlIncrementSet.f = 0.0f;
   }
   if (ifButtonPressed(&hButtonCurrentControl))
   {
+		hLKTECH.task = LETECH_MG_CAN_BUS_TASK_CURRENT_CONTROL;
+		hLKTECH.currentControlSet.f = 0.0f;
   }
   if (ifButtonPressed(&hButtonMotorZeroing))
   {
+		hLKTECH.task = LKTECH_MG_CAN_BUS_TASK_NONE;
+		LETECH_MG_Shutdown(&hLKTECH);
+		LETECH_MG_ZeroingByCurrentPosition(&hLKTECH);;
   }
+	if (ifButtonPressed(&hButtonReadAngle))
+	{
+		ifKeepReadingAngle = !ifKeepReadingAngle;
+		hLKTECH.task = LETECH_MG_CAN_BUS_TASK_READ_ANGLE_SINGLE_TURN;
+	}
+	
+	if (hLKTECH.task == LETECH_MG_CAN_BUS_TASK_SPEED_CONTROL)
+		hLKTECH.velocityControlSet.f = LKTECHJoyStickValue * 360.0f;
+	else if (hLKTECH.task == LETECH_MG_CAN_BUS_TASK_POSITION_CONTROL_6_INCREMENT)
+		hLKTECH.positionControlIncrementSet.f = LKTECHJoyStickValue * 10.0f;
+	else if (hLKTECH.task == LETECH_MG_CAN_BUS_TASK_CURRENT_CONTROL)
+		hLKTECH.currentControlSet.f = LKTECHJoyStickValue * 1.0f;
+	else if (ifKeepReadingAngle && hLKTECH.task == LETECH_MG_CAN_BUS_TASK_READ_ANGLE_SINGLE_TURN)
+		LETECH_MG_ReadAngleSingleTurn(&hLKTECH);
+	
+	LCD_SetLayer(1);
+  LCD_SetColor(LCD_BLACK);
+	LCD_DisplayDecimals(200, 200, hLKTECH.angle.f, 4, 1);
+	LCD_DisplayDecimals(200, 230, hLKTECH.speedDeg.f, 4, 1);
+	LCD_DisplayDecimals(200, 260, hLKTECH.current.f, 4, 1);
   
   if (ifButtonPressed(&hButtonGoBack))
     UI_Page_Change_To(&UIPage_Home1);
@@ -1561,12 +1599,13 @@ void UI_Page_LinKongKeJiTesting_Init(void)
 {
   hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
   hButtonMotorEnable = Button_Create(5, 80, 100, 40, "Enable", LCD_WHITE, LCD_RED);
-	hButtonMotorDisable = Button_Create(5, 160, 100, 150, "Disable", LCD_YELLOW, LCD_RED);
+	hButtonStop = Button_Create(5, 160, 100, 150, "STOP", LCD_YELLOW, LCD_RED);
 	hButtonVelocityControl = Button_Create(120, 50, 180, 40, "Vel Control", LCD_GREEN, LCD_RED);
 	hButtonPositionControl = Button_Create(120, 100, 180, 40, "Pos Control", LCD_GREEN, LCD_RED);
 	hButtonCurrentControl = Button_Create(120, 150, 180, 40, "Cur Control", LCD_GREEN, LCD_RED);
   hButtonMotorZeroing = Button_Create(330, 50, 140, 40, "Zeroing", LCD_GREEN, LCD_RED);
-	hJoyLKTECHTesting = Joystick_Create(220, 580, 160, LCD_WHITE, LCD_BLACK, 50, 180, &LKTECHTestingPositionControl, &LKTECHBlank, 0.0f, 1.0f, 1.0f, -1.0f);
+	hButtonReadAngle = Button_Create(330, 100, 140, 70, "Read Angle", LCD_GREEN, LCD_RED);
+	hJoyLKTECHTesting = Joystick_Create(220, 580, 160, LCD_WHITE, LCD_BLACK, 50, 180, &LKTECHJoyStickValue, &LKTECHBlank, 0.0f, 1.0f, 1.0f, -1.0f);
   
 	
 	LCD_SetLayer(1);

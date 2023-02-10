@@ -1,10 +1,11 @@
 #include "lktech_mg_motor.h"
 
-void LKTECH_MG_Init(LKTECH_MG_Handle* hmotor, CAN_HandleTypeDef* hcan, uint32_t motor_id)
+void LKTECH_MG_Init(LKTECH_MG_Handle* hmotor, CAN_HandleTypeDef* hcan, uint32_t motor_id, float gear_ratio)
 {
   hmotor->motorID = motor_id;
   hmotor->hcan = hcan;
   hmotor->canID = 0x140 + hmotor->motorID;
+	hmotor->gearRatio = gear_ratio;
   
   hmotor->txHeader.DLC = 8;
   hmotor->txHeader.IDE = 0;
@@ -51,7 +52,7 @@ void LKTECH_MG_GetFeedback(LKTECH_MG_Handle* hmotor, CAN_RxHeaderTypeDef* rxhead
         hmotor->angleRaw.b8[1] = rxbuf[5];
         hmotor->angleRaw.b8[2] = rxbuf[6];
         hmotor->angleRaw.b8[3] = rxbuf[7];
-        hmotor->angle.f = ((float)hmotor->angleRaw.b32) * 0.01f;
+        hmotor->angle.f = (((float)hmotor->angleRaw.b32) * 0.01f) / hmotor->gearRatio;
       }
       break;
       case LETECH_MG_CAN_BUS_TASK_READ_ANGLE_MULTI_TURN:
@@ -82,7 +83,10 @@ void LKTECH_MG_GetFeedback(LKTECH_MG_Handle* hmotor, CAN_RxHeaderTypeDef* rxhead
       case LETECH_MG_CAN_BUS_TASK_POSITION_CONTROL_2_MULTI_TURN:
       case LETECH_MG_CAN_BUS_TASK_POSITION_CONTROL_5_INCREMENT:
       case LETECH_MG_CAN_BUS_TASK_POSITION_CONTROL_6_INCREMENT:
-      if (rxbuf[0] == LKTECH_MG_COMMAND_READ_CONDITION2)
+      if (rxbuf[0] == LKTECH_MG_COMMAND_READ_CONDITION2   | rxbuf[0] == LKTECH_MG_COMMAND_CURRENT_CONTROL   | \
+					rxbuf[0] == LKTECH_MG_COMMAND_VELOCITY_CONTROL  | rxbuf[0] == LKTECH_MG_COMMAND_POSITION_CONTROL1 | \
+					rxbuf[0] == LKTECH_MG_COMMAND_POSITION_CONTROL2 | rxbuf[0] == LKTECH_MG_COMMAND_POSITION_CONTROL5 | \
+					rxbuf[0] == LKTECH_MG_COMMAND_POSITION_CONTROL6 )
       {
         hmotor->temperature.f = (float)((int8_t)rxbuf[1]);
         hmotor->currentRaw.b8[0] = rxbuf[2];
@@ -90,9 +94,10 @@ void LKTECH_MG_GetFeedback(LKTECH_MG_Handle* hmotor, CAN_RxHeaderTypeDef* rxhead
         hmotor->current.f = ((float)hmotor->currentRaw.b16) *33.0f / 2048.0f;
         hmotor->speedRawDeg.b8[0] = rxbuf[4];
         hmotor->speedRawDeg.b8[1] = rxbuf[5];
-        hmotor->current.f = (float)hmotor->currentRaw.b16;
+        hmotor->speedDeg.f = ((float)hmotor->speedRawDeg.b16) / hmotor->gearRatio;
         hmotor->encoderRaw.b8[0] = rxbuf[6];
         hmotor->encoderRaw.b8[1] = rxbuf[7];
+				hmotor->angle.f = ((float)hmotor->encoderRaw.b16) * 360.0f / 16383.0f / hmotor->gearRatio;
       }
       break;
       case LETECH_MG_CAN_BUS_TASK_READ_CONDITION3:
@@ -205,7 +210,7 @@ void LETECH_MG_SpeedControl(LKTECH_MG_Handle* hmotor, float spd)
   memset(hmotor->txBuf, 0, 8);
   hmotor->txBuf[0] = LKTECH_MG_COMMAND_VELOCITY_CONTROL;
   union Int32UInt8 vel;
-  vel.b32 = (int32_t)(spd * 100.0f);
+  vel.b32 = (int32_t)(spd * 100.0f * hmotor->gearRatio);
   hmotor->txBuf[4] = vel.b8[0];
   hmotor->txBuf[5] = vel.b8[1];
   hmotor->txBuf[6] = vel.b8[2];
@@ -268,9 +273,9 @@ void LETECH_MG_PositionControl6Increment(LKTECH_MG_Handle* hmotor, float pos_inc
   union UInt16UInt8 vel;
   vel.b16 = (uint16_t)vel_limit;
   pos.b32 = (int32_t)(pos_incre * 100.0f);
-  hmotor->task = LETECH_MG_CAN_BUS_TASK_POSITION_CONTROL_2_MULTI_TURN;
+  hmotor->task = LETECH_MG_CAN_BUS_TASK_POSITION_CONTROL_6_INCREMENT;
   memset(hmotor->txBuf, 0, 8);
-  hmotor->txBuf[0] = LKTECH_MG_COMMAND_POSITION_CONTROL2;
+  hmotor->txBuf[0] = LKTECH_MG_COMMAND_POSITION_CONTROL6;
   hmotor->txBuf[2] = vel.b8[0];
   hmotor->txBuf[3] = vel.b8[1];
   hmotor->txBuf[4] = pos.b8[0];
