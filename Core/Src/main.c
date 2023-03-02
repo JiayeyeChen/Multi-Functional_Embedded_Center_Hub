@@ -38,7 +38,7 @@ int main(void)
   UI_Init();
   
   EXOSKELETON_MotorInit();
-//  MotorInit_CubeMarsFW();
+
   AD7606_Init(AD7606_RANG_10V, AD7606_OS_RATIO_4);
 	
 	BENMOKEJI_M15_Init(&hBENMOKEJI, &hcan2, 1);
@@ -158,7 +158,7 @@ void AK10Calibration_Task(void *argument)
       EXOSKELETON_CommonDatalogManager();
 
     if (ifMotorProfilingStarted)
-      AK10_9_MotorProfiling_Function1_Half_Sin(&hAKMotorRightHip_old, tmotorProfilingSinWaveFrequency);
+      AK10_9_MotorProfiling_Function1_Half_Sin(&hAKMotorRightHip, tmotorProfilingSinWaveFrequency);
     
     if (ifManualControlStarted)
     {
@@ -185,7 +185,7 @@ void AK10Calibration_Task(void *argument)
       EXOSKELETON_SetBNO055Mode_ACC_Only(&hIMUTorso);
     
     AK10_9_CubeMarsFW_MotorStatusMonitor(&hAKMotorRightKnee, 100);
-    AK10_9_DMFW_MotorStatusMonitor(&hAKMotorRightHip, 100);
+    AK10_9_CubeMarsFW_MotorStatusMonitor(&hAKMotorRightHip, 100);
     
     osDelay(1);
   }
