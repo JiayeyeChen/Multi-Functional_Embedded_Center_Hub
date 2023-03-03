@@ -72,24 +72,13 @@ void CAN_ConfigureFilters(void)
 
   /*Filter bank 0 & 1*/
   /*******************/
-  /*Servo mode*/
-//  hAKMotorRightKnee.rxFilter = ConfigCANFilter_EXT_ID_32BitIDListMode(&hcan2, 0, CAN_FILTER_FIFO1, CAN_ID_EXT, CAN_ID_TMOTOR_EXOSKELETON_RIGHT_KNEE_TX_SERVO_MODE, 0);
-//  hAKMotorRightHip_old.rxFilter = ConfigCANFilter_EXT_ID_32BitIDListMode(&hcan2, 1, CAN_FILTER_FIFO1, CAN_ID_EXT, CAN_ID_TMOTOR_EXOSKELETON_RIGHT_HIP_SERVO_MODE, 0);
-  /*MIT mode*/
-  hAKMotorRightHip.rxFilter.FilterMode = CAN_FILTERMODE_IDLIST;
-	hAKMotorRightHip.rxFilter.FilterScale = CAN_FILTERSCALE_16BIT;
-	hAKMotorRightHip.rxFilter.FilterFIFOAssignment = CAN_FILTER_FIFO1;
-	hAKMotorRightHip.rxFilter.FilterBank = 0;
-	hAKMotorRightHip.rxFilter.FilterIdHigh = CAN_ID_TMOTOR_EXOSKELETON_RIGHT_HIP_RX << 5;
-	hAKMotorRightHip.rxFilter.FilterActivation = ENABLE;
-	HAL_CAN_ConfigFilter(hAKMotorRightHip.hcan, &hAKMotorRightHip.rxFilter);
-  hAKMotorRightKnee.rxFilter.FilterMode = CAN_FILTERMODE_IDLIST;
-	hAKMotorRightKnee.rxFilter.FilterScale = CAN_FILTERSCALE_16BIT;
-	hAKMotorRightKnee.rxFilter.FilterFIFOAssignment = CAN_FILTER_FIFO1;
-	hAKMotorRightKnee.rxFilter.FilterBank = 1;
-	hAKMotorRightKnee.rxFilter.FilterIdHigh = hAKMotorRightKnee.canID << 5;
-	hAKMotorRightKnee.rxFilter.FilterActivation = ENABLE;
-	HAL_CAN_ConfigFilter(hAKMotorRightKnee.hcan, &hAKMotorRightKnee.rxFilter);
+	tempFilter.FilterMode = CAN_FILTERMODE_IDLIST;;
+	tempFilter.FilterScale = CAN_FILTERSCALE_16BIT;
+	tempFilter.FilterFIFOAssignment = CAN_FILTER_FIFO0;
+	tempFilter.FilterBank = 0;
+	tempFilter.FilterIdHigh = CAN_ID_TMOTOR_RX << 5;
+	tempFilter.FilterActivation = ENABLE;
+	HAL_CAN_ConfigFilter(&hcan2, &tempFilter);
   /*Filter bank 2*/
 	ConfigCANFilter_STD_ID_16Bit4IDListMode(hBENMOKEJI.hcan, 2, CAN_FILTER_FIFO0, hBENMOKEJI.canIDFeedback, 0x00, 0x00, 0x00);
   /***************/
@@ -184,6 +173,14 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 	
 	if (temRxHeader.StdId == hLKTECH.canID)
 		LKTECH_MG_GetFeedback(&hLKTECH, &temRxHeader, temRxData);
+	
+	if (temRxHeader.StdId == CAN_ID_TMOTOR_RX)
+	{
+		if (temRxData[0] == CAN_ID_TMOTOR_EXOSKELETON_RIGHT_HIP_TX)
+			AK10_9_MITMode_GetFeedbackMsg(&temRxHeader, &hAKMotorRightHip, temRxData);
+		else if (temRxData[0] == CAN_ID_TMOTOR_EXOSKELETON_RIGHT_KNEE_TX)
+			AK10_9_MITMode_GetFeedbackMsg(&temRxHeader, &hAKMotorRightKnee, temRxData);
+	}
   
   //End
   rxfifo0detected++;
@@ -197,10 +194,7 @@ void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
   HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO1, &temRxHeader, temRxData);
   
   //Application specific codes
-  if (temRxHeader.StdId == CAN_ID_TMOTOR_EXOSKELETON_RIGHT_HIP_RX)
-    AK10_9_MITMode_GetFeedbackMsg(&temRxHeader, &hAKMotorRightHip, temRxData);
-  else if (temRxHeader.StdId == CAN_ID_TMOTOR_EXOSKELETON_RIGHT_KNEE_RX)
-    AK10_9_MITMode_GetFeedbackMsg(&temRxHeader, &hAKMotorRightKnee, temRxData);
+  
   
   rxfifo1detected++;
 }
