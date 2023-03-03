@@ -44,11 +44,8 @@ void EXOSKELETON_Init(void)
 
 void EXOSKELETON_Set_Common_Datalog_Label(void)
 {
-  USB_SendDataSlotLabel("29", "theta0", "theta1", "theta1 vel", \
-                        "theta1 acc", "theta2", "theta2 vel", "theta2 acc", "torque1", "torque2", "HipMTq", "KneeMTq", \
-                        "HipIMU xAcc", "HipIMU yAcc", "HipIMU zAcc", "HipIMU xGrv", "HipIMU yGrv", "HipIMU zGrv", \
-                        "KneeIMU xAcc", "KneeIMU yAcc", "KneeIMU zAcc", "KneeIMU xGrv", "KneeIMU yGrv", "KneeIMU zGrv", \
-                        "Hip LiAccX", "Hip LiAccY", "Hip LiAccZ", "Knee LiAccX", "Knee LiAccY", "Knee LiAccZ");
+  USB_SendDataSlotLabel("11", "theta0", "theta1", "theta1 vel", \
+                        "theta1 acc", "theta2", "theta2 vel", "theta2 acc", "HipTq", "KneeTq", "HipMuscleTq", "KneeMuscleTq");
 }
 
 void EXOSKELETON_CommonDatalogManager(void)
@@ -71,24 +68,6 @@ void EXOSKELETON_UpdateCommonDataSlot(void)
   dataSlots_Exoskeleton_Common[ptr++].f = hAKMotorRightKnee.realTorque.f;
   dataSlots_Exoskeleton_Common[ptr++].f = hExoskeleton.hmusculartorque->muscularTorqueHip.f;
   dataSlots_Exoskeleton_Common[ptr++].f = hExoskeleton.hmusculartorque->muscularTorqueKnee.f;
-  dataSlots_Exoskeleton_Common[ptr++].f = hIMUHip.xAcc.f;
-  dataSlots_Exoskeleton_Common[ptr++].f = hIMUHip.yAcc.f;
-  dataSlots_Exoskeleton_Common[ptr++].f = hIMUHip.zAcc.f;
-  dataSlots_Exoskeleton_Common[ptr++].f = hIMUHip.xGrv.f;
-  dataSlots_Exoskeleton_Common[ptr++].f = hIMUHip.yGrv.f;
-  dataSlots_Exoskeleton_Common[ptr++].f = hIMUHip.zGrv.f;
-  dataSlots_Exoskeleton_Common[ptr++].f = hIMUKnee.xAcc.f;
-  dataSlots_Exoskeleton_Common[ptr++].f = hIMUKnee.yAcc.f;
-  dataSlots_Exoskeleton_Common[ptr++].f = hIMUKnee.zAcc.f;
-  dataSlots_Exoskeleton_Common[ptr++].f = hIMUKnee.xGrv.f;
-  dataSlots_Exoskeleton_Common[ptr++].f = hIMUKnee.yGrv.f;
-  dataSlots_Exoskeleton_Common[ptr++].f = hIMUKnee.zGrv.f;
-  dataSlots_Exoskeleton_Common[ptr++].f = hIMUHip.xLiAcc.f;
-  dataSlots_Exoskeleton_Common[ptr++].f = hIMUHip.yLiAcc.f;
-  dataSlots_Exoskeleton_Common[ptr++].f = hIMUHip.zLiAcc.f;
-  dataSlots_Exoskeleton_Common[ptr++].f = hIMUKnee.xLiAcc.f;
-  dataSlots_Exoskeleton_Common[ptr++].f = hIMUKnee.yLiAcc.f;
-  dataSlots_Exoskeleton_Common[ptr++].f = hIMUKnee.zLiAcc.f;
   hUSB.ifNewDataLogPiece2Send = 1;
 }
 
@@ -567,7 +546,7 @@ void EXOSKELETON_CentreControl(void)
       break;
   }
   
-//  EXOSKELETON_SystemIDManager();
+  EXOSKELETON_SystemIDManager();
   EXOSKELETON_GravityCompemsationManager();
   EXOSKELETON_MuscularTorqueCalculation(&hExoskeleton);
   EXOSKELETON_AugmentedControlManager();
