@@ -3,6 +3,7 @@
 #include "usb.h"
 #include "exoskeleton.h"
 #include "bldc_actuators_testing.h"
+#include "mrdoor.h"
 
 //for testing//
 uint32_t rxfifo0detected = 0;
@@ -180,6 +181,10 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 			AK10_9_MITMode_GetFeedbackMsg(&temRxHeader, &hAKMotorRightHip, temRxData);
 		else if (temRxData[0] == CAN_ID_TMOTOR_EXOSKELETON_RIGHT_KNEE_TX)
 			AK10_9_MITMode_GetFeedbackMsg(&temRxHeader, &hAKMotorRightKnee, temRxData);
+		else if (temRxData[0] == CAN_ID_TMOTOR_MRDOOR_LEFT_TX)
+			AK10_9_MITMode_GetFeedbackMsg(&temRxHeader, &hAKMotorMrDoorLeft, temRxData);
+		else if (temRxData[0] == CAN_ID_TMOTOR_MRDOOR_RIGHT_TX)
+			AK10_9_MITMode_GetFeedbackMsg(&temRxHeader, &hAKMotorMrDoorRight, temRxData);
 	}
   
   //End

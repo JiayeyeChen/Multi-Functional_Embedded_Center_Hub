@@ -20,6 +20,7 @@
 #include "BenMoKeJi_M15.h"
 #include "lktech_mg_motor.h"
 #include "bldc_actuators_testing.h"
+#include "mrdoor.h"
 
 void SystemClock_Config(void);
 
@@ -38,6 +39,7 @@ int main(void)
   UI_Init();
   
   EXOSKELETON_MotorInit();
+	MRDOOR_MotorInit();
 
   AD7606_Init(AD7606_RANG_10V, AD7606_OS_RATIO_4);
 	

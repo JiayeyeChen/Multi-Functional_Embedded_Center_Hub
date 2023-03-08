@@ -11,6 +11,7 @@
 #include "exoskeleton.h"
 #include "adc.h"
 #include "bldc_actuators_testing.h"
+#include "mrdoor.h"
 
 typedef struct
 {
@@ -136,6 +137,8 @@ void 				 UI_Page_BenMoKeJiM15Testing(void);
 void 				 UI_Page_BenMoKeJiM15Testing_Init(void);
 void 				 UI_Page_LinKongKeJiTesting(void);
 void 				 UI_Page_LinKongKeJiTesting_Init(void);
+void			   UI_Page_MrDoorTesting(void);
+void			   UI_Page_MrDoorTesting_Init(void);
 
 /* Lin Kong Ke Ji Testing */
 extern uint8_t ifKeepReadingAngle;

@@ -76,6 +76,20 @@ float                         LKTECHJoyStickValue, LKTECHBlank;
 uint8_t												ifKeepReadingAngle = 0;
 ////////////////////////////
 
+/* MrDoor Testing */
+PageHandle                    UIPage_MrDoorTesting;
+ButtonHandle                  hButtonPageMrDoorTesting, hButtonWeightControl;
+JoystickHandle 								hJoyMrDoorMotorLeft, hJoyMrDoorMotorRight;
+uint8_t                       MrDoorControlMode;
+uint8_t                       ifMrDoorStarted;
+LinearPotentialmeterHandle    hTMotorManualControlPot_kd, hMrDoorCurrentControlMax;
+float                         MrDoorManualControlLeft, MrDoorManualControlRight, MrDoorKd;
+float                         MrDoorJoyValueLeft, MrDoorJoyValueLeftBlank, MrDoorJoyValueRight, MrDoorJoyValueRightBlank;
+float                         MrDoorCurrentMax;
+float                         MrDoorPositionControlLeft, MrDoorPositionControlRight;
+
+////////////////////
+
 
 ButtonHandle Button_Create(uint16_t x, uint16_t y, uint16_t xLen, uint16_t yLen, char label[],\
                            uint32_t colorUnpressed, uint32_t colorPressed)
@@ -289,6 +303,11 @@ void UI_Init(void)
   UIPage_LinKongKeJi_Testing.ifPageInitialized = 0;
 	UIPage_LinKongKeJi_Testing.Page = UI_Page_LinKongKeJiTesting;
   UIPage_LinKongKeJi_Testing.PageInit = UI_Page_LinKongKeJiTesting_Init;
+	
+	
+	UIPage_MrDoorTesting.ifPageInitialized = 0;
+	UIPage_MrDoorTesting.Page = UI_Page_MrDoorTesting;
+  UIPage_MrDoorTesting.PageInit = UI_Page_MrDoorTesting_Init;
 }
 
 JoystickHandle Joystick_Create(uint16_t x, uint16_t y, uint16_t r, uint32_t background_color, \
@@ -849,6 +868,8 @@ void UI_Page_Home1(void)
   ButtonRefresh(&hButtonPageBenMoKeJiM15Testing);
   ButtonScan(&hButtonPageLinKongKeJiTesting);
   ButtonRefresh(&hButtonPageLinKongKeJiTesting);
+  ButtonScan(&hButtonPageMrDoorTesting);
+  ButtonRefresh(&hButtonPageMrDoorTesting);
   
   
   if (ifButtonPressed(&hButtonPageExoskeletonInterface))
@@ -867,6 +888,8 @@ void UI_Page_Home1(void)
     UI_Page_Change_To(&UIPage_BenMoKeJiM15_Testing);
   if (ifButtonPressed(&hButtonPageLinKongKeJiTesting))
     UI_Page_Change_To(&UIPage_LinKongKeJi_Testing);
+  if (ifButtonPressed(&hButtonPageMrDoorTesting))
+    UI_Page_Change_To(&UIPage_MrDoorTesting);
   
 }
 void UI_Page_Home1_Init(void)
@@ -879,6 +902,7 @@ void UI_Page_Home1_Init(void)
   hButtonPageCustomizedIMUMonitor = Button_Create(80, 200, 360, 40, "Customized IMU Monitor", LIGHT_MAGENTA, LCD_RED);
 	hButtonPageBenMoKeJiM15Testing = Button_Create(150, 400, 200, 40, "BenMoKeJiM15", LIGHT_MAGENTA, LCD_RED);
   hButtonPageLinKongKeJiTesting = Button_Create(100, 450, 300, 40, "LinKongKeJi MG Motor", LIGHT_MAGENTA, LCD_RED);
+  hButtonPageMrDoorTesting = Button_Create(100, 500, 300, 40, "MrDoor", LIGHT_MAGENTA, LCD_RED);
 }
 
 void UI_Page_AK10_9_ManualControlCubeMarsFWServoMode(void)
@@ -1614,3 +1638,158 @@ void UI_Page_LinKongKeJiTesting_Init(void)
 	LCD_DisplayString(120, 230, "Vel:");
 	LCD_DisplayString(120, 260, "Cur:");
 }
+
+void UI_Page_MrDoorTesting(void)
+{
+  ButtonScan(&hButtonGoBack);
+  ButtonRefresh(&hButtonGoBack);
+  ButtonScan(&hButtonMotorZeroing);
+  ButtonRefresh(&hButtonMotorZeroing);
+  ButtonScan(&hButtonMotorStart);
+  ButtonRefresh(&hButtonMotorStart);
+  ButtonScan(&hButtonMotorStop);
+  ButtonRefresh(&hButtonMotorStop);
+  ButtonScan(&hButtonVelocityControl);
+  ButtonRefresh(&hButtonVelocityControl);
+  ButtonScan(&hButtonCurrentControl);
+  ButtonRefresh(&hButtonCurrentControl);
+  ButtonScan(&hButtonPositionControl);
+  ButtonRefresh(&hButtonPositionControl);
+  ButtonScan(&hButtonWeightControl);
+  ButtonRefresh(&hButtonWeightControl);
+  PotentialmeterUpdate(&hTMotorManualControlPot_kd);
+  PotentialmeterUpdate(&hMrDoorCurrentControlMax);
+  JoystickUpdate(&hJoyMrDoorMotorLeft);
+  JoystickUpdate(&hJoyMrDoorMotorRight);
+  
+  MRDOOR_CalculateWeight(&hAKMotorMrDoorLeft, &hAKMotorMrDoorRight, 1.0594f, -6.644f, 1.431f, -10.2397f);
+  
+  if (ifButtonPressed(&hButtonGoBack))
+    UI_Page_Change_To(&UIPage_Home1);
+  if (ifButtonPressed(&hButtonMotorZeroing))
+  {
+    AK10_9_MITMode_Zeroing(&hAKMotorMrDoorLeft);
+    AK10_9_MITMode_Zeroing(&hAKMotorMrDoorRight);
+    PotentialmeterSliderGoTo(&hTMotorManualControlPot_kd, 0.0f);
+    PotentialmeterSliderGoTo(&hMrDoorCurrentControlMax, 0.0f);
+  }
+  if (ifButtonPressed(&hButtonMotorStart))
+  {
+    AK10_9_MITMode_EnableMotor(&hAKMotorMrDoorLeft);
+    AK10_9_MITMode_EnableMotor(&hAKMotorMrDoorRight);
+    ifMrDoorStarted = 1;
+    PotentialmeterSliderGoTo(&hTMotorManualControlPot_kd, 0.0f);
+    PotentialmeterSliderGoTo(&hMrDoorCurrentControlMax, 0.0f);
+  }
+  if (ifButtonPressed(&hButtonMotorStop))
+  {
+    AK10_9_MITMode_DisableMotor(&hAKMotorMrDoorLeft);
+    AK10_9_MITMode_DisableMotor(&hAKMotorMrDoorRight);
+    ifMrDoorStarted = 0;
+    PotentialmeterSliderGoTo(&hTMotorManualControlPot_kd, 0.0f);
+    PotentialmeterSliderGoTo(&hMrDoorCurrentControlMax, 0.0f);
+  }
+  if (ifButtonPressed(&hButtonVelocityControl))
+  {
+    MrDoorControlMode = 1;
+    PotentialmeterSliderGoTo(&hTMotorManualControlPot_kd, 0.0f);
+    PotentialmeterSliderGoTo(&hMrDoorCurrentControlMax, 0.0f);
+  }
+  if (ifButtonPressed(&hButtonCurrentControl))
+  {
+    MrDoorControlMode = 2;
+    PotentialmeterSliderGoTo(&hTMotorManualControlPot_kd, 0.0f);
+    PotentialmeterSliderGoTo(&hMrDoorCurrentControlMax, 0.0f);
+  }
+  if (ifButtonPressed(&hButtonPositionControl))
+  {
+    MrDoorControlMode = 3;
+    MrDoorPositionControlLeft = 0.0f;
+    MrDoorPositionControlRight = 0.0f;
+    AK10_9_MITMode_Zeroing(&hAKMotorMrDoorLeft);
+    AK10_9_MITMode_Zeroing(&hAKMotorMrDoorRight);
+    PotentialmeterSliderGoTo(&hTMotorManualControlPot_kd, 0.0f);
+    PotentialmeterSliderGoTo(&hMrDoorCurrentControlMax, 0.0f);
+  }
+  if (ifButtonPressed(&hButtonWeightControl))
+  {
+    MrDoorControlMode = 4;
+    MrDoorControllingSupportWeight = 0.0f;
+    PotentialmeterSliderGoTo(&hTMotorManualControlPot_kd, 0.0f);
+    PotentialmeterSliderGoTo(&hMrDoorCurrentControlMax, 0.0f);
+  }
+  
+  if (ifMrDoorStarted)
+  {
+    if (MrDoorControlMode == 1)
+    {
+      AK10_9_MITModeControl_Deg(&hAKMotorMrDoorLeft, 0.0f, 360.0f * MrDoorJoyValueLeft, 0.0f, MrDoorKd, 0.0f);
+      AK10_9_MITModeControl_Deg(&hAKMotorMrDoorRight, 0.0f, 360.0f * MrDoorJoyValueRight, 0.0f, MrDoorKd, 0.0f);
+    }
+    else if (MrDoorControlMode == 2)
+    {
+      if (MrDoorJoyValueLeft < 0.0f)
+        MrDoorJoyValueLeft = 0.0f;
+      if (MrDoorJoyValueRight < 0.0f)
+        MrDoorJoyValueRight = 0.0f;
+      AK10_9_MITModeCurrentControl(&hAKMotorMrDoorLeft, MrDoorCurrentMax * MrDoorJoyValueLeft);
+      AK10_9_MITModeCurrentControl(&hAKMotorMrDoorRight, MrDoorCurrentMax * MrDoorJoyValueRight);
+    }
+    else if (MrDoorControlMode == 3)
+    {
+      MrDoorPositionControlLeft += MrDoorJoyValueLeft * 10.0f;
+      MrDoorPositionControlRight += MrDoorJoyValueRight * 10.0f;
+      AK10_9_MITModeControl_Deg(&hAKMotorMrDoorLeft, MrDoorPositionControlLeft, 0.0f, MrDoorCurrentMax, MrDoorKd, 0.0f);
+      AK10_9_MITModeControl_Deg(&hAKMotorMrDoorRight, MrDoorPositionControlRight, 0.0f, MrDoorCurrentMax, MrDoorKd, 0.0f);
+    }
+    else if (MrDoorControlMode == 4)
+    {
+      MrDoorControllingSupportWeight = MrDoorCurrentMax;
+      AK10_9_MITModeCurrentControl(&hAKMotorMrDoorLeft, (MrDoorControllingSupportWeight + 10.2397f * 0.35f) / 1.431f);
+      AK10_9_MITModeCurrentControl(&hAKMotorMrDoorRight, (MrDoorControllingSupportWeight + 6.644f * 0.35f) / 1.0594f);
+    }
+  }
+  
+  LCD_SetLayer(1);
+  LCD_SetColor(LCD_BLACK);
+  LCD_DisplayDecimals(5, 210, MrDoorKd, 3, 2);
+  LCD_DisplayDecimals(400, 470, MrDoorCurrentMax, 4, 1);
+  LCD_DisplayDecimals(230, 225, MrDoorJoyValueRight, 4, 3);
+  LCD_DisplayDecimals(120, 500, MrDoorJoyValueLeft, 4, 3);
+  LCD_SetColor(LCD_RED);
+  LCD_DisplayDecimals(400, 225, hAKMotorMrDoorRight.realPosition.f, 5, 1);
+  LCD_DisplayDecimals(400, 250, hAKMotorMrDoorRight.realCurrent.f, 4, 2);
+  LCD_DisplayDecimals(400, 275, MrDoorRealWeightLeft, 4, 1);
+  LCD_DisplayDecimals(300, 500, hAKMotorMrDoorLeft.realPosition.f, 5, 1);
+  LCD_DisplayDecimals(300, 525, hAKMotorMrDoorLeft.realCurrent.f, 4, 2);
+  LCD_DisplayDecimals(300, 550, MrDoorRealWeightRight, 4, 1);
+}
+
+void UI_Page_MrDoorTesting_Init(void)
+{
+  hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
+  hButtonMotorZeroing = Button_Create(10, 50, 100, 80, "Zeroing", LCD_YELLOW, LCD_RED);
+  hButtonMotorStart = Button_Create(150, 20, 120, 100, "Start", LCD_YELLOW, LCD_RED);
+  hButtonMotorStop = Button_Create(320, 20, 120, 100, "Stop", LCD_YELLOW, LCD_RED);
+  hButtonVelocityControl = Button_Create(10, 150, 70, 60, "V", LCD_YELLOW, LCD_RED);
+  hButtonCurrentControl = Button_Create(100, 150, 70, 60, "I", LCD_YELLOW, LCD_RED);
+  hButtonPositionControl = Button_Create(200, 150, 70, 60, "P", LCD_YELLOW, LCD_RED);
+  hButtonWeightControl = Button_Create(300, 150, 70, 60, "KG", LCD_YELLOW, LCD_RED);
+  MrDoorControlMode = 1;
+  MrDoorManualControlLeft = 0.0f;
+  MrDoorManualControlRight = 0.0f;
+  MrDoorKd = 0.0f;
+  hTMotorManualControlPot_kd = Potentialmeter_Create(30, 240, 30, 200, 60, 70, LCD_MAGENTA, LCD_RED, LIGHT_GREY, 0.0f, 5.0f, 0.0f, &MrDoorKd);
+  MrDoorCurrentMax = 0.0f;
+  hMrDoorCurrentControlMax = Potentialmeter_Create(400, 500, 30, 260, 60, 70, LCD_MAGENTA, LCD_RED, LIGHT_GREY, 0.0f, 30.0f, 0.0f, &MrDoorCurrentMax);
+  
+  MrDoorJoyValueLeft = 0.0f;
+  MrDoorJoyValueRight = 0.0f;
+  hJoyMrDoorMotorRight = Joystick_Create(270, 370, 100, LCD_WHITE, LCD_BLACK, 25, 130, &MrDoorJoyValueRightBlank, &MrDoorJoyValueRight, 0.0f, 1.0f, 1.0f, -1.0f);
+  hJoyMrDoorMotorLeft = Joystick_Create(160, 650, 100, LCD_WHITE, LCD_BLACK, 25, 130, &MrDoorJoyValueLeftBlank, &MrDoorJoyValueLeft, 0.0f, 1.0f, 1.0f, -1.0f);
+  MrDoorPositionControlLeft = 0.0f;
+  MrDoorPositionControlRight = 0.0f;
+  
+  ifMrDoorStarted = 0;
+}
+

@@ -19,6 +19,8 @@
 #define CAN_ID_TMOTOR_RX      											            0x00
 #define CAN_ID_TMOTOR_EXOSKELETON_RIGHT_HIP_TX                  0x07
 #define CAN_ID_TMOTOR_EXOSKELETON_RIGHT_KNEE_TX                 0x09
+#define CAN_ID_TMOTOR_MRDOOR_LEFT_TX														0x01
+#define CAN_ID_TMOTOR_MRDOOR_RIGHT_TX														0x02
 
 CAN_FilterTypeDef ConfigCANFilter_EXT_ID_32BitIDListMode(CAN_HandleTypeDef* hcan, uint32_t FilterBank, uint32_t FilterFIFOAssignment, uint8_t IDE, uint32_t ID1, uint32_t ID2);
 void ConfigCANFilter_STD_ID_16Bit4IDListMode(CAN_HandleTypeDef* hcan,  uint32_t FilterBank, uint32_t FilterFIFOAssignment, uint8_t ID1, uint8_t ID2, uint8_t ID3, uint8_t ID4);
