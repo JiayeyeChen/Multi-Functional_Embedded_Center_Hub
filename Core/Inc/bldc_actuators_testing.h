@@ -7,14 +7,6 @@
 
 
 
-
-
-
-
-
-
-
-extern BENMOKEJI_M15_Handle hBENMOKEJI;
 extern LKTECH_MG_Handle     hLKTECH;
-
+extern BENMOKEJI_M15_Handle hBENMOKEJI;
 #endif

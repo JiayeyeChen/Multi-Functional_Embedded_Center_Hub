@@ -4,7 +4,6 @@ void BENMOKEJI_M15_Init(BENMOKEJI_M15_Handle* hmotor, CAN_HandleTypeDef* hcan, u
 {
 	hmotor->hcan = hcan;
 	hmotor->motorID = motor_id;
-	hmotor->motorID = 1;
 	hmotor->canIDFeedback = 0x96 + hmotor->motorID;
 	hmotor->mode = BENMOKEJI_MODE_DISABLED;
 }
@@ -84,4 +83,15 @@ void BENMODEJI_M15_CurrentControl(BENMOKEJI_M15_Handle* hmotor, float val)
 {
 	int16_t int16val = (int16_t)(val * 32767.0f / 33.0f);
 	BENMOKEJI_M15_SendControlValue(hmotor, int16val);
+}
+
+void BENMOKEJI_M15_SetCANID(BENMOKEJI_M15_Handle* hmotor, uint8_t new_id)
+{
+  hmotor->txHeader.DLC = 8;
+  hmotor->txHeader.IDE = 0;
+  hmotor->txHeader.RTR = 0;
+	hmotor->txHeader.StdId = 0x108;
+	memset(hmotor->txBuf, 0xFF, 8);
+	hmotor->txBuf[0] = new_id;
+	HAL_CAN_AddTxMessage(hmotor->hcan, &(hmotor->txHeader), hmotor->txBuf, hmotor->pTxMailbox);
 }

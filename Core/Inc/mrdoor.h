@@ -5,6 +5,7 @@
 #include "tmotor_ak10-9_v2.h"
 #include "my_math.h"
 #include <math.h>
+#include "BenMoKeJi_M15.h"
 
 void MRDOOR_MotorInit(void);
 void MRDOOR_CalculateWeight(AK10_9HandleCubaMarsFW* hmotor_left, \
@@ -16,6 +17,7 @@ void MRDOOR_CalculateWeight(AK10_9HandleCubaMarsFW* hmotor_left, \
 
 extern float MrDoorControllingSupportWeight;
 extern float MrDoorRealWeightLeft, MrDoorRealWeightRight;
+extern BENMOKEJI_M15_Handle   hBENMOKEJIMrDoorLeft, hBENMOKEJIMrDoorRight;
 extern AK10_9HandleCubaMarsFW hAKMotorMrDoorLeft, hAKMotorMrDoorRight;
 
 #endif

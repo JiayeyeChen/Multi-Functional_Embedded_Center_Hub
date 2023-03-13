@@ -39,11 +39,10 @@ int main(void)
   UI_Init();
   
   EXOSKELETON_MotorInit();
-	MRDOOR_MotorInit();
+//	MRDOOR_MotorInit();
 
   AD7606_Init(AD7606_RANG_10V, AD7606_OS_RATIO_4);
-	
-	BENMOKEJI_M15_Init(&hBENMOKEJI, &hcan2, 1);
+  BENMOKEJI_M15_Init(&hBENMOKEJI, &hcan2, 2);
 	LKTECH_MG_Init(&hLKTECH, &hcan2, 1, 36.0f);
 	
   EXOSKELETON_Init();

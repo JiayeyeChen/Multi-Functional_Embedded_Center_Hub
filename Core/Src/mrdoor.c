@@ -1,6 +1,7 @@
 #include "mrdoor.h"
 
 AK10_9HandleCubaMarsFW hAKMotorMrDoorLeft, hAKMotorMrDoorRight;
+BENMOKEJI_M15_Handle   hBENMOKEJIMrDoorLeft, hBENMOKEJIMrDoorRight;
 float MrDoorRealWeightLeft, MrDoorRealWeightRight;
 float MrDoorControllingSupportWeight;
 
@@ -77,6 +78,9 @@ void MRDOOR_MotorInit(void)
   hAKMotorMrDoorRight.b2Butter = 0.0003103;
   hAKMotorMrDoorRight.b3Butter = 0.0001551;
   hAKMotorMrDoorRight.enablingStatus = AK10_9_MITMODE_DISABLED;
+  
+  BENMOKEJI_M15_Init(&hBENMOKEJIMrDoorLeft, &hcan2, 1);
+  BENMOKEJI_M15_Init(&hBENMOKEJIMrDoorRight, &hcan2, 2);
 }
 
 void MRDOOR_CalculateWeight(AK10_9HandleCubaMarsFW* hmotor_left, \
