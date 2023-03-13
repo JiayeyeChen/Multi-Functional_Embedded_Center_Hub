@@ -8,10 +8,12 @@
 #include "BenMoKeJi_M15.h"
 
 void MRDOOR_MotorInit(void);
-void MRDOOR_CalculateWeight(AK10_9HandleCubaMarsFW* hmotor_left, \
+void MRDOOR_CalculateWeightTMotor(AK10_9HandleCubaMarsFW* hmotor_left, \
                             AK10_9HandleCubaMarsFW* hmotor_right, \
                             float k_left, float k_right, float b_left, float b_right);
-
+void MRDOOR_CalculateWeightBenMoKeJi(BENMOKEJI_M15_Handle* hmotor_left, \
+                                     BENMOKEJI_M15_Handle* hmotor_right, \
+                                     float k_left, float k_right, float b_left, float b_right);
 
 
 

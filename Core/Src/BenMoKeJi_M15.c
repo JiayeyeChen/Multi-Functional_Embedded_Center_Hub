@@ -6,6 +6,7 @@ void BENMOKEJI_M15_Init(BENMOKEJI_M15_Handle* hmotor, CAN_HandleTypeDef* hcan, u
 	hmotor->motorID = motor_id;
 	hmotor->canIDFeedback = 0x96 + hmotor->motorID;
 	hmotor->mode = BENMOKEJI_MODE_DISABLED;
+  hmotor->errorCode = 0xFF;
 }
 
 void BENMOKEJI_M15_GetFeedback(BENMOKEJI_M15_Handle* hmotor, CAN_RxHeaderTypeDef* rxheader, uint8_t rxbuf[])
@@ -16,6 +17,7 @@ void BENMOKEJI_M15_GetFeedback(BENMOKEJI_M15_Handle* hmotor, CAN_RxHeaderTypeDef
 	hmotor->currentRaw.b8[0] = rxbuf[3];
 	hmotor->positionRaw.b8[1] = rxbuf[4];
 	hmotor->positionRaw.b8[0] = rxbuf[5];
+  hmotor->errorCode = rxbuf[6];
 	
 	hmotor->speedRealDeg.f = ((float)hmotor->speedRaw.b16) * 6.0f;
 	hmotor->currentReal.f = ((float)hmotor->currentRaw.b16) * 33.0f / 32767.0f;
@@ -36,7 +38,7 @@ void BENMOKEJI_M15_SetFeedbackMode(BENMOKEJI_M15_Handle* hmotor, uint8_t mode, u
 	HAL_CAN_AddTxMessage(hmotor->hcan, &(hmotor->txHeader), hmotor->txBuf, hmotor->pTxMailbox);
 }
 
-void BENMOKEJI_M15_SendControlValue(BENMOKEJI_M15_Handle* hmotor, int16_t val)
+void BENMOKEJI_M15_SendControlValueSingleMotor(BENMOKEJI_M15_Handle* hmotor, int16_t val)
 {
 	hmotor->txHeader.DLC = 8;
   hmotor->txHeader.IDE = 0;
@@ -69,20 +71,20 @@ void BENMOKEJI_M15_SetMode(BENMOKEJI_M15_Handle* hmotor, uint8_t mode)
 	HAL_CAN_AddTxMessage(hmotor->hcan, &(hmotor->txHeader), hmotor->txBuf, hmotor->pTxMailbox);
 }
 
-void BENMODEJI_M15_PositionControl(BENMOKEJI_M15_Handle* hmotor, float val)
+void BENMODEJI_M15_PositionControlSingleMotor(BENMOKEJI_M15_Handle* hmotor, float val)
 {
 	int16_t int16val = (int16_t)(val * 32767.0f / 360.0f);
-	BENMOKEJI_M15_SendControlValue(hmotor, int16val);
+	BENMOKEJI_M15_SendControlValueSingleMotor(hmotor, int16val);
 }
-void BENMODEJI_M15_VelocityControlDeg(BENMOKEJI_M15_Handle* hmotor, float val)
+void BENMODEJI_M15_VelocityControlDegSingleMotor(BENMOKEJI_M15_Handle* hmotor, float val)
 {
 	int16_t int16val = (int16_t)(val / 6.0f);
-	BENMOKEJI_M15_SendControlValue(hmotor, int16val);
+	BENMOKEJI_M15_SendControlValueSingleMotor(hmotor, int16val);
 }
-void BENMODEJI_M15_CurrentControl(BENMOKEJI_M15_Handle* hmotor, float val)
+void BENMODEJI_M15_CurrentControlSingleMotor(BENMOKEJI_M15_Handle* hmotor, float val)
 {
 	int16_t int16val = (int16_t)(val * 32767.0f / 33.0f);
-	BENMOKEJI_M15_SendControlValue(hmotor, int16val);
+	BENMOKEJI_M15_SendControlValueSingleMotor(hmotor, int16val);
 }
 
 void BENMOKEJI_M15_SetCANID(BENMOKEJI_M15_Handle* hmotor, uint8_t new_id)

@@ -81,7 +81,14 @@ void CAN_ConfigureFilters(void)
 	tempFilter.FilterActivation = ENABLE;
 	HAL_CAN_ConfigFilter(&hcan2, &tempFilter);
   /*Filter bank 2*/
-	ConfigCANFilter_STD_ID_16Bit4IDListMode(hBENMOKEJI.hcan, 2, CAN_FILTER_FIFO0, hBENMOKEJI.canIDFeedback, 0x00, 0x00, 0x00);
+  tempFilter.FilterMode = CAN_FILTERMODE_IDLIST;;
+	tempFilter.FilterScale = CAN_FILTERSCALE_32BIT;
+	tempFilter.FilterFIFOAssignment = CAN_FILTER_FIFO0;
+	tempFilter.FilterBank = 2;
+	tempFilter.FilterIdHigh = hBENMOKEJIMrDoorLeft.canIDFeedback << 5;
+  tempFilter.FilterMaskIdHigh = hBENMOKEJIMrDoorRight.canIDFeedback << 5;
+	tempFilter.FilterActivation = ENABLE;
+	HAL_CAN_ConfigFilter(&hcan2, &tempFilter);
   /***************/
 
   /*Filter bank 3*/
@@ -171,6 +178,10 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 	
 	if (temRxHeader.StdId == hBENMOKEJI.canIDFeedback)
 		BENMOKEJI_M15_GetFeedback(&hBENMOKEJI, &temRxHeader, temRxData);
+  else if (temRxHeader.StdId == hBENMOKEJIMrDoorLeft.canIDFeedback)
+    BENMOKEJI_M15_GetFeedback(&hBENMOKEJIMrDoorLeft, &temRxHeader, temRxData);
+  else if (temRxHeader.StdId == hBENMOKEJIMrDoorRight.canIDFeedback)
+    BENMOKEJI_M15_GetFeedback(&hBENMOKEJIMrDoorRight, &temRxHeader, temRxData);
 	
 	if (temRxHeader.StdId == hLKTECH.canID)
 		LKTECH_MG_GetFeedback(&hLKTECH, &temRxHeader, temRxData);

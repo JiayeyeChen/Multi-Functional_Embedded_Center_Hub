@@ -77,13 +77,13 @@ uint8_t												ifKeepReadingAngle = 0;
 ////////////////////////////
 
 /* MrDoor Testing */
-PageHandle                    UIPage_MrDoorTesting;
-ButtonHandle                  hButtonPageMrDoorTesting, hButtonWeightControl;
+PageHandle                    UIPage_MrDoorTestingTMotor, UIPage_MrDoorTestingBenMoKeJi, UIPage_MrDoorTestingTypeSelection;
+ButtonHandle                  hButtonPageMrDoorTesting, hButtonWeightControl, hButtonTMotorType, hButtonBenMoKeJiType;
 JoystickHandle 								hJoyMrDoorMotorLeft, hJoyMrDoorMotorRight;
 uint8_t                       MrDoorControlMode;
 uint8_t                       ifMrDoorStarted;
-LinearPotentialmeterHandle    hTMotorManualControlPot_kd, hMrDoorCurrentControlMax;
-float                         MrDoorManualControlLeft, MrDoorManualControlRight, MrDoorKd;
+LinearPotentialmeterHandle    hMrDoorTMotorManualControlPot_kd, hMrDoorCurrentControlMax, hMrDoorBenMoKeJiWeightSupportControl;
+float                         MrDoorManualControlLeft, MrDoorManualControlRight, MrDoorKd, MrDoorBenMoKeJiWeightSupport;
 float                         MrDoorJoyValueLeft, MrDoorJoyValueLeftBlank, MrDoorJoyValueRight, MrDoorJoyValueRightBlank;
 float                         MrDoorCurrentMax;
 float                         MrDoorPositionControlLeft, MrDoorPositionControlRight;
@@ -305,9 +305,19 @@ void UI_Init(void)
   UIPage_LinKongKeJi_Testing.PageInit = UI_Page_LinKongKeJiTesting_Init;
 	
 	
-	UIPage_MrDoorTesting.ifPageInitialized = 0;
-	UIPage_MrDoorTesting.Page = UI_Page_MrDoorTesting;
-  UIPage_MrDoorTesting.PageInit = UI_Page_MrDoorTesting_Init;
+	UIPage_MrDoorTestingTMotor.ifPageInitialized = 0;
+	UIPage_MrDoorTestingTMotor.Page = UI_Page_MrDoorTestingTMotor;
+  UIPage_MrDoorTestingTMotor.PageInit = UI_Page_MrDoorTestingTMotor_Init;
+  
+  UIPage_MrDoorTestingTypeSelection.ifPageInitialized = 0;
+	UIPage_MrDoorTestingTypeSelection.Page = UI_Page_MrDoorTestingTypeSelection;
+  UIPage_MrDoorTestingTypeSelection.PageInit = UI_Page_MrDoorTestingTypeSelection_Init;
+  
+  UIPage_MrDoorTestingBenMoKeJi.ifPageInitialized = 0;
+	UIPage_MrDoorTestingBenMoKeJi.Page = UI_Page_MrDoorTestingBenMoKeJi;
+  UIPage_MrDoorTestingBenMoKeJi.PageInit = UI_Page_MrDoorTestingBenMoKeJi_Init;
+  
+  
 }
 
 JoystickHandle Joystick_Create(uint16_t x, uint16_t y, uint16_t r, uint32_t background_color, \
@@ -889,7 +899,7 @@ void UI_Page_Home1(void)
   if (ifButtonPressed(&hButtonPageLinKongKeJiTesting))
     UI_Page_Change_To(&UIPage_LinKongKeJi_Testing);
   if (ifButtonPressed(&hButtonPageMrDoorTesting))
-    UI_Page_Change_To(&UIPage_MrDoorTesting);
+    UI_Page_Change_To(&UIPage_MrDoorTestingTypeSelection);
   
 }
 void UI_Page_Home1_Init(void)
@@ -1639,7 +1649,7 @@ void UI_Page_LinKongKeJiTesting_Init(void)
 	LCD_DisplayString(120, 260, "Cur:");
 }
 
-void UI_Page_MrDoorTesting(void)
+void UI_Page_MrDoorTestingTMotor(void)
 {
   ButtonScan(&hButtonGoBack);
   ButtonRefresh(&hButtonGoBack);
@@ -1657,15 +1667,14 @@ void UI_Page_MrDoorTesting(void)
   ButtonRefresh(&hButtonPositionControl);
   ButtonScan(&hButtonWeightControl);
   ButtonRefresh(&hButtonWeightControl);
-  PotentialmeterUpdate(&hTMotorManualControlPot_kd);
+  PotentialmeterUpdate(&hMrDoorTMotorManualControlPot_kd);
   PotentialmeterUpdate(&hMrDoorCurrentControlMax);
   JoystickUpdate(&hJoyMrDoorMotorLeft);
   JoystickUpdate(&hJoyMrDoorMotorRight);
   
-  MRDOOR_CalculateWeight(&hAKMotorMrDoorLeft, &hAKMotorMrDoorRight, 1.0594f, -6.644f, 1.431f, -10.2397f);
+  MRDOOR_CalculateWeightTMotor(&hAKMotorMrDoorLeft, &hAKMotorMrDoorRight, 1.0594f, -6.644f, 1.431f, -10.2397f);
   
-  if (ifButtonPressed(&hButtonGoBack))
-    UI_Page_Change_To(&UIPage_Home1);
+  
   if (ifButtonPressed(&hButtonMotorZeroing))
   {
     AK10_9_MITMode_Zeroing(&hAKMotorMrDoorLeft);
@@ -1763,9 +1772,12 @@ void UI_Page_MrDoorTesting(void)
   LCD_DisplayDecimals(300, 500, hAKMotorMrDoorLeft.realPosition.f, 5, 1);
   LCD_DisplayDecimals(300, 525, hAKMotorMrDoorLeft.realCurrent.f, 4, 2);
   LCD_DisplayDecimals(300, 550, MrDoorRealWeightRight, 4, 1);
+  
+  if (ifButtonPressed(&hButtonGoBack))
+    UI_Page_Change_To(&UIPage_MrDoorTestingTypeSelection);
 }
 
-void UI_Page_MrDoorTesting_Init(void)
+void UI_Page_MrDoorTestingTMotor_Init(void)
 {
   hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
   hButtonMotorZeroing = Button_Create(10, 50, 100, 80, "Zeroing", LCD_YELLOW, LCD_RED);
@@ -1779,7 +1791,7 @@ void UI_Page_MrDoorTesting_Init(void)
   MrDoorManualControlLeft = 0.0f;
   MrDoorManualControlRight = 0.0f;
   MrDoorKd = 0.0f;
-  hTMotorManualControlPot_kd = Potentialmeter_Create(30, 240, 30, 200, 60, 70, LCD_MAGENTA, LCD_RED, LIGHT_GREY, 0.0f, 5.0f, 0.0f, &MrDoorKd);
+  hMrDoorTMotorManualControlPot_kd = Potentialmeter_Create(30, 240, 30, 200, 60, 70, LCD_MAGENTA, LCD_RED, LIGHT_GREY, 0.0f, 5.0f, 0.0f, &MrDoorKd);
   MrDoorCurrentMax = 0.0f;
   hMrDoorCurrentControlMax = Potentialmeter_Create(400, 500, 30, 260, 60, 70, LCD_MAGENTA, LCD_RED, LIGHT_GREY, 0.0f, 30.0f, 0.0f, &MrDoorCurrentMax);
   
@@ -1793,3 +1805,162 @@ void UI_Page_MrDoorTesting_Init(void)
   ifMrDoorStarted = 0;
 }
 
+void UI_Page_MrDoorTestingBenMoKeJi(void)
+{
+  ButtonScan(&hButtonGoBack);
+  ButtonRefresh(&hButtonGoBack);
+  ButtonScan(&hButtonMotorStart);
+  ButtonRefresh(&hButtonMotorStart);
+  ButtonScan(&hButtonMotorStop);
+  ButtonRefresh(&hButtonMotorStop);
+  ButtonScan(&hButtonVelocityControl);
+  ButtonRefresh(&hButtonVelocityControl);
+  ButtonScan(&hButtonCurrentControl);
+  ButtonRefresh(&hButtonCurrentControl);
+  ButtonScan(&hButtonWeightControl);
+  ButtonRefresh(&hButtonWeightControl);
+  PotentialmeterUpdate(&hMrDoorBenMoKeJiWeightSupportControl);
+  PotentialmeterUpdate(&hMrDoorCurrentControlMax);
+  JoystickUpdate(&hJoyMrDoorMotorLeft);
+  JoystickUpdate(&hJoyMrDoorMotorRight);
+  
+  if (ifButtonPressed(&hButtonMotorStart))
+  {
+    BENMOKEJI_M15_SetMode(&hBENMOKEJIMrDoorLeft, BENMOKEJI_M15_MODE_ENABLED);
+		hBENMOKEJIMrDoorLeft.mode = BENMOKEJI_MODE_ENABLED;
+    BENMOKEJI_M15_SetMode(&hBENMOKEJIMrDoorRight, BENMOKEJI_M15_MODE_ENABLED);
+		hBENMOKEJIMrDoorRight.mode = BENMOKEJI_MODE_ENABLED;
+    ifMrDoorStarted = 1;
+    PotentialmeterSliderGoTo(&hMrDoorBenMoKeJiWeightSupportControl, 0.0f);
+    PotentialmeterSliderGoTo(&hMrDoorCurrentControlMax, 0.0f);
+  }
+  if (ifButtonPressed(&hButtonMotorStop))
+  {
+    BENMOKEJI_M15_SetMode(&hBENMOKEJIMrDoorLeft, BENMOKEJI_M15_MODE_DISABLED);
+		hBENMOKEJIMrDoorLeft.mode = BENMOKEJI_MODE_DISABLED;
+    BENMOKEJI_M15_SetMode(&hBENMOKEJIMrDoorRight, BENMOKEJI_M15_MODE_DISABLED);
+		hBENMOKEJIMrDoorRight.mode = BENMOKEJI_MODE_DISABLED;
+    ifMrDoorStarted = 0;
+    PotentialmeterSliderGoTo(&hMrDoorBenMoKeJiWeightSupportControl, 0.0f);
+    PotentialmeterSliderGoTo(&hMrDoorCurrentControlMax, 0.0f);
+  }
+  if (ifButtonPressed(&hButtonVelocityControl))
+  {
+    ifMrDoorStarted = 1;
+    MrDoorControlMode = 1;
+    BENMOKEJI_M15_SetMode(&hBENMOKEJIMrDoorLeft, BENMOKEJI_M15_MODE_SPEED_CONTROL);
+		hBENMOKEJIMrDoorLeft.mode = BENMOKEJI_MODE_VELOCITY;
+    BENMOKEJI_M15_SetMode(&hBENMOKEJIMrDoorRight, BENMOKEJI_M15_MODE_SPEED_CONTROL);
+		hBENMOKEJIMrDoorRight.mode = BENMOKEJI_MODE_VELOCITY;
+    PotentialmeterSliderGoTo(&hMrDoorBenMoKeJiWeightSupportControl, 0.0f);
+    PotentialmeterSliderGoTo(&hMrDoorCurrentControlMax, 0.0f);
+  }
+  if (ifButtonPressed(&hButtonCurrentControl))
+  {
+    ifMrDoorStarted = 1;
+    BENMOKEJI_M15_SetMode(&hBENMOKEJIMrDoorLeft, BENMOKEJI_M15_MODE_CURRENT_CONTROL);
+		hBENMOKEJIMrDoorLeft.mode = BENMOKEJI_MODE_CURRENT;
+    BENMOKEJI_M15_SetMode(&hBENMOKEJIMrDoorRight, BENMOKEJI_M15_MODE_CURRENT_CONTROL);
+		hBENMOKEJIMrDoorRight.mode = BENMOKEJI_MODE_CURRENT;
+    MrDoorControlMode = 2;
+    PotentialmeterSliderGoTo(&hMrDoorBenMoKeJiWeightSupportControl, 0.0f);
+    PotentialmeterSliderGoTo(&hMrDoorCurrentControlMax, 0.0f);
+  }
+  if (ifButtonPressed(&hButtonWeightControl))
+  {
+    ifMrDoorStarted = 1;
+    BENMOKEJI_M15_SetMode(&hBENMOKEJIMrDoorLeft, BENMOKEJI_M15_MODE_CURRENT_CONTROL);
+		hBENMOKEJIMrDoorLeft.mode = BENMOKEJI_MODE_CURRENT;
+    BENMOKEJI_M15_SetMode(&hBENMOKEJIMrDoorRight, BENMOKEJI_M15_MODE_CURRENT_CONTROL);
+		hBENMOKEJIMrDoorRight.mode = BENMOKEJI_MODE_CURRENT;
+    MrDoorControlMode = 4;
+    MrDoorControllingSupportWeight = 0.0f;
+    PotentialmeterSliderGoTo(&hMrDoorBenMoKeJiWeightSupportControl, 0.0f);
+    PotentialmeterSliderGoTo(&hMrDoorCurrentControlMax, 0.0f);
+  }
+  
+  if (ifMrDoorStarted)
+  {
+    if (MrDoorControlMode == 1)
+    {
+      BENMODEJI_M15_VelocityControlDegSingleMotor(&hBENMOKEJIMrDoorLeft, MrDoorJoyValueLeft * 180.0f);
+      BENMODEJI_M15_VelocityControlDegSingleMotor(&hBENMOKEJIMrDoorRight, MrDoorJoyValueRight * 180.0f);
+    }
+    else if (MrDoorControlMode == 2)
+    {
+      BENMODEJI_M15_CurrentControlSingleMotor(&hBENMOKEJIMrDoorLeft, MrDoorJoyValueLeft * 33.0f);
+      BENMODEJI_M15_CurrentControlSingleMotor(&hBENMOKEJIMrDoorRight, MrDoorJoyValueRight * 33.0f);
+    }
+    else if (MrDoorControlMode == 4)
+    {
+      BENMODEJI_M15_CurrentControlSingleMotor(&hBENMOKEJIMrDoorLeft, MrDoorBenMoKeJiWeightSupport);
+      BENMODEJI_M15_CurrentControlSingleMotor(&hBENMOKEJIMrDoorRight, MrDoorBenMoKeJiWeightSupport);
+    }
+  }
+  
+  LCD_SetLayer(1);
+  LCD_SetColor(LCD_BLACK);
+  LCD_DisplayDecimals(5, 210, MrDoorBenMoKeJiWeightSupport, 3, 2);
+  LCD_DisplayDecimals(400, 470, MrDoorCurrentMax, 4, 1);
+  LCD_DisplayDecimals(230, 225, MrDoorJoyValueRight, 4, 3);
+  LCD_DisplayDecimals(120, 500, MrDoorJoyValueLeft, 4, 3);
+  LCD_SetColor(LCD_RED);
+  LCD_DisplayDecimals(400, 225, hBENMOKEJIMrDoorRight.positionRealDeg.f, 5, 1);
+  LCD_DisplayDecimals(400, 250, hBENMOKEJIMrDoorRight.currentReal.f, 4, 2);
+  LCD_DisplayDecimals(400, 275, MrDoorRealWeightLeft, 4, 1);
+  LCD_DisplayDecimals(300, 500, hBENMOKEJIMrDoorLeft.positionRealDeg.f, 5, 1);
+  LCD_DisplayDecimals(300, 525, hBENMOKEJIMrDoorLeft.currentReal.f, 4, 2);
+  LCD_DisplayDecimals(300, 550, MrDoorRealWeightRight, 4, 1);
+  
+  if (ifButtonPressed(&hButtonGoBack))
+    UI_Page_Change_To(&UIPage_MrDoorTestingTypeSelection);
+}
+
+void UI_Page_MrDoorTestingBenMoKeJi_Init(void)
+{
+  hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
+  hButtonMotorStart = Button_Create(150, 20, 120, 100, "Start", LCD_YELLOW, LCD_RED);
+  hButtonMotorStop = Button_Create(320, 20, 120, 100, "Stop", LCD_YELLOW, LCD_RED);
+  hButtonVelocityControl = Button_Create(10, 150, 70, 60, "V", LCD_YELLOW, LCD_RED);
+  hButtonCurrentControl = Button_Create(100, 150, 70, 60, "I", LCD_YELLOW, LCD_RED);
+  hButtonWeightControl = Button_Create(300, 150, 70, 60, "KG", LCD_YELLOW, LCD_RED);
+  MrDoorControlMode = 1;
+  MrDoorManualControlLeft = 0.0f;
+  MrDoorManualControlRight = 0.0f;
+  MrDoorBenMoKeJiWeightSupport = 0.0f;
+  hMrDoorBenMoKeJiWeightSupportControl = Potentialmeter_Create(30, 240, 30, 200, 60, 70, LCD_MAGENTA, LCD_RED, LIGHT_GREY, 0.0f, 20.0f, 0.0f, &MrDoorBenMoKeJiWeightSupport);
+  MrDoorCurrentMax = 0.0f;
+  hMrDoorCurrentControlMax = Potentialmeter_Create(400, 500, 30, 260, 60, 70, LCD_MAGENTA, LCD_RED, LIGHT_GREY, 0.0f, 30.0f, 0.0f, &MrDoorCurrentMax);
+  
+  MrDoorJoyValueLeft = 0.0f;
+  MrDoorJoyValueRight = 0.0f;
+  hJoyMrDoorMotorRight = Joystick_Create(270, 370, 100, LCD_WHITE, LCD_BLACK, 25, 130, &MrDoorJoyValueRightBlank, &MrDoorJoyValueRight, 0.0f, 1.0f, 1.0f, -1.0f);
+  hJoyMrDoorMotorLeft = Joystick_Create(160, 650, 100, LCD_WHITE, LCD_BLACK, 25, 130, &MrDoorJoyValueLeftBlank, &MrDoorJoyValueLeft, 0.0f, 1.0f, 1.0f, -1.0f);
+  
+  ifMrDoorStarted = 0;
+}
+
+void UI_Page_MrDoorTestingTypeSelection(void)
+{
+  ButtonScan(&hButtonGoBack);
+  ButtonRefresh(&hButtonGoBack);
+  ButtonScan(&hButtonTMotorType);
+  ButtonRefresh(&hButtonTMotorType);
+  ButtonScan(&hButtonBenMoKeJiType);
+  ButtonRefresh(&hButtonBenMoKeJiType);
+  
+  if (ifButtonPressed(&hButtonGoBack))
+    UI_Page_Change_To(&UIPage_Home1);
+  if (ifButtonPressed(&hButtonTMotorType))
+    UI_Page_Change_To(&UIPage_MrDoorTestingTMotor);
+  if (ifButtonPressed(&hButtonBenMoKeJiType))
+    UI_Page_Change_To(&UIPage_MrDoorTestingBenMoKeJi);
+}
+
+void UI_Page_MrDoorTestingTypeSelection_Init(void)
+{
+  hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
+  
+  hButtonTMotorType = Button_Create(200, 200, 200, 100, "TMotor", LCD_YELLOW, LCD_RED);
+  hButtonBenMoKeJiType = Button_Create(200, 400, 200, 100, "BenMoKeJi", LCD_YELLOW, LCD_RED);
+}

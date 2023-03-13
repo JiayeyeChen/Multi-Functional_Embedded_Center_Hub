@@ -39,12 +39,11 @@ int main(void)
   UI_Init();
   
   EXOSKELETON_MotorInit();
-//	MRDOOR_MotorInit();
+	MRDOOR_MotorInit();
 
   AD7606_Init(AD7606_RANG_10V, AD7606_OS_RATIO_4);
-  BENMOKEJI_M15_Init(&hBENMOKEJI, &hcan2, 2);
+//  BENMOKEJI_M15_Init(&hBENMOKEJI, &hcan2, 2);
 	LKTECH_MG_Init(&hLKTECH, &hcan2, 1, 36.0f);
-	
   EXOSKELETON_Init();
   CAN_ConfigureFilters();
   
@@ -197,12 +196,16 @@ void MotorTesting_Task(void *argument)
 	for(;;)
   {
     /* Ben Mo Ke Ji M15 */
-		if (hBENMOKEJI.mode == BENMOKEJI_MODE_POSITION)
-			BENMODEJI_M15_PositionControl(&hBENMOKEJI, hBENMOKEJI.positionSetDeg.f);
-		else if (hBENMOKEJI.mode == BENMOKEJI_MODE_VELOCITY)
-			BENMODEJI_M15_VelocityControlDeg(&hBENMOKEJI, hBENMOKEJI.speedSetDeg.f);
-		else if (hBENMOKEJI.mode == BENMOKEJI_MODE_CURRENT)
-			BENMODEJI_M15_CurrentControl(&hBENMOKEJI, hBENMOKEJI.currentSet.f);
+    if (hUI.curPage == &UIPage_BenMoKeJiM15_Testing)
+    {
+      if (hBENMOKEJI.mode == BENMOKEJI_MODE_POSITION)
+        BENMODEJI_M15_PositionControlSingleMotor(&hBENMOKEJI, hBENMOKEJI.positionSetDeg.f);
+      else if (hBENMOKEJI.mode == BENMOKEJI_MODE_VELOCITY)
+        BENMODEJI_M15_VelocityControlDegSingleMotor(&hBENMOKEJI, hBENMOKEJI.speedSetDeg.f);
+      else if (hBENMOKEJI.mode == BENMOKEJI_MODE_CURRENT)
+        BENMODEJI_M15_CurrentControlSingleMotor(&hBENMOKEJI, hBENMOKEJI.currentSet.f);
+    }
+		
     //////////////////////
 		/* Lin Kong Ke Ji MG */
 		if (hLKTECH.task == LETECH_MG_CAN_BUS_TASK_SPEED_CONTROL)

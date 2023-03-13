@@ -80,13 +80,21 @@ void MRDOOR_MotorInit(void)
   hAKMotorMrDoorRight.enablingStatus = AK10_9_MITMODE_DISABLED;
   
   BENMOKEJI_M15_Init(&hBENMOKEJIMrDoorLeft, &hcan2, 1);
-  BENMOKEJI_M15_Init(&hBENMOKEJIMrDoorRight, &hcan2, 2);
+  BENMOKEJI_M15_Init(&hBENMOKEJIMrDoorRight, &hcan2, 5);
 }
 
-void MRDOOR_CalculateWeight(AK10_9HandleCubaMarsFW* hmotor_left, \
+void MRDOOR_CalculateWeightTMotor(AK10_9HandleCubaMarsFW* hmotor_left, \
                             AK10_9HandleCubaMarsFW* hmotor_right, \
                             float k_left, float k_right, float b_left, float b_right)
 {
   MrDoorRealWeightLeft = hmotor_left->realCurrent.f * k_left + b_left;
   MrDoorRealWeightRight = hmotor_right->realCurrent.f * k_right + b_right;
+}
+
+void MRDOOR_CalculateWeightBenMoKeJi(BENMOKEJI_M15_Handle* hmotor_left, \
+                                     BENMOKEJI_M15_Handle* hmotor_right, \
+                                     float k_left, float k_right, float b_left, float b_right)
+{
+  MrDoorRealWeightLeft = hmotor_left->currentReal.f * k_left + b_left;
+  MrDoorRealWeightRight = hmotor_right->currentReal.f * k_right + b_right;
 }

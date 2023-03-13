@@ -30,6 +30,7 @@ typedef struct
 	uint8_t								canIDFeedback;
 	uint8_t								canIDCommand;
 	enum BENMOKEJI_MODE   mode;
+  uint8_t               errorCode;
   //CAN BUS transmit
   uint8_t               txBuf[8];
   uint32_t*             pTxMailbox;
@@ -43,10 +44,10 @@ typedef struct
 void BENMOKEJI_M15_Init(BENMOKEJI_M15_Handle* hmotor, CAN_HandleTypeDef* hcan, uint8_t motor_id);
 void BENMOKEJI_M15_GetFeedback(BENMOKEJI_M15_Handle* hmotor, CAN_RxHeaderTypeDef* rxheader, uint8_t rxbuf[]);
 void BENMOKEJI_M15_SetFeedbackMode(BENMOKEJI_M15_Handle* hmotor, uint8_t mode, uint8_t auto_feedback_duration);
-void BENMOKEJI_M15_SendControlValue(BENMOKEJI_M15_Handle* hmotor, int16_t val);
-void BENMODEJI_M15_PositionControl(BENMOKEJI_M15_Handle* hmotor, float val);
-void BENMODEJI_M15_VelocityControlDeg(BENMOKEJI_M15_Handle* hmotor, float val);
-void BENMODEJI_M15_CurrentControl(BENMOKEJI_M15_Handle* hmotor, float val);
+void BENMOKEJI_M15_SendControlValueSingleMotor(BENMOKEJI_M15_Handle* hmotor, int16_t val);
+void BENMODEJI_M15_PositionControlSingleMotor(BENMOKEJI_M15_Handle* hmotor, float val);
+void BENMODEJI_M15_VelocityControlDegSingleMotor(BENMOKEJI_M15_Handle* hmotor, float val);
+void BENMODEJI_M15_CurrentControlSingleMotor(BENMOKEJI_M15_Handle* hmotor, float val);
 void BENMOKEJI_M15_SetMode(BENMOKEJI_M15_Handle* hmotor, uint8_t mode);
 void BENMOKEJI_M15_SetCANID(BENMOKEJI_M15_Handle* hmotor, uint8_t new_id);
 

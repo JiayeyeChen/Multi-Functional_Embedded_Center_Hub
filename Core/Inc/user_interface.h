@@ -137,8 +137,13 @@ void 				 UI_Page_BenMoKeJiM15Testing(void);
 void 				 UI_Page_BenMoKeJiM15Testing_Init(void);
 void 				 UI_Page_LinKongKeJiTesting(void);
 void 				 UI_Page_LinKongKeJiTesting_Init(void);
-void			   UI_Page_MrDoorTesting(void);
-void			   UI_Page_MrDoorTesting_Init(void);
+void			   UI_Page_MrDoorTestingTMotor(void);
+void			   UI_Page_MrDoorTestingTMotor_Init(void);
+void         UI_Page_MrDoorTestingBenMoKeJi(void);
+void         UI_Page_MrDoorTestingBenMoKeJi_Init(void);
+void			   UI_Page_MrDoorTestingTypeSelection(void);
+void			   UI_Page_MrDoorTestingTypeSelection_Init(void);
+
 
 /* Lin Kong Ke Ji Testing */
 extern uint8_t ifKeepReadingAngle;
@@ -146,4 +151,5 @@ extern uint8_t ifKeepReadingAngle;
 
 extern UIHandle hUI;
 extern PageHandle UIPage_AK10_9_ManualControlCubeMarsFWServoMode, UIPage_AK10_9_ManualControlCubeMarsFWMITMode;
+extern PageHandle UIPage_BenMoKeJiM15_Testing;
 #endif
