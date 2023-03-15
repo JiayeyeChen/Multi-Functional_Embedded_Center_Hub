@@ -153,7 +153,7 @@ void AK10Calibration_Task(void *argument)
   
   for(;;)
   {
-    EXOSKELETON_CentreControl();
+//    EXOSKELETON_CentreControl();
     if (hExoskeleton.mainTask != EXOSKELETON_MAIN_TASK_SYSTEM_ID)
       EXOSKELETON_CommonDatalogManager();
 

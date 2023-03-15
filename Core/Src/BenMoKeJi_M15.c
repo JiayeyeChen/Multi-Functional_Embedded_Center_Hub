@@ -97,3 +97,16 @@ void BENMOKEJI_M15_SetCANID(BENMOKEJI_M15_Handle* hmotor, uint8_t new_id)
 	hmotor->txBuf[0] = new_id;
 	HAL_CAN_AddTxMessage(hmotor->hcan, &(hmotor->txHeader), hmotor->txBuf, hmotor->pTxMailbox);
 }
+
+void BENMOKEJI_M15_SetManualFeedbackMode(void)
+{
+  CAN_TxHeaderTypeDef txHeader;
+  txHeader.DLC = 8;
+  txHeader.IDE = 0;
+  txHeader.RTR = 0;
+	txHeader.StdId = 0x106;
+  uint8_t txBuf[8];
+	memset(txBuf, 0x80, 8);
+  uint32_t mailBox;
+	HAL_CAN_AddTxMessage(&hcan2, &txHeader, txBuf, &mailBox);
+}

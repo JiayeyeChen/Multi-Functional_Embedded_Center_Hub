@@ -87,8 +87,15 @@ float                         MrDoorManualControlLeft, MrDoorManualControlRight,
 float                         MrDoorJoyValueLeft, MrDoorJoyValueLeftBlank, MrDoorJoyValueRight, MrDoorJoyValueRightBlank;
 float                         MrDoorCurrentMax;
 float                         MrDoorPositionControlLeft, MrDoorPositionControlRight;
-
 ////////////////////
+
+/* Torque Constant Calibration */
+PageHandle                    UIPage_TorqueConstantCalibration;
+ButtonHandle                  hButtonPageTorqueConstantCalibration, hButtonTkCalculateAverageIq;
+float                         torqueConstantCalibrationMotorKp, torqueConstantCalibrationMotorKd, torqueConstantCalibrationMotorSetP;
+AveragerHandle                hAverageTorqueConstantCalibration;
+uint8_t                       torqueConstantCalibrationIfMotorStarted;
+/////////////////////////////////
 
 
 ButtonHandle Button_Create(uint16_t x, uint16_t y, uint16_t xLen, uint16_t yLen, char label[],\
@@ -317,6 +324,9 @@ void UI_Init(void)
 	UIPage_MrDoorTestingBenMoKeJi.Page = UI_Page_MrDoorTestingBenMoKeJi;
   UIPage_MrDoorTestingBenMoKeJi.PageInit = UI_Page_MrDoorTestingBenMoKeJi_Init;
   
+  UIPage_TorqueConstantCalibration.ifPageInitialized = 0;
+	UIPage_TorqueConstantCalibration.Page = UI_Page_TkCalibration;
+  UIPage_TorqueConstantCalibration.PageInit = UI_Page_TkCalibration_Init;
   
 }
 
@@ -880,6 +890,9 @@ void UI_Page_Home1(void)
   ButtonRefresh(&hButtonPageLinKongKeJiTesting);
   ButtonScan(&hButtonPageMrDoorTesting);
   ButtonRefresh(&hButtonPageMrDoorTesting);
+  ButtonScan(&hButtonPageTorqueConstantCalibration);
+  ButtonRefresh(&hButtonPageTorqueConstantCalibration);
+  
   
   
   if (ifButtonPressed(&hButtonPageExoskeletonInterface))
@@ -900,6 +913,8 @@ void UI_Page_Home1(void)
     UI_Page_Change_To(&UIPage_LinKongKeJi_Testing);
   if (ifButtonPressed(&hButtonPageMrDoorTesting))
     UI_Page_Change_To(&UIPage_MrDoorTestingTypeSelection);
+  if (ifButtonPressed(&hButtonPageTorqueConstantCalibration))
+    UI_Page_Change_To(&UIPage_TorqueConstantCalibration);
   
 }
 void UI_Page_Home1_Init(void)
@@ -913,6 +928,7 @@ void UI_Page_Home1_Init(void)
 	hButtonPageBenMoKeJiM15Testing = Button_Create(150, 400, 200, 40, "BenMoKeJiM15", LIGHT_MAGENTA, LCD_RED);
   hButtonPageLinKongKeJiTesting = Button_Create(100, 450, 300, 40, "LinKongKeJi MG Motor", LIGHT_MAGENTA, LCD_RED);
   hButtonPageMrDoorTesting = Button_Create(100, 500, 300, 40, "MrDoor", LIGHT_MAGENTA, LCD_RED);
+  hButtonPageTorqueConstantCalibration = Button_Create(100, 550, 300, 40, "Kt Calibration", LIGHT_MAGENTA, LCD_RED);
 }
 
 void UI_Page_AK10_9_ManualControlCubeMarsFWServoMode(void)
@@ -1064,7 +1080,6 @@ void UI_Page_AK10_9_ManualControlCubeMarsFWMITMode(void)
   ButtonScan(&hButtonMotorStart);
   ButtonScan(&hButtonMotorStop);
   ButtonScan(&hButtonMotorZeroing);
-  ButtonScan(&hButtonGoBack);
   ButtonScan(&hButtonMotorSelectRightHip);
   ButtonScan(&hButtonMotorSelectRightKnee);
   ButtonRefresh(&hButtonGoBack);
@@ -1928,7 +1943,7 @@ void UI_Page_MrDoorTestingBenMoKeJi_Init(void)
   MrDoorManualControlLeft = 0.0f;
   MrDoorManualControlRight = 0.0f;
   MrDoorBenMoKeJiWeightSupport = 0.0f;
-  hMrDoorBenMoKeJiWeightSupportControl = Potentialmeter_Create(30, 240, 30, 200, 60, 70, LCD_MAGENTA, LCD_RED, LIGHT_GREY, 0.0f, 20.0f, 0.0f, &MrDoorBenMoKeJiWeightSupport);
+  hMrDoorBenMoKeJiWeightSupportControl = Potentialmeter_Create(30, 240, 30, 200, 60, 70, LCD_MAGENTA, LCD_RED, LIGHT_GREY, 0.0f, 2.0f, 0.0f, &MrDoorBenMoKeJiWeightSupport);
   MrDoorCurrentMax = 0.0f;
   hMrDoorCurrentControlMax = Potentialmeter_Create(400, 500, 30, 260, 60, 70, LCD_MAGENTA, LCD_RED, LIGHT_GREY, 0.0f, 30.0f, 0.0f, &MrDoorCurrentMax);
   
@@ -1963,4 +1978,91 @@ void UI_Page_MrDoorTestingTypeSelection_Init(void)
   
   hButtonTMotorType = Button_Create(200, 200, 200, 100, "TMotor", LCD_YELLOW, LCD_RED);
   hButtonBenMoKeJiType = Button_Create(200, 400, 200, 100, "BenMoKeJi", LCD_YELLOW, LCD_RED);
+}
+
+void UI_Page_TkCalibration(void)
+{
+  ButtonScan(&hButtonGoBack);
+  ButtonRefresh(&hButtonGoBack);
+  ButtonScan(&hButtonMotorStart);
+  ButtonScan(&hButtonMotorStop);
+  ButtonScan(&hButtonMotorZeroing);
+  ButtonRefresh(&hButtonMotorStart);
+  ButtonRefresh(&hButtonMotorStop);
+  ButtonRefresh(&hButtonMotorZeroing);
+  ButtonScan(&hButtonTkCalculateAverageIq);
+  ButtonRefresh(&hButtonTkCalculateAverageIq);
+  PotentialmeterUpdate(&hTMotorManualControlPot_pos);
+  PotentialmeterUpdate(&hTMotorManualControlPot_kp);
+  PotentialmeterUpdate(&hTMotorManualControlPot_kd);
+  
+  if(ifButtonPressed(&hButtonMotorStart))
+  {
+    AK10_9_MITMode_EnableMotor(hMotorPtrManualControl);
+    torqueConstantCalibrationIfMotorStarted = 1;
+  }
+  if(ifButtonPressed(&hButtonMotorStop))
+  {
+    AK10_9_MITMode_DisableMotor(hMotorPtrManualControl);
+    torqueConstantCalibrationIfMotorStarted = 0;
+  }
+  if(ifButtonPressed(&hButtonMotorZeroing))
+    AK10_9_MITMode_Zeroing(hMotorPtrManualControl);
+  
+  if (hAverageTorqueConstantCalibration.ifStarted)
+    Averager_Update(&hAverageTorqueConstantCalibration, hMotorPtrManualControl->realCurrent.f);
+  if(ifButtonPressed(&hButtonTkCalculateAverageIq))
+  {
+    Averager_Init(&hAverageTorqueConstantCalibration);
+    Averager_Start(&hAverageTorqueConstantCalibration, hMotorPtrManualControl->realCurrent.f);
+  }
+  
+  if (torqueConstantCalibrationIfMotorStarted)
+    AK10_9_MITModeControl_Deg(hMotorPtrManualControl, torqueConstantCalibrationMotorSetP, 0.0f, torqueConstantCalibrationMotorKp, torqueConstantCalibrationMotorKd, 0.0f);
+  
+  
+  LCD_SetLayer(1); 
+  LCD_SetColor(LCD_BLACK);
+
+  if (hMotorPtrManualControl->status == AK10_9_Online)
+    LCD_DisplayString(200, 0, "Motor  Online");
+  else
+    LCD_DisplayString(200, 0, "Motor Offline");
+  LCD_DisplayDecimals(340, 510, (double)torqueConstantCalibrationMotorKp, 3, 0);
+  LCD_DisplayDecimals(420, 510, (double)torqueConstantCalibrationMotorKd, 3, 2);
+  LCD_DisplayDecimals(180, 80, (double)torqueConstantCalibrationMotorSetP, 3, 1);
+  LCD_DisplayDecimals(280, 100, hMotorPtrManualControl->realPosition.f, 9, 4);
+  LCD_DisplayDecimals(280, 130, hMotorPtrManualControl->realVelocityPresent.f, 4, 1);
+  LCD_DisplayDecimals(280, 160, hMotorPtrManualControl->realCurrent.f, 10, 7);
+  LCD_SetColor(LCD_RED);
+  LCD_DisplayDecimals(280, 270, hAverageTorqueConstantCalibration.avg.f, 10, 7);
+  
+  if (ifButtonPressed(&hButtonGoBack))
+    UI_Page_Change_To(&UIPage_Home1);
+}
+
+void UI_Page_TkCalibration_Init(void)
+{
+  hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
+  hButtonMotorStart = Button_Create(0, 420, 100, 40, "START", LCD_WHITE, LCD_RED);
+  hButtonMotorStop = Button_Create(0, 80, 150, 250, "STOP", LCD_RED, LCD_YELLOW);
+  hButtonMotorZeroing = Button_Create(0, 620, 200, 40, "Motor Set Zero", LCD_BLUE, LCD_RED);
+  hButtonTkCalculateAverageIq = Button_Create(280, 300, 160, 80, "Averaging Iq", LCD_YELLOW, LCD_RED);
+  
+  hTMotorManualControlPot_pos = Potentialmeter_Create(180, 80, 30, 500, 100, 70, LCD_MAGENTA, LCD_RED, LIGHT_GREY, -100.0f, 10.0f, 0.0f, &torqueConstantCalibrationMotorSetP);
+  hTMotorManualControlPot_kp = Potentialmeter_Create(340, 510, 30, 200, 60, 70, LCD_MAGENTA, LCD_RED, LIGHT_GREY, 0.0f, 500.0f, 0.0f, &torqueConstantCalibrationMotorKp);
+  hTMotorManualControlPot_kd = Potentialmeter_Create(420, 510, 30, 200, 60, 70, LCD_MAGENTA, LCD_RED, LIGHT_GREY, 0.0f, 5.0f, 0.0f, &torqueConstantCalibrationMotorKd);
+  
+  LCD_DisplayString(340, 480, "kp");
+  LCD_DisplayString(420, 480, "kd");
+  LCD_DisplayString(250, 100, "P:");
+  LCD_DisplayString(250, 130, "V:");
+  LCD_DisplayString(250, 160, "I:");
+  
+  torqueConstantCalibrationMotorKp = 0.0f;
+  torqueConstantCalibrationMotorKd = 0.0f;
+  torqueConstantCalibrationMotorSetP = 0.0f;
+  Averager_Init(&hAverageTorqueConstantCalibration);
+  hMotorPtrManualControl = &hAKMotorRightHip;
+  torqueConstantCalibrationIfMotorStarted = 0;
 }

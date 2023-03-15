@@ -50,5 +50,7 @@ void BENMODEJI_M15_VelocityControlDegSingleMotor(BENMOKEJI_M15_Handle* hmotor, f
 void BENMODEJI_M15_CurrentControlSingleMotor(BENMOKEJI_M15_Handle* hmotor, float val);
 void BENMOKEJI_M15_SetMode(BENMOKEJI_M15_Handle* hmotor, uint8_t mode);
 void BENMOKEJI_M15_SetCANID(BENMOKEJI_M15_Handle* hmotor, uint8_t new_id);
+void BENMOKEJI_M15_SetManualFeedbackMode(void);
+void BENMOKEJI_M15_RequestForManualFeedback_VelCurTem(BENMOKEJI_M15_Handle* hmotor);
 
 #endif

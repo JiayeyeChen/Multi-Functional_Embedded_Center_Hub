@@ -143,6 +143,8 @@ void         UI_Page_MrDoorTestingBenMoKeJi(void);
 void         UI_Page_MrDoorTestingBenMoKeJi_Init(void);
 void			   UI_Page_MrDoorTestingTypeSelection(void);
 void			   UI_Page_MrDoorTestingTypeSelection_Init(void);
+void         UI_Page_TkCalibration(void);
+void         UI_Page_TkCalibration_Init(void);
 
 
 /* Lin Kong Ke Ji Testing */
