@@ -2018,7 +2018,7 @@ void UI_Page_TkCalibration(void)
   }
   
   if (torqueConstantCalibrationIfMotorStarted)
-    AK10_9_MITModeControl_Deg(hMotorPtrManualControl, torqueConstantCalibrationMotorSetP, 0.0f, torqueConstantCalibrationMotorKp, torqueConstantCalibrationMotorKd, 0.0f);
+    AK10_9_MITModeControl_Deg(hMotorPtrManualControl, torqueConstantCalibrationMotorSetP, 0.0f, 200.0f, 2.0f, 0.0f);
   
   
   LCD_SetLayer(1); 
@@ -2046,10 +2046,10 @@ void UI_Page_TkCalibration_Init(void)
   hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
   hButtonMotorStart = Button_Create(0, 420, 100, 40, "START", LCD_WHITE, LCD_RED);
   hButtonMotorStop = Button_Create(0, 80, 150, 250, "STOP", LCD_RED, LCD_YELLOW);
-  hButtonMotorZeroing = Button_Create(0, 620, 200, 40, "Motor Set Zero", LCD_BLUE, LCD_RED);
+  hButtonMotorZeroing = Button_Create(0, 500, 100, 40, "Zeroing", LCD_BLUE, LCD_RED);
   hButtonTkCalculateAverageIq = Button_Create(280, 300, 160, 80, "Averaging Iq", LCD_YELLOW, LCD_RED);
   
-  hTMotorManualControlPot_pos = Potentialmeter_Create(180, 80, 30, 500, 100, 70, LCD_MAGENTA, LCD_RED, LIGHT_GREY, -100.0f, 10.0f, 0.0f, &torqueConstantCalibrationMotorSetP);
+  hTMotorManualControlPot_pos = Potentialmeter_Create(180, 80, 30, 700, 100, 70, LCD_MAGENTA, LCD_RED, LIGHT_GREY, -10.0f, 40.0f, 0.0f, &torqueConstantCalibrationMotorSetP);
   hTMotorManualControlPot_kp = Potentialmeter_Create(340, 510, 30, 200, 60, 70, LCD_MAGENTA, LCD_RED, LIGHT_GREY, 0.0f, 500.0f, 0.0f, &torqueConstantCalibrationMotorKp);
   hTMotorManualControlPot_kd = Potentialmeter_Create(420, 510, 30, 200, 60, 70, LCD_MAGENTA, LCD_RED, LIGHT_GREY, 0.0f, 5.0f, 0.0f, &torqueConstantCalibrationMotorKd);
   
@@ -2063,6 +2063,6 @@ void UI_Page_TkCalibration_Init(void)
   torqueConstantCalibrationMotorKd = 0.0f;
   torqueConstantCalibrationMotorSetP = 0.0f;
   Averager_Init(&hAverageTorqueConstantCalibration);
-  hMotorPtrManualControl = &hAKMotorRightHip;
+  hMotorPtrManualControl = &hAKMotorRightKnee;
   torqueConstantCalibrationIfMotorStarted = 0;
 }
