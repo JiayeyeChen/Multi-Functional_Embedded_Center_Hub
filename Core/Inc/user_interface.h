@@ -153,5 +153,5 @@ extern uint8_t ifKeepReadingAngle;
 
 extern UIHandle hUI;
 extern PageHandle UIPage_AK10_9_ManualControlCubeMarsFWServoMode, UIPage_AK10_9_ManualControlCubeMarsFWMITMode;
-extern PageHandle UIPage_BenMoKeJiM15_Testing;
+extern PageHandle UIPage_BenMoKeJiM15_Testing, UIPage_LinKongKeJi_Testing;
 #endif

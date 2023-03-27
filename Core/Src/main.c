@@ -153,7 +153,7 @@ void AK10Calibration_Task(void *argument)
   
   for(;;)
   {
-//    EXOSKELETON_CentreControl();
+    EXOSKELETON_CentreControl();
     if (hExoskeleton.mainTask != EXOSKELETON_MAIN_TASK_SYSTEM_ID)
       EXOSKELETON_CommonDatalogManager();
 
@@ -208,13 +208,15 @@ void MotorTesting_Task(void *argument)
 		
     //////////////////////
 		/* Lin Kong Ke Ji MG */
-		if (hLKTECH.task == LETECH_MG_CAN_BUS_TASK_SPEED_CONTROL)
-			LETECH_MG_SpeedControl(&hLKTECH, hLKTECH.velocityControlSet.f);
-		else if (hLKTECH.task == LETECH_MG_CAN_BUS_TASK_CURRENT_CONTROL)
-			LETECH_MG_CurrentControl(&hLKTECH, hLKTECH.currentControlSet.f);
-		else if (hLKTECH.task == LETECH_MG_CAN_BUS_TASK_POSITION_CONTROL_6_INCREMENT)
-			LETECH_MG_PositionControl6Increment(&hLKTECH, hLKTECH.positionControlIncrementSet.f, 600.0f);
-    
+    if (hUI.curPage == &UIPage_LinKongKeJi_Testing)
+    {
+      if (hLKTECH.task == LETECH_MG_CAN_BUS_TASK_SPEED_CONTROL)
+        LETECH_MG_SpeedControl(&hLKTECH, hLKTECH.velocityControlSet.f);
+      else if (hLKTECH.task == LETECH_MG_CAN_BUS_TASK_CURRENT_CONTROL)
+        LETECH_MG_CurrentControl(&hLKTECH, hLKTECH.currentControlSet.f);
+      else if (hLKTECH.task == LETECH_MG_CAN_BUS_TASK_POSITION_CONTROL_6_INCREMENT)
+        LETECH_MG_PositionControl6Increment(&hLKTECH, hLKTECH.positionControlIncrementSet.f, 600.0f);
+    }
     osDelay(10);
   }
 }
