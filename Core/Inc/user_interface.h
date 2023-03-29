@@ -103,10 +103,9 @@ LinearPotentialmeterHandle  Potentialmeter_Create(uint16_t x, uint16_t y, uint16
                                                   uint32_t sliderColorUnpressed, uint32_t sliderColorPressed, \
                                                   uint32_t slotColor, float minVal, float maxVal, float startVal, float* ctrVal);
 void         PotentialmeterUpdate(LinearPotentialmeterHandle* hpot);
+void         ButtonUpdate(ButtonHandle* hbutton);
 void         PotentialmeterSliderGoTo(LinearPotentialmeterHandle* hpot, float go_to_val);
-uint8_t      ButtonScan(ButtonHandle* hbutton);
 uint8_t      ifButtonPressed(ButtonHandle* hbutton);
-void         ButtonRefresh(ButtonHandle* hbutton);
 void         UI(void);
 void         UI_Page_Change_To(PageHandle* hpage);
 void         UI_Page_LowerLimb_Exoskeleton(void);
@@ -145,6 +144,8 @@ void			   UI_Page_MrDoorTestingTypeSelection(void);
 void			   UI_Page_MrDoorTestingTypeSelection_Init(void);
 void         UI_Page_TkCalibration(void);
 void         UI_Page_TkCalibration_Init(void);
+void         UI_Page_ExoskeletonMotorDurabilityTest(void);
+void         UI_Page_ExoskeletonMotorDurabilityTest_Init(void);
 
 
 /* Lin Kong Ke Ji Testing */

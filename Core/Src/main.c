@@ -148,7 +148,7 @@ void SystemClock_Config(void)
 //	HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct);
 }
 
-void AK10Calibration_Task(void *argument)
+void Main_Task(void *argument)
 {
   
   for(;;)

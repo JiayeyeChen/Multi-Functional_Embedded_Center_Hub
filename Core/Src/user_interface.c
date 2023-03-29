@@ -96,7 +96,12 @@ float                         torqueConstantCalibrationMotorKp, torqueConstantCa
 AveragerHandle                hAverageTorqueConstantCalibration;
 uint8_t                       torqueConstantCalibrationIfMotorStarted;
 /////////////////////////////////
-
+/* Exoskeleton Motor Durability test */
+PageHandle                    UIPage_ExoskeletonMotorDurabilityTest;
+ButtonHandle                  hButtonPageExoskeletonMotorDurabilityTest;
+uint8_t                       ifMotorProfilingStartedExoskeletonMotorTest;
+uint32_t                      exoskeletonMotorTestTimeDifference;
+///////////////////////////////////////
 
 ButtonHandle Button_Create(uint16_t x, uint16_t y, uint16_t xLen, uint16_t yLen, char label[],\
                            uint32_t colorUnpressed, uint32_t colorPressed)
@@ -123,20 +128,30 @@ ButtonHandle Button_Create(uint16_t x, uint16_t y, uint16_t xLen, uint16_t yLen,
   return hbutton;
 }
 
-uint8_t ButtonScan(ButtonHandle* hbutton)
+void ButtonUpdate(ButtonHandle* hbutton)
 {
+  hbutton->ifPressed = 0;
   for (uint8_t i = 0; i <= 4; i++)
   {
     if ((touchInfo.xVertical[i] > hbutton->pos.x && touchInfo.xVertical[i] < (hbutton->pos.x + hbutton->pos.xLen)) &&\
         (touchInfo.yVertical[i] > hbutton->pos.y && touchInfo.yVertical[i] < (hbutton->pos.y + hbutton->pos.yLen)))
     {
       hbutton->ifPressed = 1;
-      return 1;
+      break;
     }
-
   }
-  hbutton->ifPressed = 0;
-  return 0;
+  
+  if (hbutton->ifNeedRefresh)
+  {
+    LCD_SetLayer(0);
+    if (hbutton->ifPressed)
+      LCD_SetColor(hbutton->colorPressed);
+    else
+      LCD_SetColor(hbutton->colorUnpressed);
+
+    LCD_FillRect(hbutton->pos.x, hbutton->pos.y, hbutton->pos.xLen, hbutton->pos.yLen);
+    hbutton->ifNeedRefresh = 0;
+  }
 }
 
 uint8_t ifButtonPressed(ButtonHandle* hbutton)
@@ -328,6 +343,9 @@ void UI_Init(void)
 	UIPage_TorqueConstantCalibration.Page = UI_Page_TkCalibration;
   UIPage_TorqueConstantCalibration.PageInit = UI_Page_TkCalibration_Init;
   
+  UIPage_ExoskeletonMotorDurabilityTest.ifPageInitialized = 0;
+	UIPage_ExoskeletonMotorDurabilityTest.Page = UI_Page_ExoskeletonMotorDurabilityTest;
+  UIPage_ExoskeletonMotorDurabilityTest.PageInit = UI_Page_ExoskeletonMotorDurabilityTest_Init;
 }
 
 JoystickHandle Joystick_Create(uint16_t x, uint16_t y, uint16_t r, uint32_t background_color, \
@@ -406,21 +424,6 @@ void JoystickUpdate(JoystickHandle* hjoy)
   LCD_FillCircle(hjoy->stickPos.x, hjoy->stickPos.y, hjoy->stickPos.r);
 }
 
-void ButtonRefresh(ButtonHandle* hbutton)
-{
-  if (hbutton->ifNeedRefresh)
-  {
-    LCD_SetLayer(0);
-    if (hbutton->ifPressed)
-      LCD_SetColor(hbutton->colorPressed);
-    else
-      LCD_SetColor(hbutton->colorUnpressed);
-
-    LCD_FillRect(hbutton->pos.x, hbutton->pos.y, hbutton->pos.xLen, hbutton->pos.yLen);
-    hbutton->ifNeedRefresh = 0;
-  }
-}
-
 void UI(void)
 {
   if (!hUI.curPage->ifPageInitialized)
@@ -433,28 +436,17 @@ void UI(void)
 
 void UI_Page_LowerLimb_Exoskeleton(void)
 {
-  ButtonScan(&hButtonGoBack);
-  ButtonRefresh(&hButtonGoBack);
-  ButtonScan(&hButtonPageSystemID);
-  ButtonRefresh(&hButtonPageSystemID);
-  ButtonScan(&hButtonHipMotorZeroing);
-  ButtonRefresh(&hButtonHipMotorZeroing);
-  ButtonScan(&hButtonKneeMotorZeroing);
-  ButtonRefresh(&hButtonKneeMotorZeroing);
-  ButtonScan(&hButtonMotorEnable);
-  ButtonRefresh(&hButtonMotorEnable);
-  ButtonScan(&hButtonMotorDisable);
-  ButtonRefresh(&hButtonMotorDisable);
-  ButtonScan(&hButtonPageGravityCompensation);
-  ButtonRefresh(&hButtonPageGravityCompensation);
-  ButtonScan(&hButtonPageExoskeletonParameterPanel);
-  ButtonRefresh(&hButtonPageExoskeletonParameterPanel);
-  ButtonScan(&hButtonPageExoskeletonMuscularTorqueMonitor);
-  ButtonRefresh(&hButtonPageExoskeletonMuscularTorqueMonitor);
-  ButtonScan(&hButtonDataLogStart);
-  ButtonRefresh(&hButtonDataLogStart);
-  ButtonScan(&hButtonDataLogEnd);
-  ButtonRefresh(&hButtonDataLogEnd);
+  ButtonUpdate(&hButtonGoBack);
+  ButtonUpdate(&hButtonPageSystemID);
+  ButtonUpdate(&hButtonHipMotorZeroing);
+  ButtonUpdate(&hButtonKneeMotorZeroing);
+  ButtonUpdate(&hButtonMotorEnable);
+  ButtonUpdate(&hButtonMotorDisable);
+  ButtonUpdate(&hButtonPageGravityCompensation);
+  ButtonUpdate(&hButtonPageExoskeletonParameterPanel);
+  ButtonUpdate(&hButtonPageExoskeletonMuscularTorqueMonitor);
+  ButtonUpdate(&hButtonDataLogStart);
+  ButtonUpdate(&hButtonDataLogEnd);
   
   
   
@@ -538,18 +530,12 @@ void UI_Page_LowerLimb_Exoskeleton_Init(void)
 
 void UI_Page_LowerLimb_Exoskeleton_SystemID(void)
 {
-  ButtonScan(&hButtonGoBack);
-  ButtonRefresh(&hButtonGoBack);
-  ButtonScan(&hButtonStart);
-  ButtonRefresh(&hButtonStart);
-  ButtonScan(&hButtonSystemIDJointMovementStart);
-  ButtonRefresh(&hButtonSystemIDJointMovementStart);
-  ButtonScan(&hButtonStop);
-  ButtonRefresh(&hButtonStop);
-  ButtonScan(&hButtonProfilingTimeIncrease);
-  ButtonRefresh(&hButtonProfilingTimeIncrease);
-  ButtonScan(&hButtonProfilingTimeDecrease);
-  ButtonRefresh(&hButtonProfilingTimeDecrease);
+  ButtonUpdate(&hButtonGoBack);
+  ButtonUpdate(&hButtonStart);
+  ButtonUpdate(&hButtonSystemIDJointMovementStart);
+  ButtonUpdate(&hButtonStop);
+  ButtonUpdate(&hButtonProfilingTimeIncrease);
+  ButtonUpdate(&hButtonProfilingTimeDecrease);
   
   
   PotentialmeterUpdate(&hPotKneeProfilingFreq);
@@ -692,12 +678,9 @@ void UI_Page_LowerLimb_Exoskeleton_SystemID_Init(void)
 
 void UI_Page_LowerLimb_Exoskeleton_GravityCompensation(void)
 {
-  ButtonScan(&hButtonGoBack);
-  ButtonRefresh(&hButtonGoBack);
-  ButtonScan(&hButtonStart);
-  ButtonRefresh(&hButtonStart);
-  ButtonScan(&hButtonStop);
-  ButtonRefresh(&hButtonStop);
+  ButtonUpdate(&hButtonGoBack);
+  ButtonUpdate(&hButtonStart);
+  ButtonUpdate(&hButtonStop);
   PotentialmeterUpdate(&hPotGravityCompensationHipThrottle);
   PotentialmeterUpdate(&hPotGravityCompensationKneeThrottle);
   
@@ -746,8 +729,7 @@ void UI_Page_LowerLimb_Exoskeleton_GravityCompensation_Init(void)
 
 void UI_Page_LowerLimb_Exoskeleton_ParameterAdjusting(void)
 {
-  ButtonScan(&hButtonGoBack);
-  ButtonRefresh(&hButtonGoBack);
+  ButtonUpdate(&hButtonGoBack);
   PotentialmeterUpdate(&hPotParameterAdjust_L1);
   PotentialmeterUpdate(&hPotParameterAdjust_J1);
   PotentialmeterUpdate(&hPotParameterAdjust_X1);
@@ -796,20 +778,13 @@ void UI_Page_LowerLimb_Exoskeleton_ParameterAdjusting_Init(void)
 
 void UI_Page_LowerLimb_Exoskeleton_MuscularTorqueMonitor(void)
 {
-  ButtonScan(&hButtonGoBack);
-  ButtonRefresh(&hButtonGoBack);
-  ButtonScan(&hButtonOn);
-  ButtonRefresh(&hButtonOn);
-  ButtonScan(&hButtonOff);
-  ButtonRefresh(&hButtonOff);
-  ButtonScan(&hButtonDataLogStart);
-  ButtonRefresh(&hButtonDataLogStart);
-  ButtonScan(&hButtonDataLogEnd);
-  ButtonRefresh(&hButtonDataLogEnd);
-  ButtonScan(&hButtonAugmentedControlOff);
-  ButtonRefresh(&hButtonAugmentedControlOff);
-  ButtonScan(&hButtonAugmentedControlOn);
-  ButtonRefresh(&hButtonAugmentedControlOn);
+  ButtonUpdate(&hButtonGoBack);
+  ButtonUpdate(&hButtonOn);
+  ButtonUpdate(&hButtonOff);
+  ButtonUpdate(&hButtonDataLogStart);
+  ButtonUpdate(&hButtonDataLogEnd);
+  ButtonUpdate(&hButtonAugmentedControlOff);;
+  ButtonUpdate(&hButtonAugmentedControlOn);
   PotentialmeterUpdate(&hPotAugmentedControlHipThrottle);
   PotentialmeterUpdate(&hPotAugmentedControlKneeThrottle);
   
@@ -872,26 +847,17 @@ void UI_Page_Home1(void)
   LCD_SetFont(&Font32); 
   LCD_DisplayString(140, 30, "Welcome Jiaye");
   LCD_SetFont(&Font24);
-  ButtonScan(&hButtonPageExoskeletonInterface);
-  ButtonRefresh(&hButtonPageExoskeletonInterface);
-  ButtonScan(&hButtonPageAK10_9ManualControl);
-  ButtonRefresh(&hButtonPageAK10_9ManualControl);
-  ButtonScan(&hButtonPageBNO055_Monitor);
-  ButtonRefresh(&hButtonPageBNO055_Monitor);
-  ButtonScan(&hButtonPageTMotorAccelerationObserverProject);
-  ButtonRefresh(&hButtonPageTMotorAccelerationObserverProject);
-  ButtonScan(&hButtonPageADCMonitor);
-  ButtonRefresh(&hButtonPageADCMonitor);
-  ButtonScan(&hButtonPageCustomizedIMUMonitor);
-  ButtonRefresh(&hButtonPageCustomizedIMUMonitor);
-	ButtonScan(&hButtonPageBenMoKeJiM15Testing);
-  ButtonRefresh(&hButtonPageBenMoKeJiM15Testing);
-  ButtonScan(&hButtonPageLinKongKeJiTesting);
-  ButtonRefresh(&hButtonPageLinKongKeJiTesting);
-  ButtonScan(&hButtonPageMrDoorTesting);
-  ButtonRefresh(&hButtonPageMrDoorTesting);
-  ButtonScan(&hButtonPageTorqueConstantCalibration);
-  ButtonRefresh(&hButtonPageTorqueConstantCalibration);
+  ButtonUpdate(&hButtonPageExoskeletonInterface);
+  ButtonUpdate(&hButtonPageAK10_9ManualControl);
+  ButtonUpdate(&hButtonPageBNO055_Monitor);
+  ButtonUpdate(&hButtonPageTMotorAccelerationObserverProject);
+  ButtonUpdate(&hButtonPageADCMonitor);
+  ButtonUpdate(&hButtonPageCustomizedIMUMonitor);
+	ButtonUpdate(&hButtonPageBenMoKeJiM15Testing);
+  ButtonUpdate(&hButtonPageLinKongKeJiTesting);
+  ButtonUpdate(&hButtonPageMrDoorTesting);
+  ButtonUpdate(&hButtonPageTorqueConstantCalibration);
+  ButtonUpdate(&hButtonPageExoskeletonMotorDurabilityTest);
   
   
   
@@ -915,6 +881,8 @@ void UI_Page_Home1(void)
     UI_Page_Change_To(&UIPage_MrDoorTestingTypeSelection);
   if (ifButtonPressed(&hButtonPageTorqueConstantCalibration))
     UI_Page_Change_To(&UIPage_TorqueConstantCalibration);
+  if (ifButtonPressed(&hButtonPageExoskeletonMotorDurabilityTest))
+    UI_Page_Change_To(&UIPage_ExoskeletonMotorDurabilityTest);
   
 }
 void UI_Page_Home1_Init(void)
@@ -929,24 +897,18 @@ void UI_Page_Home1_Init(void)
   hButtonPageLinKongKeJiTesting = Button_Create(100, 450, 300, 40, "LinKongKeJi MG Motor", LIGHT_MAGENTA, LCD_RED);
   hButtonPageMrDoorTesting = Button_Create(100, 500, 300, 40, "MrDoor", LIGHT_MAGENTA, LCD_RED);
   hButtonPageTorqueConstantCalibration = Button_Create(100, 550, 300, 40, "Kt Calibration", LIGHT_MAGENTA, LCD_RED);
+  hButtonPageExoskeletonMotorDurabilityTest = Button_Create(40, 600, 400, 40, "Exoskeleton Motor Test", LIGHT_MAGENTA, LCD_RED);
 }
 
 void UI_Page_AK10_9_ManualControlCubeMarsFWServoMode(void)
 {
-  ButtonScan(&hButtonGoBack);
-  ButtonScan(&hButtonMotorStart);
-  ButtonScan(&hButtonMotorStop);
-  ButtonScan(&hButtonMotorZeroing);
-  ButtonScan(&hButtonManualControlMode);
-  ButtonScan(&hButtonMotorSelectRightHip);
-  ButtonScan(&hButtonMotorSelectRightKnee);
-  ButtonRefresh(&hButtonGoBack);
-  ButtonRefresh(&hButtonMotorStart);
-  ButtonRefresh(&hButtonMotorStop);
-  ButtonRefresh(&hButtonMotorZeroing);
-  ButtonRefresh(&hButtonManualControlMode);
-  ButtonRefresh(&hButtonMotorSelectRightHip);
-  ButtonRefresh(&hButtonMotorSelectRightKnee);
+  ButtonUpdate(&hButtonGoBack);
+  ButtonUpdate(&hButtonMotorStart);
+  ButtonUpdate(&hButtonMotorStop);
+  ButtonUpdate(&hButtonMotorZeroing);
+  ButtonUpdate(&hButtonManualControlMode);
+  ButtonUpdate(&hButtonMotorSelectRightHip);
+  ButtonUpdate(&hButtonMotorSelectRightKnee);
   PotentialmeterUpdate(&hTMotorManualControlPot_pos);
   PotentialmeterUpdate(&hTMotorManualControlPot_vel);
   PotentialmeterUpdate(&hTMotorManualControlPot_cur);
@@ -1076,18 +1038,12 @@ void UI_Page_AK10_9_ManualControlCubeMarsFWServoMode_Init(void)
 
 void UI_Page_AK10_9_ManualControlCubeMarsFWMITMode(void)
 {
-  ButtonScan(&hButtonGoBack);
-  ButtonScan(&hButtonMotorStart);
-  ButtonScan(&hButtonMotorStop);
-  ButtonScan(&hButtonMotorZeroing);
-  ButtonScan(&hButtonMotorSelectRightHip);
-  ButtonScan(&hButtonMotorSelectRightKnee);
-  ButtonRefresh(&hButtonGoBack);
-  ButtonRefresh(&hButtonMotorStart);
-  ButtonRefresh(&hButtonMotorStop);
-  ButtonRefresh(&hButtonMotorZeroing);
-  ButtonRefresh(&hButtonMotorSelectRightHip);
-  ButtonRefresh(&hButtonMotorSelectRightKnee);
+  ButtonUpdate(&hButtonGoBack);
+  ButtonUpdate(&hButtonMotorStart);
+  ButtonUpdate(&hButtonMotorStop);
+  ButtonUpdate(&hButtonMotorZeroing);
+  ButtonUpdate(&hButtonMotorSelectRightHip);
+  ButtonUpdate(&hButtonMotorSelectRightKnee);
   PotentialmeterUpdate(&hTMotorManualControlPot_pos);
   PotentialmeterUpdate(&hTMotorManualControlPot_vel);
   PotentialmeterUpdate(&hTMotorManualControlPot_cur);
@@ -1193,14 +1149,10 @@ void UI_Page_AK10_9_ManualControlCubeMarsFWMITMode_Init(void)
 
 void UI_Page_BNO055_Monitor(void)
 {
-  ButtonScan(&hButtonGoBack);
-  ButtonRefresh(&hButtonGoBack);
-  ButtonScan(&hButtonIMUSetModeNDOF);
-  ButtonRefresh(&hButtonIMUSetModeNDOF);
-  ButtonScan(&hButtonIMUSetModeACCONLY);
-  ButtonRefresh(&hButtonIMUSetModeACCONLY);
-  ButtonScan(&hButtonIMUSetModeGYROONLY);
-  ButtonRefresh(&hButtonIMUSetModeGYROONLY);
+  ButtonUpdate(&hButtonGoBack);
+  ButtonUpdate(&hButtonIMUSetModeNDOF);
+  ButtonUpdate(&hButtonIMUSetModeACCONLY);
+  ButtonUpdate(&hButtonIMUSetModeGYROONLY);
   
   LCD_SetLayer(1); 
   LCD_SetColor(LCD_BLACK);
@@ -1271,18 +1223,12 @@ void UI_Page_Change_To(PageHandle* hpage)
 
 void UI_Page_TMotor_Acceleration_Observer_Project(void)
 {
-  ButtonScan(&hButtonGoBack);
-  ButtonRefresh(&hButtonGoBack);
-  ButtonScan(&hButtonDataLogStart);
-  ButtonScan(&hButtonDataLogEnd);
-  ButtonScan(&hButtonMotorProfilingStart);
-  ButtonScan(&hButtonMotorProfilingEnd);
-  ButtonScan(&hButtonMotorZeroing);
-  ButtonRefresh(&hButtonDataLogEnd);
-  ButtonRefresh(&hButtonDataLogStart);
-  ButtonRefresh(&hButtonMotorProfilingStart);
-  ButtonRefresh(&hButtonMotorProfilingEnd);
-  ButtonRefresh(&hButtonMotorZeroing);
+  ButtonUpdate(&hButtonGoBack);
+  ButtonUpdate(&hButtonDataLogStart);
+  ButtonUpdate(&hButtonDataLogEnd);
+  ButtonUpdate(&hButtonMotorProfilingStart);
+  ButtonUpdate(&hButtonMotorProfilingEnd);
+  ButtonUpdate(&hButtonMotorZeroing);
   PotentialmeterUpdate(&hPotTMotorProfilingFrequency);
   
   if (ifButtonPressed(&hButtonDataLogStart))
@@ -1379,10 +1325,8 @@ void UI_Page_ADC_Monitor_Init(void)
 }
 void UI_Page_ADC_Monitor(void)
 {
-  ButtonScan(&hButtonGoBack);
-  ButtonRefresh(&hButtonGoBack);
-  ButtonScan(&hButtonResetAD7606);
-  ButtonRefresh(&hButtonResetAD7606);
+  ButtonUpdate(&hButtonGoBack);
+  ButtonUpdate(&hButtonResetAD7606);
   
   LCD_SetLayer(1);
   LCD_SetColor(LCD_BLACK);
@@ -1411,22 +1355,13 @@ void UI_Page_ADC_Monitor(void)
 
 void UI_Page_CustomizedIMU(void)
 {
-  ButtonScan(&hButtonGoBack);
-  ButtonRefresh(&hButtonGoBack);
-  ButtonScan(&hButtonSelectHipIMU);
-  ButtonRefresh(&hButtonSelectHipIMU);
-  ButtonScan(&hButtonSelectKneeIMU);
-  ButtonRefresh(&hButtonSelectKneeIMU);
-  ButtonScan(&hButtonDataLogStart);
-  ButtonRefresh(&hButtonDataLogStart);
-  ButtonScan(&hButtonDataLogEnd);
-  ButtonRefresh(&hButtonDataLogEnd);
-  ButtonScan(&hButtonAveragingStart);
-  ButtonRefresh(&hButtonAveragingStart);
-  ButtonScan(&hButtonAveragingStop);
-  ButtonRefresh(&hButtonAveragingStop);
-  
-  
+  ButtonUpdate(&hButtonGoBack);
+  ButtonUpdate(&hButtonSelectHipIMU);
+  ButtonUpdate(&hButtonSelectKneeIMU);
+  ButtonUpdate(&hButtonDataLogStart);
+  ButtonUpdate(&hButtonDataLogEnd);
+  ButtonUpdate(&hButtonAveragingStart);
+  ButtonUpdate(&hButtonAveragingStop);
   
   LCD_SetLayer(1);
   LCD_SetColor(LCD_BLACK);
@@ -1496,18 +1431,12 @@ void UI_Page_CustomizedIMU_Init(void)
 
 void UI_Page_BenMoKeJiM15Testing(void)
 {
-	ButtonScan(&hButtonGoBack);
-  ButtonRefresh(&hButtonGoBack);
-	ButtonScan(&hButtonMotorEnable);
-  ButtonRefresh(&hButtonMotorEnable);
-	ButtonScan(&hButtonMotorDisable);
-  ButtonRefresh(&hButtonMotorDisable);
-	ButtonScan(&hButtonVelocityControl);
-  ButtonRefresh(&hButtonVelocityControl);
-	ButtonScan(&hButtonPositionControl);
-  ButtonRefresh(&hButtonPositionControl);
-	ButtonScan(&hButtonCurrentControl);
-  ButtonRefresh(&hButtonCurrentControl);
+	ButtonUpdate(&hButtonGoBack);
+	ButtonUpdate(&hButtonMotorEnable);
+	ButtonUpdate(&hButtonMotorDisable);
+	ButtonUpdate(&hButtonVelocityControl);
+	ButtonUpdate(&hButtonPositionControl);
+	ButtonUpdate(&hButtonCurrentControl);
 	PotentialmeterUpdate(&hPotPositionControl);
 	JoystickUpdate(&hJoyVelCurControl);
 	
@@ -1570,22 +1499,14 @@ void UI_Page_BenMoKeJiM15Testing_Init(void)
 
 void UI_Page_LinKongKeJiTesting(void)
 {
-  ButtonScan(&hButtonGoBack);
-  ButtonRefresh(&hButtonGoBack);
-  ButtonScan(&hButtonMotorEnable);
-  ButtonRefresh(&hButtonMotorEnable);
-	ButtonScan(&hButtonStop);
-  ButtonRefresh(&hButtonStop);
-	ButtonScan(&hButtonVelocityControl);
-  ButtonRefresh(&hButtonVelocityControl);
-	ButtonScan(&hButtonPositionControl);
-  ButtonRefresh(&hButtonPositionControl);
-	ButtonScan(&hButtonCurrentControl);
-  ButtonRefresh(&hButtonCurrentControl);
-	ButtonScan(&hButtonMotorZeroing);
-  ButtonRefresh(&hButtonMotorZeroing);
-	ButtonScan(&hButtonReadAngle);
-  ButtonRefresh(&hButtonReadAngle);
+  ButtonUpdate(&hButtonGoBack);
+  ButtonUpdate(&hButtonMotorEnable);
+	ButtonUpdate(&hButtonStop);
+	ButtonUpdate(&hButtonVelocityControl);
+	ButtonUpdate(&hButtonPositionControl);
+	ButtonUpdate(&hButtonCurrentControl);
+	ButtonUpdate(&hButtonMotorZeroing);
+	ButtonUpdate(&hButtonReadAngle);
 	JoystickUpdate(&hJoyLKTECHTesting);
   
   if (ifButtonPressed(&hButtonMotorEnable))
@@ -1666,22 +1587,14 @@ void UI_Page_LinKongKeJiTesting_Init(void)
 
 void UI_Page_MrDoorTestingTMotor(void)
 {
-  ButtonScan(&hButtonGoBack);
-  ButtonRefresh(&hButtonGoBack);
-  ButtonScan(&hButtonMotorZeroing);
-  ButtonRefresh(&hButtonMotorZeroing);
-  ButtonScan(&hButtonMotorStart);
-  ButtonRefresh(&hButtonMotorStart);
-  ButtonScan(&hButtonMotorStop);
-  ButtonRefresh(&hButtonMotorStop);
-  ButtonScan(&hButtonVelocityControl);
-  ButtonRefresh(&hButtonVelocityControl);
-  ButtonScan(&hButtonCurrentControl);
-  ButtonRefresh(&hButtonCurrentControl);
-  ButtonScan(&hButtonPositionControl);
-  ButtonRefresh(&hButtonPositionControl);
-  ButtonScan(&hButtonWeightControl);
-  ButtonRefresh(&hButtonWeightControl);
+  ButtonUpdate(&hButtonGoBack);
+  ButtonUpdate(&hButtonMotorZeroing);
+  ButtonUpdate(&hButtonMotorStart);
+  ButtonUpdate(&hButtonMotorStop);
+  ButtonUpdate(&hButtonVelocityControl);
+  ButtonUpdate(&hButtonCurrentControl);
+  ButtonUpdate(&hButtonPositionControl);
+  ButtonUpdate(&hButtonWeightControl);
   PotentialmeterUpdate(&hMrDoorTMotorManualControlPot_kd);
   PotentialmeterUpdate(&hMrDoorCurrentControlMax);
   JoystickUpdate(&hJoyMrDoorMotorLeft);
@@ -1822,18 +1735,12 @@ void UI_Page_MrDoorTestingTMotor_Init(void)
 
 void UI_Page_MrDoorTestingBenMoKeJi(void)
 {
-  ButtonScan(&hButtonGoBack);
-  ButtonRefresh(&hButtonGoBack);
-  ButtonScan(&hButtonMotorStart);
-  ButtonRefresh(&hButtonMotorStart);
-  ButtonScan(&hButtonMotorStop);
-  ButtonRefresh(&hButtonMotorStop);
-  ButtonScan(&hButtonVelocityControl);
-  ButtonRefresh(&hButtonVelocityControl);
-  ButtonScan(&hButtonCurrentControl);
-  ButtonRefresh(&hButtonCurrentControl);
-  ButtonScan(&hButtonWeightControl);
-  ButtonRefresh(&hButtonWeightControl);
+  ButtonUpdate(&hButtonGoBack);
+  ButtonUpdate(&hButtonMotorStart);
+  ButtonUpdate(&hButtonMotorStop);
+  ButtonUpdate(&hButtonVelocityControl);
+  ButtonUpdate(&hButtonCurrentControl);
+  ButtonUpdate(&hButtonWeightControl);
   PotentialmeterUpdate(&hMrDoorBenMoKeJiWeightSupportControl);
   PotentialmeterUpdate(&hMrDoorCurrentControlMax);
   JoystickUpdate(&hJoyMrDoorMotorLeft);
@@ -1957,12 +1864,9 @@ void UI_Page_MrDoorTestingBenMoKeJi_Init(void)
 
 void UI_Page_MrDoorTestingTypeSelection(void)
 {
-  ButtonScan(&hButtonGoBack);
-  ButtonRefresh(&hButtonGoBack);
-  ButtonScan(&hButtonTMotorType);
-  ButtonRefresh(&hButtonTMotorType);
-  ButtonScan(&hButtonBenMoKeJiType);
-  ButtonRefresh(&hButtonBenMoKeJiType);
+  ButtonUpdate(&hButtonGoBack);
+  ButtonUpdate(&hButtonTMotorType);
+  ButtonUpdate(&hButtonBenMoKeJiType);
   
   if (ifButtonPressed(&hButtonGoBack))
     UI_Page_Change_To(&UIPage_Home1);
@@ -1982,16 +1886,11 @@ void UI_Page_MrDoorTestingTypeSelection_Init(void)
 
 void UI_Page_TkCalibration(void)
 {
-  ButtonScan(&hButtonGoBack);
-  ButtonRefresh(&hButtonGoBack);
-  ButtonScan(&hButtonMotorStart);
-  ButtonScan(&hButtonMotorStop);
-  ButtonScan(&hButtonMotorZeroing);
-  ButtonRefresh(&hButtonMotorStart);
-  ButtonRefresh(&hButtonMotorStop);
-  ButtonRefresh(&hButtonMotorZeroing);
-  ButtonScan(&hButtonTkCalculateAverageIq);
-  ButtonRefresh(&hButtonTkCalculateAverageIq);
+  ButtonUpdate(&hButtonGoBack);
+  ButtonUpdate(&hButtonMotorStart);
+  ButtonUpdate(&hButtonMotorStop);
+  ButtonUpdate(&hButtonMotorZeroing);
+  ButtonUpdate(&hButtonTkCalculateAverageIq);
   PotentialmeterUpdate(&hTMotorManualControlPot_pos);
   PotentialmeterUpdate(&hTMotorManualControlPot_kp);
   PotentialmeterUpdate(&hTMotorManualControlPot_kd);
@@ -2065,4 +1964,63 @@ void UI_Page_TkCalibration_Init(void)
   Averager_Init(&hAverageTorqueConstantCalibration);
   hMotorPtrManualControl = &hAKMotorRightKnee;
   torqueConstantCalibrationIfMotorStarted = 0;
+}
+
+void UI_Page_ExoskeletonMotorDurabilityTest(void)
+{
+  ButtonUpdate(&hButtonGoBack);
+  ButtonUpdate(&hButtonDataLogStart);
+  ButtonUpdate(&hButtonDataLogEnd);
+  ButtonUpdate(&hButtonMotorProfilingStart);
+  ButtonUpdate(&hButtonMotorProfilingEnd);
+  ButtonUpdate(&hButtonMotorZeroing);
+  ButtonUpdate(&hButtonMotorStart);
+  ButtonUpdate(&hButtonMotorStop);
+  
+  if (ifButtonPressed(&hButtonDataLogStart))
+    USB_DataLogStart();
+  if (ifButtonPressed(&hButtonDataLogEnd))
+    USB_DataLogEnd();
+  if(ifButtonPressed(&hButtonMotorProfilingStart))
+  {
+    ifMotorProfilingStartedExoskeletonMotorTest = 1;
+    exoskeletonMotorTestTimeDifference = HAL_GetTick();
+  }
+  if(ifButtonPressed(&hButtonMotorProfilingEnd))
+  {
+    ifMotorProfilingStartedExoskeletonMotorTest = 0;
+    exoskeletonMotorTestTimeDifference = 0;
+  }
+  if(ifButtonPressed(&hButtonMotorZeroing))
+    AK10_9_ServoMode_Zeroing(&hAKMotorRightHip);
+  if(ifButtonPressed(&hButtonMotorStart))
+    AK10_9_MITMode_EnableMotor(&hAKMotorRightHip);
+  if(ifButtonPressed(&hButtonMotorStop))
+    AK10_9_MITMode_DisableMotor(&hAKMotorRightHip);
+  
+  
+  LCD_SetLayer(1); 
+  LCD_SetColor(LCD_BLACK);
+  if (hAKMotorRightHip.status == AK10_9_Online)
+    LCD_DisplayString(200, 0, "Motor  Online");
+  else
+    LCD_DisplayString(200, 0, "Motor Offline");
+  
+  if (ifButtonPressed(&hButtonGoBack))
+    UI_Page_Change_To(&UIPage_Home1);
+}
+
+void UI_Page_ExoskeletonMotorDurabilityTest_Init(void)
+{
+  ifMotorProfilingStartedExoskeletonMotorTest = 0;
+  exoskeletonMotorTestTimeDifference = 0;
+  
+  hButtonDataLogStart = Button_Create(10, 100, 200, 40, "Data Log Start", LIGHT_MAGENTA, LCD_RED);
+  hButtonDataLogEnd = Button_Create(10, 150, 200, 40, "Data Log End", LCD_GREEN, LCD_RED);
+  hButtonMotorProfilingStart = Button_Create(10, 200, 300, 40, "Motor profiling Start", LIGHT_GREY, LCD_RED);
+  hButtonMotorProfilingEnd = Button_Create(10, 250, 300, 40, "Motor profiling Stop", LCD_YELLOW, LCD_RED);
+  hButtonMotorZeroing = Button_Create(10, 330, 200, 40, "Motor Set Zero", LCD_BLUE, LCD_RED);
+  hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
+  hButtonMotorStart = Button_Create(10, 400, 300, 50, "Motor Start", LCD_YELLOW, LCD_RED);
+  hButtonMotorStop = Button_Create(10, 460, 300, 80, "Motor Stop", LCD_YELLOW, LCD_RED);
 }

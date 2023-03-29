@@ -3,7 +3,7 @@
 
 #include "cmsis_os.h"
 
-void AK10Calibration_Task(void *argument);
+void Main_Task(void *argument);
 void UI_Task(void *argument);
 void ADC_Task(void *argument);
 void MotorTesting_Task(void *argument);

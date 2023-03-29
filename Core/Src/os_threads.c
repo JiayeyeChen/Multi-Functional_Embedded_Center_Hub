@@ -1,8 +1,8 @@
 #include "os_threads.h"
 
-osThreadId_t AK10_CalibrationnTaskHandle;
-const osThreadAttr_t AK10_Calibration_attributes = {
-  .name = "AK10_Calibration",
+osThreadId_t MainTaskHandle;
+const osThreadAttr_t Main_attributes = {
+  .name = "Main",
   .stack_size = 1024 * 4,
   .priority = (osPriority_t) osPriorityRealtime,
 };
@@ -30,7 +30,7 @@ const osThreadAttr_t MotorTestingTask_attributes = {
 
 void OSThreads_Init(void)
 {
-  AK10_CalibrationnTaskHandle = osThreadNew(AK10Calibration_Task, NULL, &AK10_Calibration_attributes);
+  MainTaskHandle = osThreadNew(Main_Task, NULL, &Main_attributes);
   UITaskHandle = osThreadNew(UI_Task, NULL, &UITask_attributes);
   ADCTaskHandle = osThreadNew(ADC_Task, NULL, &ADCTask_attributes);
 	MotorTestingHandle = osThreadNew(MotorTesting_Task, NULL, &MotorTestingTask_attributes);
