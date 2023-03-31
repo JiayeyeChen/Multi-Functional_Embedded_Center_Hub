@@ -628,10 +628,10 @@ void EXOSKELETON_AugmentedControlManager(void)
 }
 
 /* Rad, milli second */
-float EXOSKELETON_HipGait1(float milli_sec)
+float EXOSKELETON_HipGait1(float sec)
 {
   float w, a0, a1, b1, a2, b2, a3, b3;
-  w = 0.003988f;
+  w = 3.988f;
   a0 = 3.002f;
   a1 = 0.1885f;
   b1 = 0.1828f;
@@ -640,8 +640,13 @@ float EXOSKELETON_HipGait1(float milli_sec)
   a3 = 0.01211f;
   b3 = -0.01612f;
   w = 3.988f;
-  float angle =  a0 + a1 * cos(milli_sec * w) + b1 * sin(milli_sec * w) + \
-                 a2 * cos(2.0f * milli_sec*w) + b2 * sin(2.0f * milli_sec * w) + \
-                 a3 * cos(3.0f * milli_sec*w) + b3 * sin(3.0f * milli_sec * w);
+  float angle =  a0 + a1 * cos(sec * w) + b1 * sin(sec * w) + \
+                 a2 * cos(2.0f * sec*w) + b2 * sin(2.0f * sec * w) + \
+                 a3 * cos(3.0f * sec*w) + b3 * sin(3.0f * sec * w);
   return angle;
+}
+
+void EXOSKELETON_Motor_Durability_Test_Set_Datalog_Label(void)
+{
+  USB_SendDataSlotLabel("4", "Pos", "Vel", "Iq", "Temp");
 }

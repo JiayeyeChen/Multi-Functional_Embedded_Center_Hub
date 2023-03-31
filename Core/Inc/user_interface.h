@@ -86,10 +86,27 @@ typedef struct
   float xDirectionCorrection, yDirectionCorrection;
 }JoystickHandle;
 
+enum UIMainTask
+{
+  UI_MAIN_TASK_NONE,
+  UI_MAIN_TASK_LOWER_LIMB_EXOSKELETON,
+  UI_MAIN_TASK_AK10_9_MANUAL_CONTROL,
+  UI_MAIN_TASK_IMU_MONITOR,
+  UI_MAIN_TASK_BNO055_MONITOR,
+  UI_MAIN_TASK_TMOTOR_ACCELERATION_OBSERVER,
+  UI_MAIN_TASK_ADC_MONITOR,
+  UI_MAIN_TASK_BENMOKEJIM15,
+  UI_MAIN_TASK_LINKONGKEJI_MG_MOTOR,
+  UI_MAIN_TASK_MRDOOR,
+  UI_MAIN_TASK_KT_CALIBRATION,
+  UI_MAIN_TASK_EXOSKELETON_MOTOR_TEST
+};
+
 typedef struct
 {
   PageHandle* curPage;
   PageHandle* prePage;
+  enum UIMainTask task;
 }UIHandle;
 
 void UI_Init(void);
@@ -150,9 +167,17 @@ void         UI_Page_ExoskeletonMotorDurabilityTest_Init(void);
 
 /* Lin Kong Ke Ji Testing */
 extern uint8_t ifKeepReadingAngle;
+extern PageHandle UIPage_LinKongKeJi_Testing;
+////////////////////////////
+
+/* Exoskeleton motor test */
+extern uint8_t ifMotorProfilingStartedExoskeletonMotorTest;
+extern uint32_t exoskeletonMotorTestTimeDifference;
+extern float exoskeletonMotorTestHipGaitAngleDeg;
 ////////////////////////////
 
 extern UIHandle hUI;
 extern PageHandle UIPage_AK10_9_ManualControlCubeMarsFWServoMode, UIPage_AK10_9_ManualControlCubeMarsFWMITMode;
-extern PageHandle UIPage_BenMoKeJiM15_Testing, UIPage_LinKongKeJi_Testing;
+extern PageHandle UIPage_BenMoKeJiM15_Testing;
+extern PageHandle UIPage_LowerLimb_Exoskeleton;
 #endif

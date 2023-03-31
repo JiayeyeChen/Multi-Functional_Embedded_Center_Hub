@@ -24,6 +24,10 @@
 
 void SystemClock_Config(void);
 
+
+/* For exoskeleton motor test */
+uint32_t datalogTimeStamp;
+////////////////////////////////
 int main(void)
 {
   HAL_Init();
@@ -150,39 +154,78 @@ void SystemClock_Config(void)
 
 void Main_Task(void *argument)
 {
-  
+  datalogTimeStamp = HAL_GetTick();
   for(;;)
   {
-    EXOSKELETON_CentreControl();
-    if (hExoskeleton.mainTask != EXOSKELETON_MAIN_TASK_SYSTEM_ID)
-      EXOSKELETON_CommonDatalogManager();
-
-    if (ifMotorProfilingStarted)
-      AK10_9_MotorProfiling_Function1_Half_Sin(&hAKMotorRightHip, tmotorProfilingSinWaveFrequency);
-    
-    if (ifManualControlStarted)
+    /* Proprioception lower limb exoskeleton control */
+    if (hUI.task == UI_MAIN_TASK_LOWER_LIMB_EXOSKELETON)
     {
-      if (hUI.curPage == &UIPage_AK10_9_ManualControlCubeMarsFWServoMode)
+      EXOSKELETON_CentreControl();
+      if (hUI.curPage == &UIPage_LowerLimb_Exoskeleton)
+        EXOSKELETON_CommonDatalogManager();
+    }
+    
+    /* Tmotor acceleration observer */
+    if (hUI.task == UI_MAIN_TASK_TMOTOR_ACCELERATION_OBSERVER)
+    {
+      if (ifMotorProfilingStarted)
+        AK10_9_MotorProfiling_Function1_Half_Sin(&hAKMotorRightHip, tmotorProfilingSinWaveFrequency);
+    }
+    
+    /* Tmotor manual control */
+    if (hUI.task == UI_MAIN_TASK_AK10_9_MANUAL_CONTROL)
+    {
+      if (ifManualControlStarted)
       {
-        if (controlModeCubeMarsFW == AK10_9_CUBEMARS_FW_MODE_POSITION)
-          AK10_9_ServoMode_PositionControl(hMotorPtrManualControl, manualControlValue_pos);
-        else if (controlModeCubeMarsFW == AK10_9_CUBEMARS_FW_MODE_CURRENT)
-          AK10_9_ServoMode_CurrentControl(hMotorPtrManualControl, manualControlValue_cur);
-        else if (controlModeCubeMarsFW == AK10_9_CUBEMARS_FW_MODE_VELOCITY)
-          AK10_9_ServoMode_VelocityControl(hMotorPtrManualControl, manualControlValue_vel);
-      }
-      else if (hUI.curPage == &UIPage_AK10_9_ManualControlCubeMarsFWMITMode)
-      {
-        AK10_9_CubaMarsFW_MITMode_ContinuousControl_Deg(hMotorPtrManualControl, \
-                                                        manualControlValue_pos, manualControlValue_vel, \
-                                                        manualControlValue_kp, manualControlValue_kd, manualControlValue_cur);
-        AK10_9_CubeMarsFW_MITMode_ContinuousControlManager(hMotorPtrManualControl, \
-                                                           30.0f, 180.0f, 1.0f, 100.0f, 0.5f, 0.001f);
+        if (hUI.curPage == &UIPage_AK10_9_ManualControlCubeMarsFWServoMode)
+        {
+          if (controlModeCubeMarsFW == AK10_9_CUBEMARS_FW_MODE_POSITION)
+            AK10_9_ServoMode_PositionControl(hMotorPtrManualControl, manualControlValue_pos);
+          else if (controlModeCubeMarsFW == AK10_9_CUBEMARS_FW_MODE_CURRENT)
+            AK10_9_ServoMode_CurrentControl(hMotorPtrManualControl, manualControlValue_cur);
+          else if (controlModeCubeMarsFW == AK10_9_CUBEMARS_FW_MODE_VELOCITY)
+            AK10_9_ServoMode_VelocityControl(hMotorPtrManualControl, manualControlValue_vel);
+        }
+        else if (hUI.curPage == &UIPage_AK10_9_ManualControlCubeMarsFWMITMode)
+        {
+          AK10_9_CubaMarsFW_MITMode_ContinuousControl_Deg(hMotorPtrManualControl, \
+                                                          manualControlValue_pos, manualControlValue_vel, \
+                                                          manualControlValue_kp, manualControlValue_kd, manualControlValue_cur);
+          AK10_9_CubeMarsFW_MITMode_ContinuousControlManager(hMotorPtrManualControl, \
+                                                             30.0f, 180.0f, 1.0f, 100.0f, 0.5f, 0.001f);
+        }
       }
     }
     
-    if (ifIMUFeedbackStarted)
-      EXOSKELETON_SetBNO055Mode_ACC_Only(&hIMUTorso);
+    /* Customized IMU Monitor */
+    if (hUI.task == UI_MAIN_TASK_IMU_MONITOR)
+    {
+      if (ifIMUFeedbackStarted)
+        EXOSKELETON_SetBNO055Mode_ACC_Only(&hIMUTorso);
+    }
+    
+    /* Exoskeleton motor test */
+    if (hUI.task == UI_MAIN_TASK_EXOSKELETON_MOTOR_TEST)
+    {
+      if (ifMotorProfilingStartedExoskeletonMotorTest)
+      {
+        exoskeletonMotorTestHipGaitAngleDeg = rad2deg * EXOSKELETON_HipGait1(((float)(HAL_GetTick() - exoskeletonMotorTestTimeDifference))/1000.0f);
+        AK10_9_CubaMarsFW_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightHip, exoskeletonMotorTestHipGaitAngleDeg, \
+                                                                    0.0f, 499.0f, 3.0f, 0.0f);
+      }
+      AK10_9_CubeMarsFW_MITMode_ContinuousControlManager(&hAKMotorRightHip, \
+                                                             300.0f, 180.0f, 1.0f, 100.0f, 0.5f, 0.001f);
+      dataSlots_Exoskeleton_Motor_Durability_Test[0].f = hAKMotorRightHip.realPositionOffseted.f;
+      dataSlots_Exoskeleton_Motor_Durability_Test[1].f = hAKMotorRightHip.realVelocityPresent.f;
+      dataSlots_Exoskeleton_Motor_Durability_Test[2].f = hAKMotorRightHip.realCurrent.f;
+      dataSlots_Exoskeleton_Motor_Durability_Test[3].f = hAKMotorRightHip.temperature;
+      if (HAL_GetTick() - datalogTimeStamp > 10)
+      {
+        hUSB.ifNewDataLogPiece2Send = 1;
+        datalogTimeStamp = HAL_GetTick();
+      }
+      USB_DataLogManager(EXOSKELETON_Motor_Durability_Test_Set_Datalog_Label, dataSlots_Exoskeleton_Motor_Durability_Test);
+    }
     
     AK10_9_CubeMarsFW_MotorStatusMonitor(&hAKMotorRightKnee, 100);
     AK10_9_CubeMarsFW_MotorStatusMonitor(&hAKMotorRightHip, 100);

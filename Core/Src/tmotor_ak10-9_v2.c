@@ -326,7 +326,8 @@ void AK10_9_MITMode_GetFeedbackMsg(CAN_RxHeaderTypeDef* rxheader, AK10_9HandleCu
   hmotor->realCurrent.f  = (((float)iUint) - 2048.0f) * 0.0293111871f;
   hmotor->realCurrent.f *= hmotor->posDirectionCorrection;
   hmotor->realTorque.f = hmotor->realCurrent.f * hmotor->kt;
-  
+  hmotor->temperature = (int8_t)rxbuf[6];
+  hmotor->errorCode = rxbuf[7];
   //Butterworth filter method to estimate acceleration//
   hmotor->realAccelerationFiltered.f = hmotor->b1Butter * hmotor->realAccelerationRaw.f + \
                                        hmotor->b2Butter * hmotor->realAccelerationRawPreviousButter[0] + \

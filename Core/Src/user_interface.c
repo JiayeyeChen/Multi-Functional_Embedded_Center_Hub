@@ -101,6 +101,7 @@ PageHandle                    UIPage_ExoskeletonMotorDurabilityTest;
 ButtonHandle                  hButtonPageExoskeletonMotorDurabilityTest;
 uint8_t                       ifMotorProfilingStartedExoskeletonMotorTest;
 uint32_t                      exoskeletonMotorTestTimeDifference;
+float                         exoskeletonMotorTestHipGaitAngleDeg;
 ///////////////////////////////////////
 
 ButtonHandle Button_Create(uint16_t x, uint16_t y, uint16_t xLen, uint16_t yLen, char label[],\
@@ -268,6 +269,7 @@ void UI_Init(void)
   /*UI handle Initialization*/
   hUI.curPage = &UIPage_Home1;
   hUI.prePage = &UIPage_Home1;
+  hUI.task = UI_MAIN_TASK_NONE;
   
   /*UI Pages*/
   UIPage_Home1.ifPageInitialized = 0;
@@ -504,6 +506,7 @@ void UI_Page_LowerLimb_Exoskeleton(void)
 
 void UI_Page_LowerLimb_Exoskeleton_Init(void)
 {
+  hUI.task = UI_MAIN_TASK_LOWER_LIMB_EXOSKELETON;
   hExoskeleton.mainTask = EXOSKELETON_MAIN_TASK_FREE;
   hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
   hButtonPageSystemID = Button_Create(100, 50, 280, 40, "System Identification", LCD_WHITE, LCD_RED);
@@ -887,6 +890,7 @@ void UI_Page_Home1(void)
 }
 void UI_Page_Home1_Init(void)
 {
+  hUI.task = UI_MAIN_TASK_NONE;
   hButtonPageExoskeletonInterface = Button_Create(100, 100, 300, 40, "Lower Limb Exoskeleton", LIGHT_MAGENTA, LCD_RED);
   hButtonPageAK10_9ManualControl = Button_Create(80, 150, 360, 40, "AK10-9 V2.0 Manual Control", LIGHT_MAGENTA, LCD_RED);
   hButtonPageBNO055_Monitor = Button_Create(150, 250, 200, 40, "BNO055 Monitor", LIGHT_MAGENTA, LCD_RED);
@@ -1011,6 +1015,7 @@ void UI_Page_AK10_9_ManualControlCubeMarsFWServoMode(void)
 }
 void UI_Page_AK10_9_ManualControlCubeMarsFWServoMode_Init(void)
 {
+  hUI.task = UI_MAIN_TASK_AK10_9_MANUAL_CONTROL;
   hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
   hButtonMotorStart = Button_Create(0, 420, 100, 40, "START", LCD_WHITE, LCD_RED);
   hButtonMotorStop = Button_Create(0, 80, 150, 250, "STOP", LCD_RED, LCD_YELLOW);
@@ -1121,6 +1126,7 @@ void UI_Page_AK10_9_ManualControlCubeMarsFWMITMode(void)
 
 void UI_Page_AK10_9_ManualControlCubeMarsFWMITMode_Init(void)
 {
+  hUI.task = UI_MAIN_TASK_AK10_9_MANUAL_CONTROL;
   hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
   hButtonMotorStart = Button_Create(0, 420, 100, 40, "START", LCD_WHITE, LCD_RED);
   hButtonMotorStop = Button_Create(0, 80, 150, 250, "STOP", LCD_RED, LCD_YELLOW);
@@ -1189,6 +1195,7 @@ void UI_Page_BNO055_Monitor(void)
 
 void UI_Page_BNO055_Monitor_Init(void)
 {
+  hUI.task = UI_MAIN_TASK_BNO055_MONITOR;
   hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
   hButtonIMUSetModeNDOF = Button_Create(100, 700, 250, 40, "9 DOF Fusion Mode", LIGHT_YELLOW, LCD_RED);
   hButtonIMUSetModeACCONLY = Button_Create(100, 750, 200, 40, "ACCONLY Mode", LIGHT_YELLOW, LCD_RED);
@@ -1282,6 +1289,7 @@ void UI_Page_TMotor_Acceleration_Observer_Project(void)
 }
 void UI_Page_TMotor_Acceleration_Observer_Project_Init(void)
 {
+  hUI.task = UI_MAIN_TASK_TMOTOR_ACCELERATION_OBSERVER;
   hButtonDataLogStart = Button_Create(10, 100, 200, 40, "Data Log Start", LIGHT_MAGENTA, LCD_RED);
   hButtonDataLogEnd = Button_Create(10, 150, 200, 40, "Data Log End", LCD_GREEN, LCD_RED);
   hButtonMotorProfilingStart = Button_Create(10, 200, 300, 40, "Motor profiling Start", LIGHT_GREY, LCD_RED);
@@ -1312,6 +1320,7 @@ void UI_Page_TMotor_Acceleration_Observer_Project_Init(void)
 
 void UI_Page_ADC_Monitor_Init(void)
 {
+  hUI.task = UI_MAIN_TASK_ADC_MONITOR;
   hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
   hButtonResetAD7606 = Button_Create(100, 500, 300, 50, "Reset AD7606", LCD_GREEN, LCD_RED);
   LCD_DisplayString(100, 200, "Channel 1 (V): ");
@@ -1406,6 +1415,7 @@ void UI_Page_CustomizedIMU(void)
 }
 void UI_Page_CustomizedIMU_Init(void)
 {
+  hUI.task = UI_MAIN_TASK_IMU_MONITOR;
   USB_SetNewDataSlotLen(sizeof(dataSlots_Exoskeleton_Common)/4);
   
   hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
@@ -1481,6 +1491,7 @@ void UI_Page_BenMoKeJiM15Testing(void)
 
 void UI_Page_BenMoKeJiM15Testing_Init(void)
 {
+  hUI.task = UI_MAIN_TASK_BENMOKEJIM15;
 	hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
 	hButtonMotorEnable = Button_Create(5, 80, 100, 40, "Enable", LCD_WHITE, LCD_RED);
 	hButtonMotorDisable = Button_Create(5, 160, 100, 150, "Disable", LCD_YELLOW, LCD_RED);
@@ -1567,6 +1578,7 @@ void UI_Page_LinKongKeJiTesting(void)
 
 void UI_Page_LinKongKeJiTesting_Init(void)
 {
+  hUI.task = UI_MAIN_TASK_LINKONGKEJI_MG_MOTOR;
   hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
   hButtonMotorEnable = Button_Create(5, 80, 100, 40, "Enable", LCD_WHITE, LCD_RED);
 	hButtonStop = Button_Create(5, 160, 100, 150, "STOP", LCD_YELLOW, LCD_RED);
@@ -1707,6 +1719,7 @@ void UI_Page_MrDoorTestingTMotor(void)
 
 void UI_Page_MrDoorTestingTMotor_Init(void)
 {
+  
   hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
   hButtonMotorZeroing = Button_Create(10, 50, 100, 80, "Zeroing", LCD_YELLOW, LCD_RED);
   hButtonMotorStart = Button_Create(150, 20, 120, 100, "Start", LCD_YELLOW, LCD_RED);
@@ -1878,6 +1891,7 @@ void UI_Page_MrDoorTestingTypeSelection(void)
 
 void UI_Page_MrDoorTestingTypeSelection_Init(void)
 {
+  hUI.task = UI_MAIN_TASK_MRDOOR;
   hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
   
   hButtonTMotorType = Button_Create(200, 200, 200, 100, "TMotor", LCD_YELLOW, LCD_RED);
@@ -1942,6 +1956,7 @@ void UI_Page_TkCalibration(void)
 
 void UI_Page_TkCalibration_Init(void)
 {
+  hUI.task = UI_MAIN_TASK_KT_CALIBRATION;
   hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
   hButtonMotorStart = Button_Create(0, 420, 100, 40, "START", LCD_WHITE, LCD_RED);
   hButtonMotorStop = Button_Create(0, 80, 150, 250, "STOP", LCD_RED, LCD_YELLOW);
@@ -1992,7 +2007,7 @@ void UI_Page_ExoskeletonMotorDurabilityTest(void)
     exoskeletonMotorTestTimeDifference = 0;
   }
   if(ifButtonPressed(&hButtonMotorZeroing))
-    AK10_9_ServoMode_Zeroing(&hAKMotorRightHip);
+    AK10_9_MITMode_Zeroing(&hAKMotorRightHip);
   if(ifButtonPressed(&hButtonMotorStart))
     AK10_9_MITMode_EnableMotor(&hAKMotorRightHip);
   if(ifButtonPressed(&hButtonMotorStop))
@@ -2005,6 +2020,9 @@ void UI_Page_ExoskeletonMotorDurabilityTest(void)
     LCD_DisplayString(200, 0, "Motor  Online");
   else
     LCD_DisplayString(200, 0, "Motor Offline");
+  LCD_DisplayDecimals(90, 560, hAKMotorRightHip.realPositionOffseted.f, 7,1);
+  LCD_DisplayDecimals(90, 585, hAKMotorRightHip.realVelocityPresent.f, 7,1);
+  LCD_DisplayDecimals(90, 610, hAKMotorRightHip.realCurrent.f, 7,1);
   
   if (ifButtonPressed(&hButtonGoBack))
     UI_Page_Change_To(&UIPage_Home1);
@@ -2012,6 +2030,8 @@ void UI_Page_ExoskeletonMotorDurabilityTest(void)
 
 void UI_Page_ExoskeletonMotorDurabilityTest_Init(void)
 {
+  hUI.task = UI_MAIN_TASK_EXOSKELETON_MOTOR_TEST;
+  USB_SetNewDataSlotLen(sizeof(dataSlots_Exoskeleton_Motor_Durability_Test)/4);
   ifMotorProfilingStartedExoskeletonMotorTest = 0;
   exoskeletonMotorTestTimeDifference = 0;
   
@@ -2023,4 +2043,10 @@ void UI_Page_ExoskeletonMotorDurabilityTest_Init(void)
   hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
   hButtonMotorStart = Button_Create(10, 400, 300, 50, "Motor Start", LCD_YELLOW, LCD_RED);
   hButtonMotorStop = Button_Create(10, 460, 300, 80, "Motor Stop", LCD_YELLOW, LCD_RED);
+  
+  LCD_SetLayer(1); 
+  LCD_SetColor(LCD_BLACK);
+  LCD_DisplayString(10, 560, "Pos:");
+  LCD_DisplayString(10, 585, "Vel:");
+  LCD_DisplayString(10, 610, "Cur:");
 }
