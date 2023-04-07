@@ -214,6 +214,7 @@ void EXOSKELETON_GravityCompemsationManager(void);
 void EXOSKELETON_MuscularTorqueCalculation(ExoskeletonHandle* hexoskeleton);
 void EXOSKELETON_AugmentedControlManager(void);
 float EXOSKELETON_HipGait1(float sec);
+float EXOSKELETON_HipGait2(float sec);
 void EXOSKELETON_Motor_Durability_Test_Set_Datalog_Label(void);
 
 extern BNO055Handle hIMUTorso;

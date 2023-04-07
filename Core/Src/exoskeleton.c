@@ -547,10 +547,11 @@ void EXOSKELETON_CentreControl(void)
       break;
     case EXOSKELETON_MAIN_TASK_MOTOR_PROFILING:
       AK10_9_CubaMarsFW_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightHip, \
-                                                                hExoskeleton.hmotorprofiling->HipGaitFunc((float)(HAL_GetTick() - hExoskeleton.hmotorprofiling->motorProfilingStartingTimestamp)), \
+                                                                EXOSKELETON_HipGait2(((float)(HAL_GetTick() - hExoskeleton.hmotorprofiling->motorProfilingStartingTimestamp)) / 1000.0f), \
                                                                     0.0f, 499.0f, 3.0f, 0.0f);
       AK10_9_CubeMarsFW_MITMode_ContinuousControlManager(&hAKMotorRightHip, \
                                                              300.0f, 180.0f, 1.0f, 100.0f, 0.5f, 0.001f);
+      AK10_9_MITModeControl_Deg(&hAKMotorRightKnee, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
       break;
     default:
       break;
@@ -638,7 +639,7 @@ void EXOSKELETON_AugmentedControlManager(void)
   }
 }
 
-/* Rad, milli second */
+/* Rad, second */
 float EXOSKELETON_HipGait1(float sec)
 {
   float w, a0, a1, b1, a2, b2, a3, b3;
@@ -654,6 +655,13 @@ float EXOSKELETON_HipGait1(float sec)
   float angle =  a0 + a1 * cos(sec * w) + b1 * sin(sec * w) + \
                  a2 * cos(2.0f * sec*w) + b2 * sin(2.0f * sec * w) + \
                  a3 * cos(3.0f * sec*w) + b3 * sin(3.0f * sec * w);
+  return angle;
+}
+
+/* Degree, second */
+float EXOSKELETON_HipGait2(float sec)
+{
+  float angle = 180.0f + 15.0f * sin((2.0f * pi / 1.0f) * sec);
   return angle;
 }
 
