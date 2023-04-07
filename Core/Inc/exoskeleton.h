@@ -45,7 +45,8 @@ enum EXOSKELETON_Main_Tasks
   EXOSKELETON_MAIN_TASK_FREE,
   EXOSKELETON_MAIN_TASK_SYSTEM_ID,
   EXOSKELETON_MAIN_TASK_GRAVITY_COMPENSATION,
-  EXOSKELETON_MAIN_TASK_AUGMENTED_CONTROL
+  EXOSKELETON_MAIN_TASK_AUGMENTED_CONTROL,
+  EXOSKELETON_MAIN_TASK_MOTOR_PROFILING
 };
 
 typedef struct
@@ -89,12 +90,21 @@ typedef struct
 
 typedef struct
 {
+  uint8_t ifMotorProfiling;
+  uint32_t motorProfilingStartingTimestamp;
+  float (*HipGaitFunc) (float);
+  float (*KneeGaitFunc) (float);
+}Exoskeleton_MotorProfilingHandle;
+
+typedef struct
+{
   union FloatUInt8 L1;
   enum EXOSKELETON_Main_Tasks mainTask;
   Exoskeleton_SystemIDHandle* hsysid;
   Exoskeleton_GravityCompensation* hgravitycompensation;
   Exoskeleton_MuscularTorqueEstimationHandle* hmusculartorque;
   Exoskeleton_AugmentedControlHandle* haugmentedcontrol;
+  Exoskeleton_MotorProfilingHandle* hmotorprofiling;
 }ExoskeletonHandle;
 
 typedef struct

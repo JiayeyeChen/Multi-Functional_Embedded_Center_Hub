@@ -449,6 +449,8 @@ void UI_Page_LowerLimb_Exoskeleton(void)
   ButtonUpdate(&hButtonPageExoskeletonMuscularTorqueMonitor);
   ButtonUpdate(&hButtonDataLogStart);
   ButtonUpdate(&hButtonDataLogEnd);
+  ButtonUpdate(&hButtonMotorProfilingStart);
+  ButtonUpdate(&hButtonMotorProfilingEnd);
   
   
   
@@ -499,6 +501,17 @@ void UI_Page_LowerLimb_Exoskeleton(void)
     USB_DataLogStart();
   else if (ifButtonPressed(&hButtonDataLogEnd))
     USB_DataLogEnd();
+  else if (ifButtonPressed(&hButtonMotorProfilingStart))
+  {
+    hExoskeleton.mainTask = EXOSKELETON_MAIN_TASK_MOTOR_PROFILING;
+    hExoskeleton.hmotorprofiling->ifMotorProfiling = 1;
+    hExoskeleton.hmotorprofiling->motorProfilingStartingTimestamp = HAL_GetTick();
+  }
+  else if (ifButtonPressed(&hButtonMotorProfilingEnd))
+  {
+    hExoskeleton.mainTask = EXOSKELETON_MAIN_TASK_FREE;
+    hExoskeleton.hmotorprofiling->ifMotorProfiling = 0;
+  }
   
   if (ifButtonPressed(&hButtonGoBack))
     UI_Page_Change_To(&UIPage_Home1);
@@ -519,6 +532,8 @@ void UI_Page_LowerLimb_Exoskeleton_Init(void)
   hButtonPageExoskeletonMuscularTorqueMonitor = Button_Create(100, 600, 280, 60, "Muscular Torque", LIGHT_GREEN, LCD_RED);
   hButtonDataLogStart = Button_Create(10, 350, 150, 60, "DatalogStart", LIGHT_YELLOW, LCD_RED);
   hButtonDataLogEnd = Button_Create(10, 420, 150, 60, "DatalogEnd", LIGHT_YELLOW, LCD_RED);
+  hButtonMotorProfilingStart = Button_Create(10, 680, 150, 60, "MotrProfgSt", LIGHT_YELLOW, LCD_RED);
+  hButtonMotorProfilingEnd = Button_Create(200, 680, 150, 60, "MotrProfgSp", LIGHT_YELLOW, LCD_RED);
   
   LCD_DisplayString(0, 100, "Hip  Joint:");
   LCD_DisplayString(250, 100, "Angle:");
@@ -2022,7 +2037,8 @@ void UI_Page_ExoskeletonMotorDurabilityTest(void)
     LCD_DisplayString(200, 0, "Motor Offline");
   LCD_DisplayDecimals(90, 560, hAKMotorRightHip.realPositionOffseted.f, 7,1);
   LCD_DisplayDecimals(90, 585, hAKMotorRightHip.realVelocityPresent.f, 7,1);
-  LCD_DisplayDecimals(90, 610, hAKMotorRightHip.realCurrent.f, 7,1);
+  LCD_DisplayDecimals(90, 610, hAKMotorRightHip.realCurrent.f, 7,4);
+  LCD_DisplayDecimals(90, 635, (float)hAKMotorRightHip.temperature, 7,1);
   
   if (ifButtonPressed(&hButtonGoBack))
     UI_Page_Change_To(&UIPage_Home1);
@@ -2049,4 +2065,5 @@ void UI_Page_ExoskeletonMotorDurabilityTest_Init(void)
   LCD_DisplayString(10, 560, "Pos:");
   LCD_DisplayString(10, 585, "Vel:");
   LCD_DisplayString(10, 610, "Cur:");
+  LCD_DisplayString(10, 635, "Tem:");
 }

@@ -11,6 +11,7 @@ Exoskeleton_GravityCompensation            hGravityCompensation;
 ExoskeletonHandle                          hExoskeleton;
 Exoskeleton_MuscularTorqueEstimationHandle hMuscularTorque;
 Exoskeleton_AugmentedControlHandle         hAugmentedControl;
+Exoskeleton_MotorProfilingHandle           hMotorProfiling;
 
 void EXOSKELETON_Init(void)
 {
@@ -25,14 +26,19 @@ void EXOSKELETON_Init(void)
   hMuscularTorque.muscularTorqueHip.f = 0.0f;
   hMuscularTorque.muscularTorqueKnee.f = 0.0f;
   
-  hSystemID.sysIDResults_J1.f = 1.29053f;
-  hSystemID.sysIDResults_X1.f = 4.21455f;
-  hSystemID.sysIDResults_J2.f = 0.247732f;
-  hSystemID.sysIDResults_X2.f = 1.13107f;
+  hSystemID.sysIDResults_J1.f = 0.205f;
+  hSystemID.sysIDResults_X1.f = 0.792f;
+  hSystemID.sysIDResults_J2.f = 0.033f;
+  hSystemID.sysIDResults_X2.f = 0.074f;
   
   hAugmentedControl.hipJointAugmentedControlThrottle = 0.0f;
   hAugmentedControl.kneeJointAugmentedControlThrottle = 0.0f;
   hAugmentedControl.ifAugmentedControl = 0;
+  
+  hMotorProfiling.ifMotorProfiling = 0;
+  hMotorProfiling.HipGaitFunc = EXOSKELETON_HipGait1;
+  hMotorProfiling.KneeGaitFunc = EXOSKELETON_HipGait1;
+  hMotorProfiling.motorProfilingStartingTimestamp = HAL_GetTick();
   
   hExoskeleton.hgravitycompensation = &hGravityCompensation;
   hExoskeleton.hsysid = &hSystemID;
@@ -40,12 +46,13 @@ void EXOSKELETON_Init(void)
   hExoskeleton.hmusculartorque = &hMuscularTorque;
   hExoskeleton.L1.f = 0.0f;
   hExoskeleton.haugmentedcontrol = &hAugmentedControl;
+  hExoskeleton.hmotorprofiling = &hMotorProfiling;
 }
 
 void EXOSKELETON_Set_Common_Datalog_Label(void)
 {
-  USB_SendDataSlotLabel("11", "theta0", "theta1", "theta1 vel", \
-                        "theta1 acc", "theta2", "theta2 vel", "theta2 acc", "HipTq", "KneeTq", "HipMuscleTq", "KneeMuscleTq");
+  USB_SendDataSlotLabel("7", "theta0", "theta1", \
+                         "theta2", "HipTq", "KneeTq", "HipMuscleTq", "KneeMuscleTq");
 }
 
 void EXOSKELETON_CommonDatalogManager(void)
@@ -59,11 +66,7 @@ void EXOSKELETON_UpdateCommonDataSlot(void)
   uint8_t ptr = 0;
   dataSlots_Exoskeleton_Common[ptr++].f = 0.0f;
   dataSlots_Exoskeleton_Common[ptr++].f = hAKMotorRightHip.realPositionOffsetedRad.f;
-  dataSlots_Exoskeleton_Common[ptr++].f = hAKMotorRightHip.realVelocityPresentRad.f;
-  dataSlots_Exoskeleton_Common[ptr++].f = hAKMotorRightHip.realAccelerationFilteredRad.f;
   dataSlots_Exoskeleton_Common[ptr++].f = hAKMotorRightKnee.realPositionOffsetedRad.f;
-  dataSlots_Exoskeleton_Common[ptr++].f = hAKMotorRightKnee.realVelocityPresentRad.f;
-  dataSlots_Exoskeleton_Common[ptr++].f = hAKMotorRightKnee.realAccelerationFilteredRad.f;
   dataSlots_Exoskeleton_Common[ptr++].f = hAKMotorRightHip.realTorque.f;
   dataSlots_Exoskeleton_Common[ptr++].f = hAKMotorRightKnee.realTorque.f;
   dataSlots_Exoskeleton_Common[ptr++].f = hExoskeleton.hmusculartorque->muscularTorqueHip.f;
@@ -542,11 +545,19 @@ void EXOSKELETON_CentreControl(void)
       AK10_9_CubeMarsFW_MITMode_ContinuousControlManager(&hAKMotorRightHip, \
                                                    0.0f, 0.0f, 100.0f, 0.0f, 0.0f, 0.001f);
       break;
+    case EXOSKELETON_MAIN_TASK_MOTOR_PROFILING:
+      AK10_9_CubaMarsFW_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightHip, \
+                                                                hExoskeleton.hmotorprofiling->HipGaitFunc((float)(HAL_GetTick() - hExoskeleton.hmotorprofiling->motorProfilingStartingTimestamp)), \
+                                                                    0.0f, 499.0f, 3.0f, 0.0f);
+      AK10_9_CubeMarsFW_MITMode_ContinuousControlManager(&hAKMotorRightHip, \
+                                                             300.0f, 180.0f, 1.0f, 100.0f, 0.5f, 0.001f);
+      break;
     default:
       break;
   }
   
-  EXOSKELETON_SystemIDManager();
+  if (hExoskeleton.mainTask == EXOSKELETON_MAIN_TASK_SYSTEM_ID)
+    EXOSKELETON_SystemIDManager();
   EXOSKELETON_GravityCompemsationManager();
   EXOSKELETON_MuscularTorqueCalculation(&hExoskeleton);
   EXOSKELETON_AugmentedControlManager();

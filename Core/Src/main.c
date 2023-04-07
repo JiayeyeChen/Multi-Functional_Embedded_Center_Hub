@@ -209,9 +209,10 @@ void Main_Task(void *argument)
     {
       if (ifMotorProfilingStartedExoskeletonMotorTest)
       {
-        exoskeletonMotorTestHipGaitAngleDeg = rad2deg * EXOSKELETON_HipGait1(((float)(HAL_GetTick() - exoskeletonMotorTestTimeDifference))/1000.0f);
-        AK10_9_CubaMarsFW_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightHip, exoskeletonMotorTestHipGaitAngleDeg, \
-                                                                    0.0f, 499.0f, 3.0f, 0.0f);
+//////        exoskeletonMotorTestHipGaitAngleDeg = rad2deg * EXOSKELETON_HipGait1(((float)(HAL_GetTick() - exoskeletonMotorTestTimeDifference))/1000.0f);
+//////        AK10_9_CubaMarsFW_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightHip, exoskeletonMotorTestHipGaitAngleDeg, \
+//////                                                                    0.0f, 499.0f, 3.0f, 0.0f);
+        AK10_9_CubaMarsFW_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightHip, 0.0f, 0.0f, 0.0f, 0.0f, -26.0f / hAKMotorRightHip.kt);
       }
       AK10_9_CubeMarsFW_MITMode_ContinuousControlManager(&hAKMotorRightHip, \
                                                              300.0f, 180.0f, 1.0f, 100.0f, 0.5f, 0.001f);
@@ -219,7 +220,7 @@ void Main_Task(void *argument)
       dataSlots_Exoskeleton_Motor_Durability_Test[1].f = hAKMotorRightHip.realVelocityPresent.f;
       dataSlots_Exoskeleton_Motor_Durability_Test[2].f = hAKMotorRightHip.realCurrent.f;
       dataSlots_Exoskeleton_Motor_Durability_Test[3].f = hAKMotorRightHip.temperature;
-      if (HAL_GetTick() - datalogTimeStamp > 10)
+      if (HAL_GetTick() - datalogTimeStamp > 100)
       {
         hUSB.ifNewDataLogPiece2Send = 1;
         datalogTimeStamp = HAL_GetTick();
