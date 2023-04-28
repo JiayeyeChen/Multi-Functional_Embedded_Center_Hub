@@ -75,4 +75,5 @@ extern union FloatUInt8 dataSlots_AK10_9_TorqueConstantTesting[2];
 extern union FloatUInt8 dataSlots_Exoskeleton_SystemID[9];
 extern union FloatUInt8 dataSlots_Exoskeleton_Common[7];
 extern union FloatUInt8 dataSlots_Exoskeleton_Motor_Durability_Test[4];
+extern union FloatUInt8 dataSlots_LKTECH_MG_MotorTest[4];
 #endif

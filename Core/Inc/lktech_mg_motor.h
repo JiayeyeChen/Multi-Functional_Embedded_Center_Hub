@@ -77,6 +77,7 @@ typedef struct
   float                        currentLoopKp;
   float                        currentLoopKi;
   //Motor Control
+  float                        kt;
   union Int32UInt8             accelerationDeg;
   union UInt32UInt8            angleRaw;
   union FloatUInt8             angle;
@@ -84,6 +85,7 @@ typedef struct
   union FloatUInt8             angleMultiTurn;
   union Int16UInt8             currentRaw;
   union FloatUInt8             current;
+  union FloatUInt8             torque;
   union Int16UInt8             speedRawDeg;
   union FloatUInt8             speedDeg;
   union UInt16UInt8            encoderRaw;
@@ -98,7 +100,7 @@ typedef struct
   union FloatUInt8             currentControlSet;
 }LKTECH_MG_Handle;
 
-void LKTECH_MG_Init(LKTECH_MG_Handle* hmotor, CAN_HandleTypeDef* hcan, uint32_t motor_id, float gear_ratio);
+void LKTECH_MG_Init(LKTECH_MG_Handle* hmotor, CAN_HandleTypeDef* hcan, uint32_t motor_id, float gear_ratio, float kt);
 void LKTECH_MG_SendSingleCommand(LKTECH_MG_Handle* hmotor, uint8_t command, uint8_t task_name);
 void LKTECH_MG_ReadPID(LKTECH_MG_Handle* hmotor);
 void LKTECH_MG_GetFeedback(LKTECH_MG_Handle* hmotor, CAN_RxHeaderTypeDef* rxheader, uint8_t rxbuf[]);

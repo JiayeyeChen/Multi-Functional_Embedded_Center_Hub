@@ -47,7 +47,7 @@ int main(void)
 
   AD7606_Init(AD7606_RANG_10V, AD7606_OS_RATIO_4);
 //  BENMOKEJI_M15_Init(&hBENMOKEJI, &hcan2, 2);
-	LKTECH_MG_Init(&hLKTECH, &hcan2, 1, 36.0f);
+	LKTECH_MG_Init(&hLKTECH, &hcan2, 1, 10.0f, 1.8226f);
   EXOSKELETON_Init();
   CAN_ConfigureFilters();
   
@@ -212,10 +212,10 @@ void Main_Task(void *argument)
 //////        exoskeletonMotorTestHipGaitAngleDeg = rad2deg * EXOSKELETON_HipGait1(((float)(HAL_GetTick() - exoskeletonMotorTestTimeDifference))/1000.0f);
 //////        AK10_9_CubaMarsFW_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightHip, exoskeletonMotorTestHipGaitAngleDeg, \
 //////                                                                    0.0f, 499.0f, 3.0f, 0.0f);
-        AK10_9_CubaMarsFW_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightHip, 0.0f, 0.0f, 0.0f, 0.0f, -26.0f / hAKMotorRightHip.kt);
+        AK10_9_CubaMarsFW_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightHip, 0.0f, 0.0f, 0.0f, 0.0f, -35.0f / hAKMotorRightHip.kt);
       }
       AK10_9_CubeMarsFW_MITMode_ContinuousControlManager(&hAKMotorRightHip, \
-                                                             300.0f, 180.0f, 1.0f, 100.0f, 0.5f, 0.001f);
+                                                             300.0f, 180.0f, 5.0f, 100.0f, 0.5f, 0.001f);
       dataSlots_Exoskeleton_Motor_Durability_Test[0].f = hAKMotorRightHip.realPositionOffseted.f;
       dataSlots_Exoskeleton_Motor_Durability_Test[1].f = hAKMotorRightHip.realVelocityPresent.f;
       dataSlots_Exoskeleton_Motor_Durability_Test[2].f = hAKMotorRightHip.realCurrent.f;
@@ -227,7 +227,7 @@ void Main_Task(void *argument)
       }
       USB_DataLogManager(EXOSKELETON_Motor_Durability_Test_Set_Datalog_Label, dataSlots_Exoskeleton_Motor_Durability_Test);
     }
-    
+
     AK10_9_CubeMarsFW_MotorStatusMonitor(&hAKMotorRightKnee, 100);
     AK10_9_CubeMarsFW_MotorStatusMonitor(&hAKMotorRightHip, 100);
     
@@ -251,16 +251,23 @@ void MotorTesting_Task(void *argument)
     }
 		
     //////////////////////
-		/* Lin Kong Ke Ji MG */
-    if (hUI.curPage == &UIPage_LinKongKeJi_Testing)
-    {
-      if (hLKTECH.task == LETECH_MG_CAN_BUS_TASK_SPEED_CONTROL)
-        LETECH_MG_SpeedControl(&hLKTECH, hLKTECH.velocityControlSet.f);
-      else if (hLKTECH.task == LETECH_MG_CAN_BUS_TASK_CURRENT_CONTROL)
-        LETECH_MG_CurrentControl(&hLKTECH, hLKTECH.currentControlSet.f);
-      else if (hLKTECH.task == LETECH_MG_CAN_BUS_TASK_POSITION_CONTROL_6_INCREMENT)
-        LETECH_MG_PositionControl6Increment(&hLKTECH, hLKTECH.positionControlIncrementSet.f, 600.0f);
-    }
+////////		/* Lin Kong Ke Ji MG */
+////////    if (hUI.curPage == &UIPage_LinKongKeJi_Testing)
+////////    {
+////////      if (hLKTECH.task == LETECH_MG_CAN_BUS_TASK_SPEED_CONTROL)
+////////        LETECH_MG_SpeedControl(&hLKTECH, hLKTECH.velocityControlSet.f);
+////////      else if (hLKTECH.task == LETECH_MG_CAN_BUS_TASK_CURRENT_CONTROL)
+////////        LETECH_MG_CurrentControl(&hLKTECH, hLKTECH.currentControlSet.f);
+////////      else if (hLKTECH.task == LETECH_MG_CAN_BUS_TASK_POSITION_CONTROL_6_INCREMENT)
+////////        LETECH_MG_PositionControl6Increment(&hLKTECH, hLKTECH.positionControlIncrementSet.f, 600.0f);
+////////      
+////////      dataSlots_LKTECH_MG_MotorTest[0].f = hLKTECH.angle.f;
+////////      dataSlots_LKTECH_MG_MotorTest[1].f = hLKTECH.speedDeg.f;
+////////      dataSlots_LKTECH_MG_MotorTest[2].f = hLKTECH.torque.f;
+////////      dataSlots_LKTECH_MG_MotorTest[3].f = hLKTECH.temperature.f;
+////////      hUSB.ifNewDataLogPiece2Send = 1;
+////////      USB_DataLogManager(LKTECH_MotorTest_Set_Datalog_Label, dataSlots_LKTECH_MG_MotorTest);
+////////    }
     osDelay(10);
   }
 }

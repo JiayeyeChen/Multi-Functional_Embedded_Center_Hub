@@ -316,16 +316,13 @@ void EXOSKELETON_SystemIDManager(void)
         {
           USB_DataLogEnd();
           hSystemID.curTask = EXOSKELETON_SYSTEMID_TASK_HIP_JOINT_MOVEMENT_WAIT_FOR_START;
-
         }
       }
       break;
     case EXOSKELETON_SYSTEMID_TASK_HIP_JOINT_MOVEMENT_WAIT_FOR_START:
       if (hUSB.datalogTask == DATALOG_TASK_END)
         USB_DataLogEnd();
-      if (hUSB.datalogTask == DATALOG_TASK_FREE)
-        USB_DataLogStart();
-      if (hUSB.datalogTask == DATALOG_TASK_START)
+      if (hUSB.datalogTask == DATALOG_TASK_FREE || hUSB.datalogTask == DATALOG_TASK_START)
         USB_DataLogStart();
       break;
     case EXOSKELETON_SYSTEMID_TASK_HIP_JOINT_MOVEMENT_POSITIONING:
@@ -387,8 +384,10 @@ void EXOSKELETON_SystemIDManager(void)
         }
         else
         {
-          USB_DataLogEnd();
-          hSystemID.curTask = EXOSKELETON_SYSTEMID_TASK_RELEASING_JOINTS;
+          if (hUSB.datalogTask == DATALOG_TASK_DATALOG || hUSB.datalogTask == DATALOG_TASK_END)
+            USB_DataLogEnd();
+          else if (hUSB.datalogTask == DATALOG_TASK_FREE)
+            hSystemID.curTask = EXOSKELETON_SYSTEMID_TASK_RELEASING_JOINTS;
         }
       }
       break;
@@ -531,15 +530,15 @@ void EXOSKELETON_CentreControl(void)
       break;
     case EXOSKELETON_MAIN_TASK_GRAVITY_COMPENSATION:
       AK10_9_CubeMarsFW_MITMode_ContinuousControlManager(&hAKMotorRightKnee, \
-                                                         0.0f, 0.0f, 5.0f, 0.0f, 0.0f, 0.001f);
+                                                         0.0f, 0.0f, 10.0f, 0.0f, 0.0f, 0.001f);
       AK10_9_CubeMarsFW_MITMode_ContinuousControlManager(&hAKMotorRightHip, \
-                                                   0.0f, 0.0f, 5.0f, 0.0f, 0.0f, 0.001f);
+                                                   0.0f, 0.0f, 10.0f, 0.0f, 0.0f, 0.001f);
       break;
     case EXOSKELETON_MAIN_TASK_FREE:
       AK10_9_MITModeControl_Deg(&hAKMotorRightKnee, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
       AK10_9_MITModeControl_Deg(&hAKMotorRightHip, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
       break;
-    case EXOSKELETON_MAIN_TASK_AUGMENTED_CONTROL:
+    case EXOSKELETON_MAIN_TASK_AUGMENTATION_CONTROL:
       AK10_9_CubeMarsFW_MITMode_ContinuousControlManager(&hAKMotorRightKnee, \
                                                          0.0f, 0.0f, 100.0f, 0.0f, 0.0f, 0.001f);
       AK10_9_CubeMarsFW_MITMode_ContinuousControlManager(&hAKMotorRightHip, \
@@ -559,9 +558,13 @@ void EXOSKELETON_CentreControl(void)
   
   if (hExoskeleton.mainTask == EXOSKELETON_MAIN_TASK_SYSTEM_ID)
     EXOSKELETON_SystemIDManager();
-  EXOSKELETON_GravityCompemsationManager();
-  EXOSKELETON_MuscularTorqueCalculation(&hExoskeleton);
-  EXOSKELETON_AugmentedControlManager();
+  else if (hExoskeleton.mainTask == EXOSKELETON_MAIN_TASK_GRAVITY_COMPENSATION)
+    EXOSKELETON_GravityCompemsationManager();
+  else if (hExoskeleton.mainTask == EXOSKELETON_MAIN_TASK_AUGMENTATION_CONTROL)
+  {
+    EXOSKELETON_MuscularTorqueCalculation(&hExoskeleton);
+    EXOSKELETON_AugmentedControlManager();
+  }
 }
 
 void EXOSKELETON_GravityCompemsationManager(void)

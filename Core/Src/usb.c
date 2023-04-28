@@ -6,6 +6,7 @@ union FloatUInt8 dataSlots_AK10_9_TorqueConstantTesting[2];
 union FloatUInt8 dataSlots_Exoskeleton_SystemID[9];
 union FloatUInt8 dataSlots_Exoskeleton_Common[7];
 union FloatUInt8 dataSlots_Exoskeleton_Motor_Durability_Test[4];
+union FloatUInt8 dataSlots_LKTECH_MG_MotorTest[4];
 
 void USB_Init(uint8_t data_slot_len)
 {

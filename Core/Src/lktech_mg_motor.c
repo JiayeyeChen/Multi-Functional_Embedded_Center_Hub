@@ -1,11 +1,12 @@
 #include "lktech_mg_motor.h"
 
-void LKTECH_MG_Init(LKTECH_MG_Handle* hmotor, CAN_HandleTypeDef* hcan, uint32_t motor_id, float gear_ratio)
+void LKTECH_MG_Init(LKTECH_MG_Handle* hmotor, CAN_HandleTypeDef* hcan, uint32_t motor_id, float gear_ratio, float kt)
 {
   hmotor->motorID = motor_id;
   hmotor->hcan = hcan;
   hmotor->canID = 0x140 + hmotor->motorID;
 	hmotor->gearRatio = gear_ratio;
+  hmotor->kt = kt;
   
   hmotor->txHeader.DLC = 8;
   hmotor->txHeader.IDE = 0;
@@ -92,6 +93,7 @@ void LKTECH_MG_GetFeedback(LKTECH_MG_Handle* hmotor, CAN_RxHeaderTypeDef* rxhead
         hmotor->currentRaw.b8[0] = rxbuf[2];
         hmotor->currentRaw.b8[1] = rxbuf[3];
         hmotor->current.f = ((float)hmotor->currentRaw.b16) *33.0f / 2048.0f;
+        hmotor->torque.f = hmotor->current.f * hmotor->kt;
         hmotor->speedRawDeg.b8[0] = rxbuf[4];
         hmotor->speedRawDeg.b8[1] = rxbuf[5];
         hmotor->speedDeg.f = ((float)hmotor->speedRawDeg.b16) / hmotor->gearRatio;

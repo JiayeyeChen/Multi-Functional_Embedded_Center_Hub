@@ -74,6 +74,7 @@ ButtonHandle                  hButtonPageLinKongKeJiTesting, hButtonReadAngle;
 JoystickHandle 								hJoyLKTECHTesting;
 float                         LKTECHJoyStickValue, LKTECHBlank;
 uint8_t												ifKeepReadingAngle = 0;
+uint8_t                       LKTECHifMotorProfiling = 0;
 ////////////////////////////
 
 /* MrDoor Testing */
@@ -643,18 +644,18 @@ void UI_Page_LowerLimb_Exoskeleton_SystemID(void)
   if (ifButtonPressed(&hButtonProfilingTimeIncrease))
   {
     if (hSystemID.curTask == EXOSKELETON_SYSTEMID_TASK_KNEE_JOINT_MOVEMENT_WAIT_FOR_START)
-      hSystemID.kneeProfilingTime += 10000;
+      hSystemID.kneeProfilingTime += 5000;
     else if (hSystemID.curTask == EXOSKELETON_SYSTEMID_TASK_HIP_JOINT_MOVEMENT_WAIT_FOR_START)
-      hSystemID.hipProfilingTime += 10000;
+      hSystemID.hipProfilingTime += 5000;
     LIMIT_MIN_MAX(hSystemID.kneeProfilingTime, 0, 600000);
     LIMIT_MIN_MAX(hSystemID.hipProfilingTime, 0, 600000);
   }
   else if (ifButtonPressed(&hButtonProfilingTimeDecrease))
   {
     if (hSystemID.curTask == EXOSKELETON_SYSTEMID_TASK_KNEE_JOINT_MOVEMENT_WAIT_FOR_START)
-      hSystemID.kneeProfilingTime -= 10000;
+      hSystemID.kneeProfilingTime -= 5000;
     else if (hSystemID.curTask == EXOSKELETON_SYSTEMID_TASK_HIP_JOINT_MOVEMENT_WAIT_FOR_START)
-      hSystemID.hipProfilingTime -= 10000;
+      hSystemID.hipProfilingTime -= 5000;
     LIMIT_MIN_MAX(hSystemID.kneeProfilingTime, 0, 600000);
     LIMIT_MIN_MAX(hSystemID.hipProfilingTime, 0, 600000);
   }
@@ -826,7 +827,7 @@ void UI_Page_LowerLimb_Exoskeleton_MuscularTorqueMonitor(void)
     USB_DataLogEnd();
   else if (ifButtonPressed(&hButtonAugmentedControlOn))
   {
-    hExoskeleton.mainTask = EXOSKELETON_MAIN_TASK_AUGMENTED_CONTROL;
+    hExoskeleton.mainTask = EXOSKELETON_MAIN_TASK_AUGMENTATION_CONTROL;
     hExoskeleton.haugmentedcontrol->ifAugmentedControl = 1;
   }
   else if (ifButtonPressed(&hButtonAugmentedControlOff))
@@ -1533,6 +1534,10 @@ void UI_Page_LinKongKeJiTesting(void)
 	ButtonUpdate(&hButtonCurrentControl);
 	ButtonUpdate(&hButtonMotorZeroing);
 	ButtonUpdate(&hButtonReadAngle);
+  ButtonUpdate(&hButtonDataLogStart);
+  ButtonUpdate(&hButtonDataLogEnd);
+  ButtonUpdate(&hButtonMotorProfilingStart);
+  ButtonUpdate(&hButtonMotorProfilingEnd);
 	JoystickUpdate(&hJoyLKTECHTesting);
   
   if (ifButtonPressed(&hButtonMotorEnable))
@@ -1571,13 +1576,28 @@ void UI_Page_LinKongKeJiTesting(void)
 		ifKeepReadingAngle = !ifKeepReadingAngle;
 		hLKTECH.task = LETECH_MG_CAN_BUS_TASK_READ_ANGLE_SINGLE_TURN;
 	}
+  if (ifButtonPressed(&hButtonDataLogStart))
+    USB_DataLogStart();
+  if (ifButtonPressed(&hButtonDataLogEnd))
+    USB_DataLogEnd();
+  if (ifButtonPressed(&hButtonMotorProfilingStart))
+  {
+    hLKTECH.task = LETECH_MG_CAN_BUS_TASK_CURRENT_CONTROL;
+		hLKTECH.currentControlSet.f += 5.0f / hLKTECH.kt;
+  }
+  if (ifButtonPressed(&hButtonMotorProfilingEnd))
+  {
+    LETECH_MG_Shutdown(&hLKTECH);
+		hLKTECH.task = LKTECH_MG_CAN_BUS_TASK_NONE;
+    hLKTECH.currentControlSet.f = 0.0f;
+  }
 	
 	if (hLKTECH.task == LETECH_MG_CAN_BUS_TASK_SPEED_CONTROL)
 		hLKTECH.velocityControlSet.f = LKTECHJoyStickValue * 360.0f;
 	else if (hLKTECH.task == LETECH_MG_CAN_BUS_TASK_POSITION_CONTROL_6_INCREMENT)
 		hLKTECH.positionControlIncrementSet.f = LKTECHJoyStickValue * 10.0f;
-	else if (hLKTECH.task == LETECH_MG_CAN_BUS_TASK_CURRENT_CONTROL)
-		hLKTECH.currentControlSet.f = LKTECHJoyStickValue * 1.0f;
+//	else if (hLKTECH.task == LETECH_MG_CAN_BUS_TASK_CURRENT_CONTROL)
+//		hLKTECH.currentControlSet.f = LKTECHJoyStickValue * 6.0f;
 	else if (ifKeepReadingAngle && hLKTECH.task == LETECH_MG_CAN_BUS_TASK_READ_ANGLE_SINGLE_TURN)
 		LETECH_MG_ReadAngleSingleTurn(&hLKTECH);
 	
@@ -1585,7 +1605,8 @@ void UI_Page_LinKongKeJiTesting(void)
   LCD_SetColor(LCD_BLACK);
 	LCD_DisplayDecimals(200, 200, hLKTECH.angle.f, 4, 1);
 	LCD_DisplayDecimals(200, 230, hLKTECH.speedDeg.f, 4, 1);
-	LCD_DisplayDecimals(200, 260, hLKTECH.current.f, 4, 1);
+	LCD_DisplayDecimals(200, 260, hLKTECH.torque.f, 6, 4);
+  LCD_DisplayDecimals(200, 290, hLKTECH.temperature.f, 4, 1);
   
   if (ifButtonPressed(&hButtonGoBack))
     UI_Page_Change_To(&UIPage_Home1);
@@ -1602,14 +1623,20 @@ void UI_Page_LinKongKeJiTesting_Init(void)
 	hButtonCurrentControl = Button_Create(120, 150, 180, 40, "Cur Control", LCD_GREEN, LCD_RED);
   hButtonMotorZeroing = Button_Create(330, 50, 140, 40, "Zeroing", LCD_GREEN, LCD_RED);
 	hButtonReadAngle = Button_Create(330, 100, 140, 70, "Read Angle", LCD_GREEN, LCD_RED);
+  hButtonDataLogStart = Button_Create(330, 200, 100, 40, "DataLogS", LIGHT_MAGENTA, LCD_RED);
+  hButtonDataLogEnd = Button_Create(330, 250, 100, 40, "DataLogE", LCD_GREEN, LCD_RED);
+  hButtonMotorProfilingStart = Button_Create(280, 300, 100, 40, "ProfSt", LCD_GREEN, LCD_RED);
+  hButtonMotorProfilingEnd = Button_Create(280, 350, 100, 40, "ProfEd", LCD_GREEN, LCD_RED);
 	hJoyLKTECHTesting = Joystick_Create(220, 580, 160, LCD_WHITE, LCD_BLACK, 50, 180, &LKTECHJoyStickValue, &LKTECHBlank, 0.0f, 1.0f, 1.0f, -1.0f);
   
+  USB_SetNewDataSlotLen(sizeof(dataSlots_LKTECH_MG_MotorTest)/4);
 	
 	LCD_SetLayer(1);
   LCD_SetColor(LCD_BLACK);
 	LCD_DisplayString(120, 200, "Pos:");
 	LCD_DisplayString(120, 230, "Vel:");
-	LCD_DisplayString(120, 260, "Cur:");
+	LCD_DisplayString(120, 260, "Toq:");
+  LCD_DisplayString(120, 290, "Tem:");
 }
 
 void UI_Page_MrDoorTestingTMotor(void)
