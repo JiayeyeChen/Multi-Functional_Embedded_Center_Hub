@@ -3,7 +3,6 @@
 #include "usb.h"
 #include "exoskeleton.h"
 #include "bldc_actuators_testing.h"
-#include "mrdoor.h"
 
 //for testing//
 uint32_t rxfifo0detected = 0;
@@ -81,14 +80,7 @@ void CAN_ConfigureFilters(void)
 	tempFilter.FilterActivation = ENABLE;
 	HAL_CAN_ConfigFilter(&hcan2, &tempFilter);
   /*Filter bank 2*/
-  tempFilter.FilterMode = CAN_FILTERMODE_IDLIST;;
-	tempFilter.FilterScale = CAN_FILTERSCALE_32BIT;
-	tempFilter.FilterFIFOAssignment = CAN_FILTER_FIFO0;
-	tempFilter.FilterBank = 2;
-	tempFilter.FilterIdHigh = hBENMOKEJIMrDoorLeft.canIDFeedback << 5;
-  tempFilter.FilterMaskIdHigh = hBENMOKEJIMrDoorRight.canIDFeedback << 5;
-	tempFilter.FilterActivation = ENABLE;
-	HAL_CAN_ConfigFilter(&hcan2, &tempFilter);
+
   /***************/
 
   /*Filter bank 3*/
@@ -176,12 +168,6 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
   else if (temRxHeader.StdId == CAN_ID_IMU_TORSO_ANGLE_EXOSKELETON)
     EXOSKELETON_GetBNO055FeedbackGrv(&hIMUTorso, temRxData);
 	
-	if (temRxHeader.StdId == hBENMOKEJI.canIDFeedback)
-		BENMOKEJI_M15_GetFeedback(&hBENMOKEJI, &temRxHeader, temRxData);
-  else if (temRxHeader.StdId == hBENMOKEJIMrDoorLeft.canIDFeedback)
-    BENMOKEJI_M15_GetFeedback(&hBENMOKEJIMrDoorLeft, &temRxHeader, temRxData);
-  else if (temRxHeader.StdId == hBENMOKEJIMrDoorRight.canIDFeedback)
-    BENMOKEJI_M15_GetFeedback(&hBENMOKEJIMrDoorRight, &temRxHeader, temRxData);
 	
 	if (temRxHeader.StdId == hLKTECH.canID)
 		LKTECH_MG_GetFeedback(&hLKTECH, &temRxHeader, temRxData);
@@ -192,10 +178,6 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 			AK10_9_MITMode_GetFeedbackMsg(&temRxHeader, &hAKMotorRightHip, temRxData);
 		else if (temRxData[0] == CAN_ID_TMOTOR_EXOSKELETON_RIGHT_KNEE_TX)
 			AK10_9_MITMode_GetFeedbackMsg(&temRxHeader, &hAKMotorRightKnee, temRxData);
-		else if (temRxData[0] == CAN_ID_TMOTOR_MRDOOR_LEFT_TX)
-			AK10_9_MITMode_GetFeedbackMsg(&temRxHeader, &hAKMotorMrDoorLeft, temRxData);
-		else if (temRxData[0] == CAN_ID_TMOTOR_MRDOOR_RIGHT_TX)
-			AK10_9_MITMode_GetFeedbackMsg(&temRxHeader, &hAKMotorMrDoorRight, temRxData);
 	}
   
   //End

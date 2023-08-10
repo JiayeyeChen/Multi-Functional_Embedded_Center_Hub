@@ -1,7 +1,6 @@
 #include "bldc_actuators_testing.h"
 
 LKTECH_MG_Handle     hLKTECH;
-BENMOKEJI_M15_Handle hBENMOKEJI;
 
 
 void LKTECH_Testing_DataSlotUpdate(void)
