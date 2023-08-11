@@ -3,6 +3,7 @@
 #include "usb.h"
 #include "exoskeleton.h"
 #include "bldc_actuators_testing.h"
+#include "foshan_hip_exoskeleton.h"
 
 //for testing//
 uint32_t rxfifo0detected = 0;
@@ -72,25 +73,31 @@ void CAN_ConfigureFilters(void)
 
   /*Filter bank 0 & 1*/
   /*******************/
-	tempFilter.FilterMode = CAN_FILTERMODE_IDLIST;;
-	tempFilter.FilterScale = CAN_FILTERSCALE_16BIT;
-	tempFilter.FilterFIFOAssignment = CAN_FILTER_FIFO0;
-	tempFilter.FilterBank = 0;
-	tempFilter.FilterIdHigh = CAN_ID_TMOTOR_RX << 5;
-	tempFilter.FilterActivation = ENABLE;
-	HAL_CAN_ConfigFilter(&hcan2, &tempFilter);
+//	tempFilter.FilterMode = CAN_FILTERMODE_IDLIST;;
+//	tempFilter.FilterScale = CAN_FILTERSCALE_16BIT;
+//	tempFilter.FilterFIFOAssignment = CAN_FILTER_FIFO0;
+//	tempFilter.FilterBank = 0;
+//	tempFilter.FilterIdHigh = CAN_ID_TMOTOR_RX << 5;
+//	tempFilter.FilterActivation = ENABLE;
+//	HAL_CAN_ConfigFilter(&hcan2, &tempFilter);
   /*Filter bank 2*/
-
-  /***************/
-
-  /*Filter bank 3*/
-	tempFilter.FilterMode = CAN_FILTERMODE_IDLIST;;
+  tempFilter.FilterMode = CAN_FILTERMODE_IDLIST;;
 	tempFilter.FilterScale = CAN_FILTERSCALE_32BIT;
 	tempFilter.FilterFIFOAssignment = CAN_FILTER_FIFO0;
 	tempFilter.FilterBank = 3;
-	tempFilter.FilterIdHigh = hLKTECH.canID << 5;
+	tempFilter.FilterIdHigh = hFoshanHipExoskeleton.hMotorLeft.canID << 5;
 	tempFilter.FilterActivation = ENABLE;
-	HAL_CAN_ConfigFilter(hLKTECH.hcan, &tempFilter);
+	HAL_CAN_ConfigFilter(hFoshanHipExoskeleton.hMotorLeft.hcan, &tempFilter);
+  /***************/
+
+  /*Filter bank 3*/
+//	tempFilter.FilterMode = CAN_FILTERMODE_IDLIST;;
+//	tempFilter.FilterScale = CAN_FILTERSCALE_32BIT;
+//	tempFilter.FilterFIFOAssignment = CAN_FILTER_FIFO0;
+//	tempFilter.FilterBank = 3;
+//	tempFilter.FilterIdHigh = hLKTECH.canID << 5;
+//	tempFilter.FilterActivation = ENABLE;
+//	HAL_CAN_ConfigFilter(hLKTECH.hcan, &tempFilter);
   /***************/
   
   /*Filter bank 4*/
@@ -169,8 +176,8 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
     EXOSKELETON_GetBNO055FeedbackGrv(&hIMUTorso, temRxData);
 	
 	
-	if (temRxHeader.StdId == hLKTECH.canID)
-		LKTECH_MG_GetFeedback(&hLKTECH, &temRxHeader, temRxData);
+	if (temRxHeader.StdId == hFoshanHipExoskeleton.hMotorLeft.canID)
+		LKTECH_MG_GetFeedback(&hFoshanHipExoskeleton.hMotorLeft, &temRxHeader, temRxData);
 	
 	if (temRxHeader.StdId == CAN_ID_TMOTOR_RX)
 	{

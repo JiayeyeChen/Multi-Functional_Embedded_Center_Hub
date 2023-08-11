@@ -11,6 +11,7 @@
 #include "exoskeleton.h"
 #include "adc.h"
 #include "bldc_actuators_testing.h"
+#include "foshan_hip_exoskeleton.h"
 
 typedef struct
 {
@@ -134,6 +135,8 @@ void         UI_Page_LowerLimb_Exoskeleton_ParameterAdjusting(void);
 void         UI_Page_LowerLimb_Exoskeleton_ParameterAdjusting_Init(void);
 void         UI_Page_LowerLimb_Exoskeleton_MuscularTorqueMonitor(void);
 void         UI_Page_LowerLimb_Exoskeleton_MuscularTorqueMonitor_Init(void);
+void         UI_Page_FoshanHipExoskeleton_Init(void);
+void         UI_Page_FoshanHipExoskeleton(void);
 void         UI_Page_Home1(void);
 void         UI_Page_Home1_Init(void);
 void         UI_Page_AK10_9_ManualControlCubeMarsFWServoMode(void);
@@ -159,6 +162,7 @@ void         UI_Page_ExoskeletonMotorDurabilityTest_Init(void);
 /* Lin Kong Ke Ji Testing */
 extern uint8_t ifKeepReadingAngle;
 extern PageHandle UIPage_LinKongKeJi_Testing;
+extern LKTECH_MG_Handle* hLKTechTestingMotorPtr;
 ////////////////////////////
 
 /* Exoskeleton motor test */

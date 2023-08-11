@@ -45,7 +45,7 @@ SD_HandleTypeDef hsd;
 GPIOStruct hButtonOnboardKey;
 LEDHandle  hLEDBlue, hLEDYellowGreen;
 
-static uint32_t HAL_RCC_CAN1_CLK_ENABLED=0;
+static uint32_t HAL_RCC_CAN1_CLK_ENABLED=1;
 
 static void CAN1_Init(void);
 static void DAC_Init(void);
@@ -108,7 +108,7 @@ static void CAN2_Init(void)
   hcan2.Init.TimeTriggeredMode = DISABLE;
   hcan2.Init.AutoBusOff = DISABLE;
   hcan2.Init.AutoWakeUp = DISABLE;
-  hcan2.Init.AutoRetransmission = ENABLE;
+  hcan2.Init.AutoRetransmission = DISABLE;
   hcan2.Init.ReceiveFifoLocked = DISABLE;
   hcan2.Init.TransmitFifoPriority = DISABLE;
   HAL_CAN_Init(&hcan2);
@@ -630,13 +630,13 @@ void HAL_CAN_MspInit(CAN_HandleTypeDef* hcan)
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
     /* CAN1 interrupt Init */
-    HAL_NVIC_SetPriority(CAN1_TX_IRQn, 5, 0);
+    HAL_NVIC_SetPriority(CAN1_TX_IRQn, 2, 0);
     HAL_NVIC_EnableIRQ(CAN1_TX_IRQn);
-    HAL_NVIC_SetPriority(CAN1_RX0_IRQn, 5, 0);
+    HAL_NVIC_SetPriority(CAN1_RX0_IRQn, 2, 0);
     HAL_NVIC_EnableIRQ(CAN1_RX0_IRQn);
-    HAL_NVIC_SetPriority(CAN1_RX1_IRQn, 5, 0);
+    HAL_NVIC_SetPriority(CAN1_RX1_IRQn, 2, 0);
     HAL_NVIC_EnableIRQ(CAN1_RX1_IRQn);
-    HAL_NVIC_SetPriority(CAN1_SCE_IRQn, 5, 0);
+    HAL_NVIC_SetPriority(CAN1_SCE_IRQn, 2, 0);
     HAL_NVIC_EnableIRQ(CAN1_SCE_IRQn);
   }
   else if(hcan->Instance==CAN2)
@@ -1529,8 +1529,8 @@ void SystemPeriphral_Init(void)
   HAL_TIM_Base_Start(&htim8);
   TIM13_Init();
   TIM14_Init();
-//  CAN1_Init();
-  CAN2_Init();
+  CAN1_Init();
+//  CAN2_Init();
   SPI1_Init();
   USB_DEVICE_Init();
   Button_Init();

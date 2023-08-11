@@ -99,7 +99,7 @@ void LKTECH_MG_GetFeedback(LKTECH_MG_Handle* hmotor, CAN_RxHeaderTypeDef* rxhead
         hmotor->speedDeg.f = ((float)hmotor->speedRawDeg.b16) / hmotor->gearRatio;
         hmotor->encoderRaw.b8[0] = rxbuf[6];
         hmotor->encoderRaw.b8[1] = rxbuf[7];
-				hmotor->angle.f = ((float)hmotor->encoderRaw.b16) * 360.0f / 16383.0f / hmotor->gearRatio;
+//				hmotor->angle.f = ((float)hmotor->encoderRaw.b16) * 360.0f / 16383.0f / hmotor->gearRatio;
       }
       break;
       case LETECH_MG_CAN_BUS_TASK_READ_CONDITION3:
