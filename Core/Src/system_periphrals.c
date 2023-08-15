@@ -45,7 +45,7 @@ SD_HandleTypeDef hsd;
 GPIOStruct hButtonOnboardKey;
 LEDHandle  hLEDBlue, hLEDYellowGreen;
 
-static uint32_t HAL_RCC_CAN1_CLK_ENABLED=1;
+static uint32_t HAL_RCC_CAN1_CLK_ENABLED=0;
 
 static void CAN1_Init(void);
 static void DAC_Init(void);
@@ -108,7 +108,7 @@ static void CAN2_Init(void)
   hcan2.Init.TimeTriggeredMode = DISABLE;
   hcan2.Init.AutoBusOff = DISABLE;
   hcan2.Init.AutoWakeUp = DISABLE;
-  hcan2.Init.AutoRetransmission = DISABLE;
+  hcan2.Init.AutoRetransmission = ENABLE;
   hcan2.Init.ReceiveFifoLocked = DISABLE;
   hcan2.Init.TransmitFifoPriority = DISABLE;
   HAL_CAN_Init(&hcan2);
@@ -612,10 +612,11 @@ void HAL_CAN_MspInit(CAN_HandleTypeDef* hcan)
   GPIO_InitTypeDef GPIO_InitStruct = {0};
   if(hcan->Instance==CAN1)
   {
-    HAL_RCC_CAN1_CLK_ENABLED++;
-    if(HAL_RCC_CAN1_CLK_ENABLED==1){
-      __HAL_RCC_CAN1_CLK_ENABLE();
-    }
+//    HAL_RCC_CAN1_CLK_ENABLED++;
+//    if(HAL_RCC_CAN1_CLK_ENABLED==1){
+//      __HAL_RCC_CAN1_CLK_ENABLE();
+//    }
+    __HAL_RCC_CAN1_CLK_ENABLE();
 
     __HAL_RCC_GPIOA_CLK_ENABLE();
     /**CAN1 GPIO Configuration
@@ -642,11 +643,11 @@ void HAL_CAN_MspInit(CAN_HandleTypeDef* hcan)
   else if(hcan->Instance==CAN2)
   {
     /* Peripheral clock enable */
-    __HAL_RCC_CAN2_CLK_ENABLE();
     HAL_RCC_CAN1_CLK_ENABLED++;
     if(HAL_RCC_CAN1_CLK_ENABLED==1){
       __HAL_RCC_CAN1_CLK_ENABLE();
     }
+    __HAL_RCC_CAN2_CLK_ENABLE();
 
     __HAL_RCC_GPIOB_CLK_ENABLE();
     /**CAN2 GPIO Configuration
@@ -678,10 +679,11 @@ void HAL_CAN_MspDeInit(CAN_HandleTypeDef* hcan)
   if(hcan->Instance==CAN1)
   {
     /* Peripheral clock disable */
-    HAL_RCC_CAN1_CLK_ENABLED--;
-    if(HAL_RCC_CAN1_CLK_ENABLED==0){
-      __HAL_RCC_CAN1_CLK_DISABLE();
-    }
+//    HAL_RCC_CAN1_CLK_ENABLED--;
+//    if(HAL_RCC_CAN1_CLK_ENABLED==0){
+//      __HAL_RCC_CAN1_CLK_DISABLE();
+//    }
+    __HAL_RCC_CAN1_CLK_DISABLE();
 
     /**CAN1 GPIO Configuration
     PA11     ------> CAN1_RX
@@ -699,10 +701,11 @@ void HAL_CAN_MspDeInit(CAN_HandleTypeDef* hcan)
   {
     /* Peripheral clock disable */
     __HAL_RCC_CAN2_CLK_DISABLE();
-    HAL_RCC_CAN1_CLK_ENABLED--;
-    if(HAL_RCC_CAN1_CLK_ENABLED==0){
-      __HAL_RCC_CAN1_CLK_DISABLE();
-    }
+//    HAL_RCC_CAN1_CLK_ENABLED--;
+//    if(HAL_RCC_CAN1_CLK_ENABLED==0){
+//      __HAL_RCC_CAN1_CLK_DISABLE();
+//    }
+    __HAL_RCC_CAN1_CLK_DISABLE();
 
     /**CAN2 GPIO Configuration
     PB12     ------> CAN2_RX
@@ -1529,8 +1532,8 @@ void SystemPeriphral_Init(void)
   HAL_TIM_Base_Start(&htim8);
   TIM13_Init();
   TIM14_Init();
-  CAN1_Init();
-//  CAN2_Init();
+//  CAN1_Init();
+  CAN2_Init();
   SPI1_Init();
   USB_DEVICE_Init();
   Button_Init();

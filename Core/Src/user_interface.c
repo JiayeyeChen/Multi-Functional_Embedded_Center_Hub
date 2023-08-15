@@ -1442,7 +1442,7 @@ void UI_Page_LinKongKeJiTesting(void)
   if (ifButtonPressed(&hButtonMotorEnable))
 	{
 		LETECH_MG_Enable(hLKTechTestingMotorPtr);
-		hLKTECH.task = LETECH_MG_CAN_BUS_TASK_ENABLE;
+		hLKTechTestingMotorPtr->task = LETECH_MG_CAN_BUS_TASK_ENABLE;
 	}
   if (ifButtonPressed(&hButtonStop))
 	{
@@ -1482,7 +1482,7 @@ void UI_Page_LinKongKeJiTesting(void)
   if (ifButtonPressed(&hButtonMotorProfilingStart))
   {
     hLKTechTestingMotorPtr->task = LETECH_MG_CAN_BUS_TASK_CURRENT_CONTROL;
-		hLKTechTestingMotorPtr->currentControlSet.f += 5.0f / hLKTECH.kt;
+		hLKTechTestingMotorPtr->currentControlSet.f += 5.0f / hLKTechTestingMotorPtr->kt;
   }
   if (ifButtonPressed(&hButtonMotorProfilingEnd))
   {
@@ -1495,8 +1495,8 @@ void UI_Page_LinKongKeJiTesting(void)
 		hLKTechTestingMotorPtr->velocityControlSet.f = LKTECHJoyStickValue * 360.0f;
 	else if (hLKTechTestingMotorPtr->task == LETECH_MG_CAN_BUS_TASK_POSITION_CONTROL_6_INCREMENT)
 		hLKTechTestingMotorPtr->positionControlIncrementSet.f = LKTECHJoyStickValue * 10.0f;
-//	else if (hLKTECH.task == LETECH_MG_CAN_BUS_TASK_CURRENT_CONTROL)
-//		hLKTECH.currentControlSet.f = LKTECHJoyStickValue * 6.0f;
+	else if (hLKTechTestingMotorPtr->task == LETECH_MG_CAN_BUS_TASK_CURRENT_CONTROL)
+		hLKTechTestingMotorPtr->currentControlSet.f = LKTECHJoyStickValue * 2.0f;
 	else if (ifKeepReadingAngle && hLKTechTestingMotorPtr->task == LETECH_MG_CAN_BUS_TASK_READ_ANGLE_SINGLE_TURN)
 		LETECH_MG_ReadAngleSingleTurn(hLKTechTestingMotorPtr);
 	
@@ -1703,17 +1703,18 @@ void UI_Page_FoshanHipExoskeleton_Init(void)
   hButtonFoshanHipExoskeletonAssistControl = Button_Create(20, 120, 130, 70, "Assist", LCD_YELLOW, LCD_RED);
   hButtonFoshanHipExoskeletonResistControl = Button_Create(180, 120, 130, 70, "Resist", LCD_YELLOW, LCD_RED);
   hButtonStop = Button_Create(340, 120, 130, 70, "STOP", LCD_YELLOW, LCD_RED);
-  hButtonMotorZeroing = Button_Create(100, 60, 300, 50, "Zeroing", LCD_YELLOW, LCD_RED);
+  hButtonMotorZeroing = Button_Create(5, 60, 70, 50, "Zero", LCD_YELLOW, LCD_RED);
   
-  hPotFoshanHipExoskeletonGraFactor = Potentialmeter_Create(70, 300, 30, 400, 100, 70, LCD_MAGENTA, LCD_RED, LIGHT_GREY, 0.0f, 10.0f, 0.0f, &hFoshanHipExoskeleton.gravityFactor);
-  hPotFoshanHipExoskeletonInnerFactor = Potentialmeter_Create(230, 300, 30, 400, 100, 70, LCD_MAGENTA, LCD_RED, LIGHT_GREY, 0.0f, 10.0f, 0.0f, &hFoshanHipExoskeleton.innertiaFactor);
-  hPotFoshanHipExoskeletonSpringFactor = Potentialmeter_Create(380, 300, 30, 400, 100, 70, LCD_MAGENTA, LCD_RED, LIGHT_GREY, 0.0f, 10.0f, 0.0f, &hFoshanHipExoskeleton.springFactor);
+  hPotFoshanHipExoskeletonGraFactor = Potentialmeter_Create(70, 300, 30, 400, 100, 70, LCD_MAGENTA, LCD_RED, LIGHT_GREY, 0.0f, 15.0f, 0.0f, &hFoshanHipExoskeleton.gravityFactor);
+  hPotFoshanHipExoskeletonInnerFactor = Potentialmeter_Create(230, 300, 30, 400, 100, 70, LCD_MAGENTA, LCD_RED, LIGHT_GREY, 0.0f, 2.0f, 0.0f, &hFoshanHipExoskeleton.innertiaFactor);
+  hPotFoshanHipExoskeletonSpringFactor = Potentialmeter_Create(380, 300, 30, 400, 100, 70, LCD_MAGENTA, LCD_RED, LIGHT_GREY, -10.0f, 10.0f, 0.0f, &hFoshanHipExoskeleton.springFactor);
   
   LCD_SetLayer(1); 
   LCD_SetColor(LCD_BLACK);
   LCD_DisplayString(100, 0, "LPos:");
-  LCD_DisplayString(250, 0, "LCur:");
-  LCD_DisplayString(100, 30, "RPos:");
+  LCD_DisplayString(100, 30, "LCur:");
+  LCD_DisplayString(100, 60, "LATq:");
+  LCD_DisplayString(250, 0, "RPos:");
   LCD_DisplayString(250, 30, "RCur:");
   LCD_DisplayString(70, 210, "Gra:");
   LCD_DisplayString(230, 210, "Ine:");
@@ -1752,14 +1753,17 @@ void UI_Page_FoshanHipExoskeleton(void)
   }
   if (ifButtonPressed(&hButtonMotorZeroing))
   {
-    LETECH_MG_Shutdown(&hFoshanHipExoskeleton.hMotorLeft);
-		LETECH_MG_ZeroingByCurrentPosition(&hFoshanHipExoskeleton.hMotorLeft);
+    hFoshanHipExoskeleton.leftAngleOffset = hFoshanHipExoskeleton.hMotorLeft.angle.f;
   }
   
   LCD_SetLayer(1); 
   LCD_SetColor(LCD_BLACK);
-  LCD_DisplayDecimals(150, 0, hFoshanHipExoskeleton.leftOffsetedAngle, 4, 1);
-  LCD_DisplayDecimals(300, 0, hFoshanHipExoskeleton.hMotorLeft.current.f, 4, 1);
+  LCD_DisplayDecimals(170, 0, hFoshanHipExoskeleton.leftOffsetedAngle, 4, 1);
+  LCD_DisplayDecimals(170, 30, hFoshanHipExoskeleton.hMotorLeft.current.f, 4, 1);
+  if (hFoshanHipExoskeleton.task == FOSHAN_HIP_EXOSKELETON_TASK_ASSIST)
+    LCD_DisplayDecimals(170, 60, hFoshanHipExoskeleton.assistiveTorqueFilteredLeft.output.f, 4, 1);
+  else if (hFoshanHipExoskeleton.task == FOSHAN_HIP_EXOSKELETON_TASK_RESIST)
+    LCD_DisplayDecimals(170, 60, hFoshanHipExoskeleton.resistiveTorqueFilteredLeft.output.f, 4, 1);
   LCD_DisplayDecimals(70, 240, hFoshanHipExoskeleton.gravityFactor, 3, 1);
   LCD_DisplayDecimals(230, 240, hFoshanHipExoskeleton.innertiaFactor, 3, 1);
   LCD_DisplayDecimals(380, 240, hFoshanHipExoskeleton.springFactor, 3, 1);

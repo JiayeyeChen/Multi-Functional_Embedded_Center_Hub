@@ -10,7 +10,6 @@
 #include "ak10-9_v2_testing.h"
 #include "exoskeleton.h"
 #include "adc.h"
-#include "bldc_actuators_testing.h"
 #include "foshan_hip_exoskeleton.h"
 
 typedef struct
@@ -174,4 +173,5 @@ extern float exoskeletonMotorTestHipGaitAngleDeg;
 extern UIHandle hUI;
 extern PageHandle UIPage_AK10_9_ManualControlCubeMarsFWServoMode, UIPage_AK10_9_ManualControlCubeMarsFWMITMode;
 extern PageHandle UIPage_LowerLimb_Exoskeleton;
+extern PageHandle UIPage_FoshanHipExoskeleton;
 #endif

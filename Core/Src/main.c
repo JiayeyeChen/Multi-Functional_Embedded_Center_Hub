@@ -18,7 +18,6 @@
 #include "adc.h"
 #include "exoskeleton.h"
 #include "lktech_mg_motor.h"
-#include "bldc_actuators_testing.h"
 #include "foshan_hip_exoskeleton.h"
 
 void SystemClock_Config(void);
@@ -44,7 +43,7 @@ int main(void)
 ////  EXOSKELETON_MotorInit();
 
   AD7606_Init(AD7606_RANG_10V, AD7606_OS_RATIO_4);
-  FOSHANHIPEXOSKELETON_Init();
+  FOSHANHIPEXOSKELETON_Init(0.01f);
 ////  EXOSKELETON_Init();
   CAN_ConfigureFilters();
   
@@ -154,38 +153,8 @@ void Main_Task(void *argument)
   datalogTimeStamp = HAL_GetTick();
   for(;;)
   {
-    LETECH_MG_ReadAngleSingleTurn(&(hFoshanHipExoskeleton.hMotorLeft));
-////    hFoshanHipExoskeleton.leftOffsetedAngle = hFoshanHipExoskeleton.hMotorLeft.angle.f - hFoshanHipExoskeleton.leftAngleOffset;
-////    switch (hFoshanHipExoskeleton.task)
-////    {
-////      case FOSHAN_HIP_EXOSKELETON_TASK_NONE:
-////      {
-////        LETECH_MG_ReadAngleSingleTurn(&(hFoshanHipExoskeleton.hMotorLeft));
-////        break;
-////      }
-////      case FOSHAN_HIP_EXOSKELETON_TASK_ASSIST:
-////      {
-////        LETECH_MG_CurrentControl(&(hFoshanHipExoskeleton.hMotorLeft), 0.0f);
-////        osDelay(1);
-////        LETECH_MG_ReadAngleSingleTurn(&(hFoshanHipExoskeleton.hMotorLeft));
-////        break;
-////      }
-////      case FOSHAN_HIP_EXOSKELETON_TASK_RESIST:
-////      {
-////        break;
-////      }
-////      default:
-////        break;
-////    }
-    
-    
-    
-    
-    
-    
-    
-    
-    
+    if (hUI.curPage == &UIPage_FoshanHipExoskeleton)
+      FOSHANHIPEXOSKELETON_CentreControl();
     
 
 ////////////    /* Proprioception lower limb exoskeleton control */
@@ -262,7 +231,7 @@ void Main_Task(void *argument)
 ////////////    AK10_9_CubeMarsFW_MotorStatusMonitor(&hAKMotorRightKnee, 100);
 ////////////    AK10_9_CubeMarsFW_MotorStatusMonitor(&hAKMotorRightHip, 100);
     
-    osDelay(19);
+    osDelay(5);
   }
 }
 
@@ -270,23 +239,23 @@ void MotorTesting_Task(void *argument)
 {
 	for(;;)
   {
-//////		/* Lin Kong Ke Ji MG */
-//////    if (hUI.curPage == &UIPage_LinKongKeJi_Testing)
-//////    {
-//////      if (hLKTechTestingMotorPtr->task == LETECH_MG_CAN_BUS_TASK_SPEED_CONTROL)
-//////        LETECH_MG_SpeedControl(hLKTechTestingMotorPtr, hLKTechTestingMotorPtr->velocityControlSet.f);
-//////      else if (hLKTechTestingMotorPtr->task == LETECH_MG_CAN_BUS_TASK_CURRENT_CONTROL)
-//////        LETECH_MG_CurrentControl(hLKTechTestingMotorPtr, hLKTechTestingMotorPtr->currentControlSet.f);
-//////      else if (hLKTechTestingMotorPtr->task == LETECH_MG_CAN_BUS_TASK_POSITION_CONTROL_6_INCREMENT)
-//////        LETECH_MG_PositionControl6Increment(hLKTechTestingMotorPtr, hLKTechTestingMotorPtr->positionControlIncrementSet.f, 600.0f);
-//////      
-//////      dataSlots_LKTECH_MG_MotorTest[0].f = hLKTechTestingMotorPtr->angle.f;
-//////      dataSlots_LKTECH_MG_MotorTest[1].f = hLKTechTestingMotorPtr->speedDeg.f;
-//////      dataSlots_LKTECH_MG_MotorTest[2].f = hLKTechTestingMotorPtr->torque.f;
-//////      dataSlots_LKTECH_MG_MotorTest[3].f = hLKTechTestingMotorPtr->temperature.f;
-//////      hUSB.ifNewDataLogPiece2Send = 1;
-//////      USB_DataLogManager(LKTECH_MotorTest_Set_Datalog_Label, dataSlots_LKTECH_MG_MotorTest);
-//////    }
+		/* Lin Kong Ke Ji MG */
+    if (hUI.curPage == &UIPage_LinKongKeJi_Testing)
+    {
+      if (hLKTechTestingMotorPtr->task == LETECH_MG_CAN_BUS_TASK_SPEED_CONTROL)
+        LETECH_MG_SpeedControl(hLKTechTestingMotorPtr, hLKTechTestingMotorPtr->velocityControlSet.f);
+      else if (hLKTechTestingMotorPtr->task == LETECH_MG_CAN_BUS_TASK_CURRENT_CONTROL)
+        LETECH_MG_CurrentControl(hLKTechTestingMotorPtr, hLKTechTestingMotorPtr->currentControlSet.f);
+      else if (hLKTechTestingMotorPtr->task == LETECH_MG_CAN_BUS_TASK_POSITION_CONTROL_6_INCREMENT)
+        LETECH_MG_PositionControl6Increment(hLKTechTestingMotorPtr, hLKTechTestingMotorPtr->positionControlIncrementSet.f, 600.0f);
+      
+//      dataSlots_LKTECH_MG_MotorTest[0].f = hLKTechTestingMotorPtr->angle.f;
+//      dataSlots_LKTECH_MG_MotorTest[1].f = hLKTechTestingMotorPtr->speedDeg.f;
+//      dataSlots_LKTECH_MG_MotorTest[2].f = hLKTechTestingMotorPtr->torque.f;
+//      dataSlots_LKTECH_MG_MotorTest[3].f = hLKTechTestingMotorPtr->temperature.f;
+//      hUSB.ifNewDataLogPiece2Send = 1;
+//      USB_DataLogManager(LKTECH_MotorTest_Set_Datalog_Label, dataSlots_LKTECH_MG_MotorTest);
+    }
     osDelay(10);
   }
 }

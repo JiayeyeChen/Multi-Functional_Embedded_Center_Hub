@@ -2,7 +2,6 @@
 #include "ak10-9_v2_testing.h"
 #include "usb.h"
 #include "exoskeleton.h"
-#include "bldc_actuators_testing.h"
 #include "foshan_hip_exoskeleton.h"
 
 //for testing//
