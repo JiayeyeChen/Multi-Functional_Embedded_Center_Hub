@@ -1705,7 +1705,7 @@ void UI_Page_FoshanHipExoskeleton_Init(void)
   hButtonStop = Button_Create(340, 120, 130, 70, "STOP", LCD_YELLOW, LCD_RED);
   hButtonMotorZeroing = Button_Create(5, 60, 70, 50, "Zero", LCD_YELLOW, LCD_RED);
   
-  hPotFoshanHipExoskeletonGraFactor = Potentialmeter_Create(70, 300, 30, 400, 100, 70, LCD_MAGENTA, LCD_RED, LIGHT_GREY, 0.0f, 15.0f, 0.0f, &hFoshanHipExoskeleton.gravityFactor);
+  hPotFoshanHipExoskeletonGraFactor = Potentialmeter_Create(70, 300, 30, 400, 100, 70, LCD_MAGENTA, LCD_RED, LIGHT_GREY, 0.0f, 100.0f, 0.0f, &hFoshanHipExoskeleton.gravityFactor);
   hPotFoshanHipExoskeletonInnerFactor = Potentialmeter_Create(230, 300, 30, 400, 100, 70, LCD_MAGENTA, LCD_RED, LIGHT_GREY, 0.0f, 2.0f, 0.0f, &hFoshanHipExoskeleton.innertiaFactor);
   hPotFoshanHipExoskeletonSpringFactor = Potentialmeter_Create(380, 300, 30, 400, 100, 70, LCD_MAGENTA, LCD_RED, LIGHT_GREY, -10.0f, 10.0f, 0.0f, &hFoshanHipExoskeleton.springFactor);
   
