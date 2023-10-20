@@ -11,6 +11,7 @@
 #include "exoskeleton.h"
 #include "adc.h"
 #include "foshan_hip_exoskeleton.h"
+#include "lktech_mg_motor.h"
 
 typedef struct
 {

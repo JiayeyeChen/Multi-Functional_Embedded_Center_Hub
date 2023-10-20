@@ -80,16 +80,20 @@ void CAN_ConfigureFilters(void)
 //	tempFilter.FilterActivation = ENABLE;
 //	HAL_CAN_ConfigFilter(&hcan2, &tempFilter);
   /*Filter bank 2*/
-  tempFilter.FilterMode = CAN_FILTERMODE_IDLIST;;
+  tempFilter.FilterMode = CAN_FILTERMODE_IDMASK;;
 	tempFilter.FilterScale = CAN_FILTERSCALE_32BIT;
 	tempFilter.FilterFIFOAssignment = CAN_FILTER_FIFO0;
-	tempFilter.FilterBank = 3;
-	tempFilter.FilterIdHigh = hFoshanHipExoskeleton.hMotorLeft.canID << 5;
+	tempFilter.FilterBank = 2;
+	tempFilter.FilterIdHigh = 0;
+	tempFilter.FilterIdLow = 0;
+	tempFilter.FilterMaskIdHigh = 0;
+	tempFilter.FilterMaskIdLow = 0;
 	tempFilter.FilterActivation = ENABLE;
-	HAL_CAN_ConfigFilter(hFoshanHipExoskeleton.hMotorLeft.hcan, &tempFilter);
+	HAL_CAN_ConfigFilter(&hcan2, &tempFilter);
   /***************/
 
   /*Filter bank 3*/
+	
 //	tempFilter.FilterMode = CAN_FILTERMODE_IDLIST;;
 //	tempFilter.FilterScale = CAN_FILTERSCALE_32BIT;
 //	tempFilter.FilterFIFOAssignment = CAN_FILTER_FIFO0;
@@ -175,8 +179,15 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
     EXOSKELETON_GetBNO055FeedbackGrv(&hIMUTorso, temRxData);
 	
 	
-	if (temRxHeader.StdId == hFoshanHipExoskeleton.hMotorLeft.canID)
-		LKTECH_MG_GetFeedback(&hFoshanHipExoskeleton.hMotorLeft, &temRxHeader, temRxData);
+	if (CYBERGEAR_CheckCANRxHeader(&hFoshanHipExoskeleton.hMotorLeft, temRxHeader))
+	{
+		CYBERGEAR_GetFeedback(&hFoshanHipExoskeleton.hMotorLeft, &temRxHeader, temRxData);
+	}
+	
+	if (CYBERGEAR_CheckCANRxHeader(&hFoshanHipExoskeleton.hMotorRight, temRxHeader))
+	{
+		CYBERGEAR_GetFeedback(&hFoshanHipExoskeleton.hMotorRight, &temRxHeader, temRxData);
+	}
 	
 	if (temRxHeader.StdId == CAN_ID_TMOTOR_RX)
 	{

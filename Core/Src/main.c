@@ -19,6 +19,7 @@
 #include "exoskeleton.h"
 #include "lktech_mg_motor.h"
 #include "foshan_hip_exoskeleton.h"
+#include "xiaomi_cybergear.h"
 
 void SystemClock_Config(void);
 
@@ -26,8 +27,10 @@ void SystemClock_Config(void);
 /* For exoskeleton motor test */
 uint32_t datalogTimeStamp;
 ////////////////////////////////
+
 int main(void)
 {
+	
   HAL_Init();
 
   SystemClock_Config();
@@ -46,7 +49,6 @@ int main(void)
   FOSHANHIPEXOSKELETON_Init(0.01f);
 ////  EXOSKELETON_Init();
   CAN_ConfigureFilters();
-  
   osKernelInitialize();
   OSThreads_Init();
   
@@ -231,7 +233,7 @@ void Main_Task(void *argument)
 ////////////    AK10_9_CubeMarsFW_MotorStatusMonitor(&hAKMotorRightKnee, 100);
 ////////////    AK10_9_CubeMarsFW_MotorStatusMonitor(&hAKMotorRightHip, 100);
     
-    osDelay(5);
+    osDelay(10);
   }
 }
 
