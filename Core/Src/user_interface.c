@@ -1831,8 +1831,44 @@ void UI_Page_Foshan4DOFExoskeletonSelection_Init(void)
 void UI_Page_Foshan4DOFExoskeletonTMotor(void)
 {
 	ButtonUpdate(&hButtonGoBack);
+	ButtonUpdate(&hButtonMotorEnable);
+  ButtonUpdate(&hButtonMotorDisable);
+  ButtonUpdate(&hButtonMotorZeroing);
+  
+  
+  LCD_SetLayer(1); 
+  LCD_SetColor(LCD_RED);
+  if (hExoskeletonFoshan4DOFTMotor.hMotorLeftHip.status == AK10_9_Online)
+    LCD_DisplayString(200, 0, "Online ");
+  else
+    LCD_DisplayString(200, 0, "Offline");
+  if (hExoskeletonFoshan4DOFTMotor.hMotorLeftKnee.status == AK10_9_Online)
+    LCD_DisplayString(380, 0, "Online ");
+  else
+    LCD_DisplayString(380, 0, "Offline");
+  /////
+  if (hExoskeletonFoshan4DOFTMotor.hMotorRightHip.status == AK10_9_Online)
+    LCD_DisplayString(200, 25, "Online ");
+  else
+    LCD_DisplayString(200, 25, "Offline");
+  if (hExoskeletonFoshan4DOFTMotor.hMotorRightKnee.status == AK10_9_Online)
+    LCD_DisplayString(380, 25, "Online ");
+  else
+    LCD_DisplayString(380, 25, "Offline");
 	
-	
+  if (ifButtonPressed(&hButtonMotorEnable))
+  {
+    hExoskeletonFoshan4DOFTMotor.task = FOSHAN_4DOF_EXO_TASK_ENABLE_MOTORS;
+    hExoskeletonFoshan4DOFTMotor.motorCmdSequence = FOSHAN_4DOF_EXO_TMOTOR_COMMAND_SEQUENCE_LEFT_HIP;
+  }
+  if (ifButtonPressed(&hButtonMotorDisable))
+  {
+  }
+  if (ifButtonPressed(&hButtonMotorZeroing))
+  {
+  }
+  
+  
 	if (ifButtonPressed(&hButtonGoBack))
     UI_Page_Change_To(&UIPage_Foshan4DOFExoskeletonSelection);
 }
@@ -1840,6 +1876,17 @@ void UI_Page_Foshan4DOFExoskeletonTMotor(void)
 void UI_Page_Foshan4DOFExoskeletonTMotor_Init(void)
 {
 	hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
+  
+  hButtonMotorEnable = Button_Create(0, 60, 100, 40, "Enable", LCD_WHITE, LCD_RED);
+  hButtonMotorDisable = Button_Create(120, 60, 100, 40, "Disable", LCD_WHITE, LCD_RED);
+  hButtonMotorZeroing = Button_Create(240, 60, 100, 40, "Zeroing", LCD_WHITE, LCD_RED);
+  
+  LCD_SetLayer(1); 
+  LCD_SetColor(LCD_BLACK);
+  LCD_DisplayString(100, 0, "LftHp:");
+  LCD_DisplayString(300, 0, "LftKe:");
+  LCD_DisplayString(100, 25, "RhtHp:");
+  LCD_DisplayString(300, 25, "RhtKe:");
 }
 
 void UI_Page_Foshan4DOFExoskeletonLKMotor(void)
