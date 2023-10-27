@@ -272,10 +272,10 @@ void EXOSKELETON_SystemIDManager(void)
       break;
     case EXOSKELETON_SYSTEMID_TASK_KNEE_JOINT_MOVEMENT_POSITIONING:
       
-      AK10_9_CubaMarsFW_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightKnee, \
+      AK10_9_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightKnee, \
                                                                 EXOSKELETON_SYSTEMID_KNEE_JOINT_LEARNING_STARTING_POSITION_KNEE_JOINT, \
                                                                 0.0f, 200.0f, 2.0f, 0.0f);
-      AK10_9_CubaMarsFW_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightHip, \
+      AK10_9_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightHip, \
                                                           EXOSKELETON_SYSTEMID_KNEE_JOINT_LEARNING_STARTING_POSITION_HIP_JOINT, \
                                                           0.0f, 200.0f, 2.0f, 0.0f);
 //////////    /* for debug */
@@ -292,10 +292,10 @@ void EXOSKELETON_SystemIDManager(void)
       if (HAL_GetTick() - enterProfilingTimeStamp <= EXOSKELETON_SYSTEMID_JOINT_POSITIONING_STABILIZING_TIME)
       {
         
-        AK10_9_CubaMarsFW_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightKnee, \
+        AK10_9_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightKnee, \
                                                                 EXOSKELETON_SYSTEMID_KNEE_JOINT_LEARNING_STARTING_POSITION_KNEE_JOINT, \
                                                                 0.0f, 200.0f, 2.0f, 0.0f);
-        AK10_9_CubaMarsFW_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightHip, \
+        AK10_9_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightHip, \
                                                           EXOSKELETON_SYSTEMID_KNEE_JOINT_LEARNING_STARTING_POSITION_HIP_JOINT, \
                                                           0.0f, 200.0f, 2.0f, 0.0f);
       }
@@ -306,7 +306,7 @@ void EXOSKELETON_SystemIDManager(void)
           EXOSKELETON_SystemID_UpdateDataSlot();
           USB_DataLogSingleCargoTransmit(dataSlots_Exoskeleton_SystemID);
           
-          AK10_9_CubaMarsFW_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightHip, \
+          AK10_9_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightHip, \
                                                           EXOSKELETON_SYSTEMID_KNEE_JOINT_LEARNING_STARTING_POSITION_HIP_JOINT, \
                                                           0.0f, 200.0f, 2.0f, 0.0f);
           EXOSKELETON_SystemID_KneeJoint_MotorProfilingSinWave(&hAKMotorRightKnee, hSystemID.kneeProfilingAmp, \
@@ -327,14 +327,14 @@ void EXOSKELETON_SystemIDManager(void)
       break;
     case EXOSKELETON_SYSTEMID_TASK_HIP_JOINT_MOVEMENT_POSITIONING:
       
-      AK10_9_CubaMarsFW_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightKnee, \
+      AK10_9_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightKnee, \
                                                                 EXOSKELETON_SYSTEMID_HIP_JOINT_LEARNING_STARTING_POSITION_KNEE_JOINT, \
                                                                 0.0f, 200.0f, 2.0f, 0.0f);
     #ifdef HIP_JOINT_LEARNING_USE_CURRENT_CONTROL
       AK10_9_DMFW_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightHip, \
                                                           0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
     #else
-      AK10_9_CubaMarsFW_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightHip, \
+      AK10_9_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightHip, \
                                                           EXOSKELETON_SYSTEMID_HIP_JOINT_LEARNING_STARTING_POSITION_HIP_JOINT, \
                                                           0.0f, 200.0f, 2.0f, 0.0f);
     #endif
@@ -352,14 +352,14 @@ void EXOSKELETON_SystemIDManager(void)
       if (HAL_GetTick() - enterProfilingTimeStamp <= EXOSKELETON_SYSTEMID_JOINT_POSITIONING_STABILIZING_TIME)
       {
         
-        AK10_9_CubaMarsFW_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightKnee, \
+        AK10_9_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightKnee, \
                                                                   EXOSKELETON_SYSTEMID_HIP_JOINT_LEARNING_STARTING_POSITION_KNEE_JOINT, \
                                                                   0.0f, 200.0f, 2.0f, 0.0f);
         #ifdef HIP_JOINT_LEARNING_USE_CURRENT_CONTROL
           AK10_9_DMFW_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightHip, \
                                                               0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
         #else
-          AK10_9_CubaMarsFW_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightHip, \
+          AK10_9_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightHip, \
                                                               EXOSKELETON_SYSTEMID_HIP_JOINT_LEARNING_STARTING_POSITION_HIP_JOINT, \
                                                               0.0f, 200.0f, 2.0f, 0.0f);
         #endif
@@ -371,7 +371,7 @@ void EXOSKELETON_SystemIDManager(void)
           EXOSKELETON_SystemID_UpdateDataSlot();
           USB_DataLogSingleCargoTransmit(dataSlots_Exoskeleton_SystemID);
           
-          AK10_9_CubaMarsFW_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightKnee, \
+          AK10_9_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightKnee, \
                                                                   EXOSKELETON_SYSTEMID_HIP_JOINT_LEARNING_STARTING_POSITION_KNEE_JOINT, \
                                                                   0.0f, 200.0f, 2.0f, 0.0f);
           #ifdef HIP_JOINT_LEARNING_USE_CURRENT_CONTROL
@@ -393,11 +393,11 @@ void EXOSKELETON_SystemIDManager(void)
       break;
     case EXOSKELETON_SYSTEMID_TASK_RELEASING_JOINTS:
       /*Knee joint goes to 10 deg. Hip joint goes to 180 deg.*/
-      AK10_9_CubaMarsFW_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightKnee, 10.0f, 0.0f, 100.0f, 2.0f, 0.0f);
+      AK10_9_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightKnee, 10.0f, 0.0f, 100.0f, 2.0f, 0.0f);
       #ifdef HIP_JOINT_LEARNING_USE_CURRENT_CONTROL
       AK10_9_DMFW_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightHip, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
       #else
-      AK10_9_CubaMarsFW_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightHip, 180.0f, 0.0f, 100.0f, 2.0f, 0.0f);
+      AK10_9_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightHip, 180.0f, 0.0f, 100.0f, 2.0f, 0.0f);
       #endif
 //////////      /* for debug */
 //////////      hAKMotorRightHip.ifCustomizedPositionSpeedControlFinished = 1;
@@ -406,8 +406,8 @@ void EXOSKELETON_SystemIDManager(void)
       if (hAKMotorRightHip.ifMITModeParameterSmootherWorkFinished && hAKMotorRightKnee.ifMITModeParameterSmootherWorkFinished)
       {
         hSystemID.curTask = EXOSKELETON_SYSTEMID_TASK_RECEIVING_RESULTS;
-        AK10_9_CubeMarsFW_MITMode_ZeroingControlParameters(&hAKMotorRightHip);
-        AK10_9_CubeMarsFW_MITMode_ZeroingControlParameters(&hAKMotorRightKnee);
+        AK10_9_MITMode_ZeroingControlParameters(&hAKMotorRightHip);
+        AK10_9_MITMode_ZeroingControlParameters(&hAKMotorRightKnee);
       }
       break;
     case EXOSKELETON_SYSTEMID_TASK_RECEIVING_RESULTS:
@@ -456,26 +456,26 @@ void EXOSKELETON_SystemIDManager(void)
 }
 
 void EXOSKELETON_SystemID_KneeJoint_MotorProfilingSinWave\
-     (AK10_9HandleCubaMarsFW* hmotor, float amplitude, float fre, uint32_t time_stamp_shift)
+     (AK10_9Handle* hmotor, float amplitude, float fre, uint32_t time_stamp_shift)
      {
        float t = (float)(HAL_GetTick() - time_stamp_shift) / 1000.0f;
        float motor_profiling_trajectory = EXOSKELETON_SYSTEMID_KNEE_JOINT_LEARNING_STARTING_POSITION_KNEE_JOINT - amplitude / 2.0f + (amplitude / 2.0f) * (float)cos(fre * 2.0f * pi * t);
-       AK10_9_CubaMarsFW_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightKnee, motor_profiling_trajectory, 0.0f, 200.0f, 3.0f, 0.0f);
+       AK10_9_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightKnee, motor_profiling_trajectory, 0.0f, 200.0f, 3.0f, 0.0f);
      }
 void EXOSKELETON_SystemID_HipJoint_MotorProfilingSinWave_PositionControl\
-     (AK10_9HandleCubaMarsFW* hmotor, float amplitude, float fre, uint32_t time_stamp_shift)
+     (AK10_9Handle* hmotor, float amplitude, float fre, uint32_t time_stamp_shift)
      {
        float t = (float)(HAL_GetTick() - time_stamp_shift) / 1000.0f;
        float motor_profiling_trajectory = EXOSKELETON_SYSTEMID_HIP_JOINT_LEARNING_STARTING_POSITION_HIP_JOINT - \
                                           amplitude / 2.0f + (amplitude / 2.0f) * (float)cos(fre * 2.0f * pi * t);
-       AK10_9_CubaMarsFW_MITMode_ContinuousControlWithOffset_Deg(hmotor, motor_profiling_trajectory, 0.0f, 499.0f, 3.0f, 0.0f);
+       AK10_9_MITMode_ContinuousControlWithOffset_Deg(hmotor, motor_profiling_trajectory, 0.0f, 499.0f, 3.0f, 0.0f);
      }
 void EXOSKELETON_SystemID_HipJoint_MotorProfilingSinWave_CurrentControl \
-     (AK10_9HandleCubaMarsFW* hmotor, float amplitude, float fre, uint32_t time_stamp_shift)
+     (AK10_9Handle* hmotor, float amplitude, float fre, uint32_t time_stamp_shift)
      {
        float t = (float)(HAL_GetTick() - time_stamp_shift) / 1000.0f;
        float motor_profiling_trajectory = -(amplitude / 2.0f) + (amplitude / 2.0f) * (float)cos(fre * 2.0f * pi * t);
-       AK10_9_CubaMarsFW_MITMode_ContinuousControlWithOffset_Deg(hmotor, 0.0f, 0.0f, 0.0f, 0.0f, motor_profiling_trajectory);
+       AK10_9_MITMode_ContinuousControlWithOffset_Deg(hmotor, 0.0f, 0.0f, 0.0f, 0.0f, motor_profiling_trajectory);
      }
 
 void EXOSKELETON_SystemID_Set_Datalog_Label(void)
@@ -515,23 +515,23 @@ void EXOSKELETON_CentreControl(void)
      if (hSystemID.curTask == EXOSKELETON_SYSTEMID_TASK_KNEE_JOINT_MOVEMENT_ONGOING || \
          hSystemID.curTask == EXOSKELETON_SYSTEMID_TASK_HIP_JOINT_MOVEMENT_ONGOING)
       {
-        AK10_9_CubeMarsFW_MITMode_ContinuousControlManager(&hAKMotorRightKnee, \
+        AK10_9_MITMode_ContinuousControlManager(&hAKMotorRightKnee, \
                                                            180.0f, 180.0f, 1.0f, 200.0f, 2.5f, 0.001f);
-        AK10_9_CubeMarsFW_MITMode_ContinuousControlManager(&hAKMotorRightHip, \
+        AK10_9_MITMode_ContinuousControlManager(&hAKMotorRightHip, \
                                                      180.0f, 180.0f, 1.0f, 200.0f, 2.5f, 0.001f);
       }
       else
       {
-        AK10_9_CubeMarsFW_MITMode_ContinuousControlManager(&hAKMotorRightKnee, \
+        AK10_9_MITMode_ContinuousControlManager(&hAKMotorRightKnee, \
                                                            20.0f, 60.0f, 1.0f, 200.0f, 2.5f, 0.001f);
-        AK10_9_CubeMarsFW_MITMode_ContinuousControlManager(&hAKMotorRightHip, \
+        AK10_9_MITMode_ContinuousControlManager(&hAKMotorRightHip, \
                                                      20.0f, 60.0f, 30.0f, 200.0f, 2.5f, 0.001f);
       }
       break;
     case EXOSKELETON_MAIN_TASK_GRAVITY_COMPENSATION:
-      AK10_9_CubeMarsFW_MITMode_ContinuousControlManager(&hAKMotorRightKnee, \
+      AK10_9_MITMode_ContinuousControlManager(&hAKMotorRightKnee, \
                                                          0.0f, 0.0f, 10.0f, 0.0f, 0.0f, 0.001f);
-      AK10_9_CubeMarsFW_MITMode_ContinuousControlManager(&hAKMotorRightHip, \
+      AK10_9_MITMode_ContinuousControlManager(&hAKMotorRightHip, \
                                                    0.0f, 0.0f, 10.0f, 0.0f, 0.0f, 0.001f);
       break;
     case EXOSKELETON_MAIN_TASK_FREE:
@@ -539,16 +539,16 @@ void EXOSKELETON_CentreControl(void)
       AK10_9_MITModeControl_Deg(&hAKMotorRightHip, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
       break;
     case EXOSKELETON_MAIN_TASK_AUGMENTATION_CONTROL:
-      AK10_9_CubeMarsFW_MITMode_ContinuousControlManager(&hAKMotorRightKnee, \
+      AK10_9_MITMode_ContinuousControlManager(&hAKMotorRightKnee, \
                                                          0.0f, 0.0f, 100.0f, 0.0f, 0.0f, 0.001f);
-      AK10_9_CubeMarsFW_MITMode_ContinuousControlManager(&hAKMotorRightHip, \
+      AK10_9_MITMode_ContinuousControlManager(&hAKMotorRightHip, \
                                                    0.0f, 0.0f, 100.0f, 0.0f, 0.0f, 0.001f);
       break;
     case EXOSKELETON_MAIN_TASK_MOTOR_PROFILING:
-      AK10_9_CubaMarsFW_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightHip, \
+      AK10_9_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightHip, \
                                                                 EXOSKELETON_HipGait2(((float)(HAL_GetTick() - hExoskeleton.hmotorprofiling->motorProfilingStartingTimestamp)) / 1000.0f), \
                                                                     0.0f, 499.0f, 3.0f, 0.0f);
-      AK10_9_CubeMarsFW_MITMode_ContinuousControlManager(&hAKMotorRightHip, \
+      AK10_9_MITMode_ContinuousControlManager(&hAKMotorRightHip, \
                                                              300.0f, 180.0f, 1.0f, 100.0f, 0.5f, 0.001f);
       AK10_9_MITModeControl_Deg(&hAKMotorRightKnee, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
       break;
@@ -580,9 +580,9 @@ void EXOSKELETON_GravityCompemsationManager(void)
   
   if (hGravityCompensation.ifGravityCompensationStarted)
   {
-    AK10_9_CubaMarsFW_MITMode_ContinuousControl_Deg(&hAKMotorRightHip, 0.0f, 0.0f, 0.0f, 0.0f, \
+    AK10_9_MITMode_ContinuousControl_Deg(&hAKMotorRightHip, 0.0f, 0.0f, 0.0f, 0.0f, \
                                                hGravityCompensation.torqueDesiredHip.f / hAKMotorRightHip.kt);
-    AK10_9_CubaMarsFW_MITMode_ContinuousControl_Deg(&hAKMotorRightKnee, 0.0f, 0.0f, 0.0f, 0.0f, \
+    AK10_9_MITMode_ContinuousControl_Deg(&hAKMotorRightKnee, 0.0f, 0.0f, 0.0f, 0.0f, \
                                                     hGravityCompensation.torqueDesiredKnee.f / hAKMotorRightKnee.kt);
   }
 }
@@ -633,10 +633,10 @@ void EXOSKELETON_AugmentedControlManager(void)
     sigmoidKnee = (1.0f / (1 + powf(e, -3.0f * (fabs(hExoskeleton.hmusculartorque->muscularTorqueKnee.f) - 5.0f)))) - 0.5f;
     
     
-    AK10_9_CubaMarsFW_MITMode_ContinuousControl_Deg(&hAKMotorRightHip, 0.0f, 0.0f, 0.0f, 0.0f, \
+    AK10_9_MITMode_ContinuousControl_Deg(&hAKMotorRightHip, 0.0f, 0.0f, 0.0f, 0.0f, \
                                               sigmoidHip * hExoskeleton.haugmentedcontrol->hipJointAugmentedControlThrottle * \
                                               hExoskeleton.hmusculartorque->muscularTorqueHip.f / hAKMotorRightHip.kt);
-    AK10_9_CubaMarsFW_MITMode_ContinuousControl_Deg(&hAKMotorRightKnee, 0.0f, 0.0f, 0.0f, 0.0f, \
+    AK10_9_MITMode_ContinuousControl_Deg(&hAKMotorRightKnee, 0.0f, 0.0f, 0.0f, 0.0f, \
                                                     sigmoidKnee * hExoskeleton.haugmentedcontrol->kneeJointAugmentedControlThrottle * \
                                                     hExoskeleton.hmusculartorque->muscularTorqueKnee.f/ hAKMotorRightKnee.kt);
   }

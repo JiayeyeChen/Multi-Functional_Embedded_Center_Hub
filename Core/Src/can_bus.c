@@ -3,6 +3,7 @@
 #include "usb.h"
 #include "exoskeleton.h"
 #include "foshan_hip_exoskeleton.h"
+#include "foshan_4dof_exoskeleton_tmotor.h"
 
 //for testing//
 uint32_t rxfifo0detected = 0;
@@ -72,24 +73,15 @@ void CAN_ConfigureFilters(void)
 
   /*Filter bank 0 & 1*/
   /*******************/
-//	tempFilter.FilterMode = CAN_FILTERMODE_IDLIST;;
-//	tempFilter.FilterScale = CAN_FILTERSCALE_16BIT;
-//	tempFilter.FilterFIFOAssignment = CAN_FILTER_FIFO0;
-//	tempFilter.FilterBank = 0;
-//	tempFilter.FilterIdHigh = CAN_ID_TMOTOR_RX << 5;
-//	tempFilter.FilterActivation = ENABLE;
-//	HAL_CAN_ConfigFilter(&hcan2, &tempFilter);
-  /*Filter bank 2*/
-  tempFilter.FilterMode = CAN_FILTERMODE_IDMASK;;
-	tempFilter.FilterScale = CAN_FILTERSCALE_32BIT;
+	tempFilter.FilterMode = CAN_FILTERMODE_IDLIST;;
+	tempFilter.FilterScale = CAN_FILTERSCALE_16BIT;
 	tempFilter.FilterFIFOAssignment = CAN_FILTER_FIFO0;
-	tempFilter.FilterBank = 2;
-	tempFilter.FilterIdHigh = 0;
-	tempFilter.FilterIdLow = 0;
-	tempFilter.FilterMaskIdHigh = 0;
-	tempFilter.FilterMaskIdLow = 0;
+	tempFilter.FilterBank = 0;
+	tempFilter.FilterIdHigh = CAN_ID_TMOTOR_RX << 5;
 	tempFilter.FilterActivation = ENABLE;
 	HAL_CAN_ConfigFilter(&hcan2, &tempFilter);
+  /*Filter bank 2*/
+
   /***************/
 
   /*Filter bank 3*/
@@ -178,23 +170,16 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
   else if (temRxHeader.StdId == CAN_ID_IMU_TORSO_ANGLE_EXOSKELETON)
     EXOSKELETON_GetBNO055FeedbackGrv(&hIMUTorso, temRxData);
 	
-	
-	if (CYBERGEAR_CheckCANRxHeader(&hFoshanHipExoskeleton.hMotorLeft, temRxHeader))
-	{
-		CYBERGEAR_GetFeedback(&hFoshanHipExoskeleton.hMotorLeft, &temRxHeader, temRxData);
-	}
-	
-	if (CYBERGEAR_CheckCANRxHeader(&hFoshanHipExoskeleton.hMotorRight, temRxHeader))
-	{
-		CYBERGEAR_GetFeedback(&hFoshanHipExoskeleton.hMotorRight, &temRxHeader, temRxData);
-	}
-	
 	if (temRxHeader.StdId == CAN_ID_TMOTOR_RX)
 	{
-		if (temRxData[0] == CAN_ID_TMOTOR_EXOSKELETON_RIGHT_HIP_TX)
-			AK10_9_MITMode_GetFeedbackMsg(&temRxHeader, &hAKMotorRightHip, temRxData);
-		else if (temRxData[0] == CAN_ID_TMOTOR_EXOSKELETON_RIGHT_KNEE_TX)
-			AK10_9_MITMode_GetFeedbackMsg(&temRxHeader, &hAKMotorRightKnee, temRxData);
+		if (temRxData[0] == CAN_ID_TMOTOR_EXOSKELETON_RIGHT_HIP_MOTOR)
+			AK10_9_MITMode_GetFeedbackMsg(&temRxHeader, &hExoskeletonFoshan4DOFTMotor.hMotorRightHip, temRxData);
+		else if (temRxData[0] == CAN_ID_TMOTOR_EXOSKELETON_RIGHT_KNEE_MOTOR)
+			AK10_9_MITMode_GetFeedbackMsg(&temRxHeader, &hExoskeletonFoshan4DOFTMotor.hMotorRightKnee, temRxData);
+		if (temRxData[0] == CAN_ID_TMOTOR_EXOSKELETON_LEFT_HIP_MOTOR)
+			AK10_9_MITMode_GetFeedbackMsg(&temRxHeader, &hExoskeletonFoshan4DOFTMotor.hMotorLeftHip, temRxData);
+		else if (temRxData[0] == CAN_ID_TMOTOR_EXOSKELETON_LEFT_KNEE_MOTOR)
+			AK10_9_MITMode_GetFeedbackMsg(&temRxHeader, &hExoskeletonFoshan4DOFTMotor.hMotorLeftKnee, temRxData);
 	}
   
   //End

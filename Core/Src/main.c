@@ -20,6 +20,7 @@
 #include "lktech_mg_motor.h"
 #include "foshan_hip_exoskeleton.h"
 #include "xiaomi_cybergear.h"
+#include "foshan_4dof_exoskeleton_tmotor.h"
 
 void SystemClock_Config(void);
 
@@ -44,6 +45,7 @@ int main(void)
   UI_Init();
   
 ////  EXOSKELETON_MotorInit();
+	Foshan4DOFExoskeletonTMotor_Init(0.001f);
 
   AD7606_Init(AD7606_RANG_10V, AD7606_OS_RATIO_4);
   FOSHANHIPEXOSKELETON_Init(0.01f);
@@ -158,6 +160,11 @@ void Main_Task(void *argument)
     if (hUI.curPage == &UIPage_FoshanHipExoskeleton)
       FOSHANHIPEXOSKELETON_CentreControl();
     
+		if (hUI.curPage == &UIPage_Foshan4DOFExoskeletonTMotor)
+			Foshan4DOFExoskeletonTMotor_CenterControl();
+		else if (hUI.curPage == &UIPage_Foshan4DOFExoskeletonLKMotor)
+		{
+		}
 
 ////////////    /* Proprioception lower limb exoskeleton control */
 ////////////    if (hUI.task == UI_MAIN_TASK_LOWER_LIMB_EXOSKELETON)
@@ -190,7 +197,7 @@ void Main_Task(void *argument)
 ////////////        }
 ////////////        else if (hUI.curPage == &UIPage_AK10_9_ManualControlCubeMarsFWMITMode)
 ////////////        {
-////////////          AK10_9_CubaMarsFW_MITMode_ContinuousControl_Deg(hMotorPtrManualControl, \
+////////////          AK10_9_CubeMarsFW_MITMode_ContinuousControl_Deg(hMotorPtrManualControl, \
 ////////////                                                          manualControlValue_pos, manualControlValue_vel, \
 ////////////                                                          manualControlValue_kp, manualControlValue_kd, manualControlValue_cur);
 ////////////          AK10_9_CubeMarsFW_MITMode_ContinuousControlManager(hMotorPtrManualControl, \
@@ -212,9 +219,9 @@ void Main_Task(void *argument)
 ////////////      if (ifMotorProfilingStartedExoskeletonMotorTest)
 ////////////      {
 //////////////////        exoskeletonMotorTestHipGaitAngleDeg = rad2deg * EXOSKELETON_HipGait1(((float)(HAL_GetTick() - exoskeletonMotorTestTimeDifference))/1000.0f);
-//////////////////        AK10_9_CubaMarsFW_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightHip, exoskeletonMotorTestHipGaitAngleDeg, \
+//////////////////        AK10_9_CubeMarsFW_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightHip, exoskeletonMotorTestHipGaitAngleDeg, \
 //////////////////                                                                    0.0f, 499.0f, 3.0f, 0.0f);
-////////////        AK10_9_CubaMarsFW_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightHip, 0.0f, 0.0f, 0.0f, 0.0f, -35.0f / hAKMotorRightHip.kt);
+////////////        AK10_9_CubeMarsFW_MITMode_ContinuousControlWithOffset_Deg(&hAKMotorRightHip, 0.0f, 0.0f, 0.0f, 0.0f, -35.0f / hAKMotorRightHip.kt);
 ////////////      }
 ////////////      AK10_9_CubeMarsFW_MITMode_ContinuousControlManager(&hAKMotorRightHip, \
 ////////////                                                             300.0f, 180.0f, 5.0f, 100.0f, 0.5f, 0.001f);
@@ -233,7 +240,7 @@ void Main_Task(void *argument)
 ////////////    AK10_9_CubeMarsFW_MotorStatusMonitor(&hAKMotorRightKnee, 100);
 ////////////    AK10_9_CubeMarsFW_MotorStatusMonitor(&hAKMotorRightHip, 100);
     
-    osDelay(10);
+    osDelay(1);
   }
 }
 

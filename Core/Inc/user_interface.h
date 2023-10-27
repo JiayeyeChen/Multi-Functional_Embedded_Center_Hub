@@ -157,7 +157,12 @@ void         UI_Page_TkCalibration(void);
 void         UI_Page_TkCalibration_Init(void);
 void         UI_Page_ExoskeletonMotorDurabilityTest(void);
 void         UI_Page_ExoskeletonMotorDurabilityTest_Init(void);
-
+void				 UI_Page_Foshan4DOFExoskeletonSelection(void);
+void				 UI_Page_Foshan4DOFExoskeletonSelection_Init(void);
+void         UI_Page_Foshan4DOFExoskeletonTMotor(void);
+void         UI_Page_Foshan4DOFExoskeletonTMotor_Init(void);
+void         UI_Page_Foshan4DOFExoskeletonLKMotor(void);
+void         UI_Page_Foshan4DOFExoskeletonLKMotor_Init(void);
 
 /* Lin Kong Ke Ji Testing */
 extern uint8_t ifKeepReadingAngle;
@@ -175,4 +180,5 @@ extern UIHandle hUI;
 extern PageHandle UIPage_AK10_9_ManualControlCubeMarsFWServoMode, UIPage_AK10_9_ManualControlCubeMarsFWMITMode;
 extern PageHandle UIPage_LowerLimb_Exoskeleton;
 extern PageHandle UIPage_FoshanHipExoskeleton;
+extern PageHandle UIPage_Foshan4DOFExoskeletonTMotor, UIPage_Foshan4DOFExoskeletonLKMotor;
 #endif

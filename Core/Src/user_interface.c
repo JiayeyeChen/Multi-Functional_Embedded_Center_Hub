@@ -91,6 +91,10 @@ ButtonHandle                  hButtonPageFoshanHipExoskeleton, hButtonFoshanHipE
 LinearPotentialmeterHandle    hPotFoshanHipExoskeletonGraFactor, hPotFoshanHipExoskeletonInnerFactor, \
                               hPotFoshanHipExoskeletonSpringFactor;
 ///////////////////////////
+/*Foshan 4dof exoskeleton*/
+PageHandle                    UIPage_Foshan4DOFExoskeletonSelection, UIPage_Foshan4DOFExoskeletonTMotor, UIPage_Foshan4DOFExoskeletonLKMotor;
+ButtonHandle                  hButtonPageFoshan4DOFExoskeletonSelection, hButtonFoshan4DOFExoskeletonTMotor, hButtonFoshan4DOFExoskeletonLKMotor;
+///////////////////////////
 
 ButtonHandle Button_Create(uint16_t x, uint16_t y, uint16_t xLen, uint16_t yLen, char label[],\
                            uint32_t colorUnpressed, uint32_t colorPressed)
@@ -323,6 +327,18 @@ void UI_Init(void)
   UIPage_FoshanHipExoskeleton.ifPageInitialized = 0;
   UIPage_FoshanHipExoskeleton.Page = UI_Page_FoshanHipExoskeleton;
   UIPage_FoshanHipExoskeleton.PageInit = UI_Page_FoshanHipExoskeleton_Init;
+	
+	UIPage_Foshan4DOFExoskeletonSelection.ifPageInitialized = 0;
+  UIPage_Foshan4DOFExoskeletonSelection.Page = UI_Page_Foshan4DOFExoskeletonSelection;
+  UIPage_Foshan4DOFExoskeletonSelection.PageInit = UI_Page_Foshan4DOFExoskeletonSelection_Init;
+	
+	UIPage_Foshan4DOFExoskeletonTMotor.ifPageInitialized = 0;
+  UIPage_Foshan4DOFExoskeletonTMotor.Page = UI_Page_Foshan4DOFExoskeletonTMotor;
+  UIPage_Foshan4DOFExoskeletonTMotor.PageInit = UI_Page_Foshan4DOFExoskeletonTMotor_Init;
+	
+	UIPage_Foshan4DOFExoskeletonLKMotor.ifPageInitialized = 0;
+  UIPage_Foshan4DOFExoskeletonLKMotor.Page = UI_Page_Foshan4DOFExoskeletonLKMotor;
+  UIPage_Foshan4DOFExoskeletonLKMotor.PageInit = UI_Page_Foshan4DOFExoskeletonLKMotor_Init;
 }
 
 JoystickHandle Joystick_Create(uint16_t x, uint16_t y, uint16_t r, uint32_t background_color, \
@@ -850,6 +866,7 @@ void UI_Page_Home1(void)
   ButtonUpdate(&hButtonPageTorqueConstantCalibration);
   ButtonUpdate(&hButtonPageExoskeletonMotorDurabilityTest);
   ButtonUpdate(&hButtonPageFoshanHipExoskeleton);
+	ButtonUpdate(&hButtonPageFoshan4DOFExoskeletonSelection);
   
   
   if (ifButtonPressed(&hButtonPageExoskeletonInterface))
@@ -872,6 +889,8 @@ void UI_Page_Home1(void)
     UI_Page_Change_To(&UIPage_ExoskeletonMotorDurabilityTest);
   if (ifButtonPressed(&hButtonPageFoshanHipExoskeleton))
     UI_Page_Change_To(&UIPage_FoshanHipExoskeleton);
+	if (ifButtonPressed(&hButtonPageFoshan4DOFExoskeletonSelection))
+    UI_Page_Change_To(&UIPage_Foshan4DOFExoskeletonSelection);
 }
 void UI_Page_Home1_Init(void)
 {
@@ -884,8 +903,10 @@ void UI_Page_Home1_Init(void)
   hButtonPageFoshanHipExoskeleton = Button_Create(150, 400, 200, 40, "Hip Exoskeleton", LIGHT_MAGENTA, LCD_RED);
   hButtonPageCustomizedIMUMonitor = Button_Create(80, 200, 360, 40, "Customized IMU Monitor", LIGHT_MAGENTA, LCD_RED);
   hButtonPageLinKongKeJiTesting = Button_Create(100, 450, 300, 40, "LinKongKeJi MG Motor", LIGHT_MAGENTA, LCD_RED);
+	hButtonPageFoshan4DOFExoskeletonSelection = Button_Create(100, 500, 300, 40, "Foshan 4DOF Exoskeleton", LIGHT_MAGENTA, LCD_RED);
   hButtonPageTorqueConstantCalibration = Button_Create(100, 550, 300, 40, "Kt Calibration", LIGHT_MAGENTA, LCD_RED);
   hButtonPageExoskeletonMotorDurabilityTest = Button_Create(40, 600, 400, 40, "Exoskeleton Motor Test", LIGHT_MAGENTA, LCD_RED);
+	
 }
 
 void UI_Page_AK10_9_ManualControlCubeMarsFWServoMode(void)
@@ -1781,4 +1802,58 @@ void UI_Page_FoshanHipExoskeleton(void)
   LCD_DisplayDecimals(380, 240, hFoshanHipExoskeleton.springFactor, 3, 1);
   if (ifButtonPressed(&hButtonGoBack))
     UI_Page_Change_To(&UIPage_Home1);
+}
+
+void UI_Page_Foshan4DOFExoskeletonSelection(void)
+{
+	ButtonUpdate(&hButtonGoBack);
+	ButtonUpdate(&hButtonFoshan4DOFExoskeletonTMotor);
+	ButtonUpdate(&hButtonFoshan4DOFExoskeletonLKMotor);
+	
+	if (ifButtonPressed(&hButtonFoshan4DOFExoskeletonTMotor))
+    UI_Page_Change_To(&UIPage_Foshan4DOFExoskeletonTMotor);
+	if (ifButtonPressed(&hButtonFoshan4DOFExoskeletonLKMotor))
+    UI_Page_Change_To(&UIPage_Foshan4DOFExoskeletonLKMotor);
+	
+	
+	
+	if (ifButtonPressed(&hButtonGoBack))
+    UI_Page_Change_To(&UIPage_Home1);
+}
+
+void UI_Page_Foshan4DOFExoskeletonSelection_Init(void)
+{
+	hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
+	hButtonFoshan4DOFExoskeletonTMotor = Button_Create(100, 300, 300, 100, "TMotor", LCD_WHITE, LCD_RED);
+	hButtonFoshan4DOFExoskeletonLKMotor = Button_Create(100, 500, 300, 100, "LKMotor", LCD_WHITE, LCD_RED);
+}
+
+void UI_Page_Foshan4DOFExoskeletonTMotor(void)
+{
+	ButtonUpdate(&hButtonGoBack);
+	
+	
+	if (ifButtonPressed(&hButtonGoBack))
+    UI_Page_Change_To(&UIPage_Foshan4DOFExoskeletonSelection);
+}
+
+void UI_Page_Foshan4DOFExoskeletonTMotor_Init(void)
+{
+	hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
+}
+
+void UI_Page_Foshan4DOFExoskeletonLKMotor(void)
+{
+	ButtonUpdate(&hButtonGoBack);
+	
+	
+	
+	
+	if (ifButtonPressed(&hButtonGoBack))
+    UI_Page_Change_To(&UIPage_Foshan4DOFExoskeletonSelection);
+}
+
+void UI_Page_Foshan4DOFExoskeletonLKMotor_Init(void)
+{
+	hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
 }

@@ -14,13 +14,16 @@
 #define CAN_ID_IMU_STATUS_EXOSKELETON_RIGHT_SHANK      28U
 #define CAN_ID_IMU_TORSO_ANGLE_EXOSKELETON             29U
 
-#define CAN_ID_TMOTOR_EXOSKELETON_RIGHT_HIP_SERVO_MODE          0x2901//0x2904
-#define CAN_ID_TMOTOR_EXOSKELETON_RIGHT_KNEE_TX_SERVO_MODE      0x2902//0x2902
 #define CAN_ID_TMOTOR_RX      											            0x00
-#define CAN_ID_TMOTOR_EXOSKELETON_RIGHT_KNEE_TX                 0x07
-#define CAN_ID_TMOTOR_EXOSKELETON_RIGHT_HIP_TX                  0x09
-#define CAN_ID_TMOTOR_MRDOOR_LEFT_TX														0x01
-#define CAN_ID_TMOTOR_MRDOOR_RIGHT_TX														0x02
+#define CAN_ID_TMOTOR_EXOSKELETON_RIGHT_KNEE_MOTOR              0x07
+#define CAN_ID_TMOTOR_EXOSKELETON_RIGHT_KNEE_MASTER             0x08
+#define CAN_ID_TMOTOR_EXOSKELETON_RIGHT_HIP_MOTOR               0x09
+#define CAN_ID_TMOTOR_EXOSKELETON_RIGHT_HIP_MASTER              0x0A
+#define CAN_ID_TMOTOR_EXOSKELETON_LEFT_KNEE_MOTOR              0x03
+#define CAN_ID_TMOTOR_EXOSKELETON_LEFT_KNEE_MASTER             0x04
+#define CAN_ID_TMOTOR_EXOSKELETON_LEFT_HIP_MOTOR               0x05
+#define CAN_ID_TMOTOR_EXOSKELETON_LEFT_HIP_MASTER              0x06
+
 
 CAN_FilterTypeDef ConfigCANFilter_EXT_ID_32BitIDListMode(CAN_HandleTypeDef* hcan, uint32_t FilterBank, uint32_t FilterFIFOAssignment, uint8_t IDE, uint32_t ID1, uint32_t ID2);
 void ConfigCANFilter_STD_ID_16Bit4IDListMode(CAN_HandleTypeDef* hcan,  uint32_t FilterBank, uint32_t FilterFIFOAssignment, uint8_t ID1, uint8_t ID2, uint8_t ID3, uint8_t ID4);

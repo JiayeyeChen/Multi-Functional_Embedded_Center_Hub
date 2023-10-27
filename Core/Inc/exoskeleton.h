@@ -203,9 +203,9 @@ void EXOSKELETON_GetJointAccelerationIMUFeedback_Z_Data(JointAccelerationIMUHand
 void EXOSKELETON_GetJointAccelerationIMUFeedback_BNO055Status(JointAccelerationIMUHandle* himu, uint8_t data[]);
 void EXOSKELETON_SystemIDManager(void);
 void EXOSKELETON_SystemID_Init(void);
-void EXOSKELETON_SystemID_KneeJoint_MotorProfilingSinWave(AK10_9HandleCubaMarsFW* hmotor, float amplitude, float fre, uint32_t time_stamp_shift);
-void EXOSKELETON_SystemID_HipJoint_MotorProfilingSinWave_PositionControl(AK10_9HandleCubaMarsFW* hmotor, float amplitude, float fre, uint32_t time_stamp_shift);
-void EXOSKELETON_SystemID_HipJoint_MotorProfilingSinWave_CurrentControl(AK10_9HandleCubaMarsFW* hmotor, float amplitude, float fre, uint32_t time_stamp_shift);
+void EXOSKELETON_SystemID_KneeJoint_MotorProfilingSinWave(AK10_9Handle* hmotor, float amplitude, float fre, uint32_t time_stamp_shift);
+void EXOSKELETON_SystemID_HipJoint_MotorProfilingSinWave_PositionControl(AK10_9Handle* hmotor, float amplitude, float fre, uint32_t time_stamp_shift);
+void EXOSKELETON_SystemID_HipJoint_MotorProfilingSinWave_CurrentControl(AK10_9Handle* hmotor, float amplitude, float fre, uint32_t time_stamp_shift);
 void EXOSKELETON_SystemID_Set_Datalog_Label(void);
 void EXOSKELETON_SystemID_UpdateDataSlot(void);
 void EXOSKELETON_GravityCompensation_Init(Exoskeleton_GravityCompensation* hgravitycompensation);
