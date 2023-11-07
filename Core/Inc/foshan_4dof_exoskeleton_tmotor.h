@@ -30,13 +30,16 @@ typedef struct
 	float controlLoopPeriod;
 	enum Foshan4DOFExoTMotorMotorSendCommandSequence motorCmdSequence;
   enum Foshan4DOFExoskeletonTMotorTask task;
+	
+	float gravLeftCoef_1, gravLeftCoef_2, gravRightCoef_1, gravRightCoef_2;
+	float calGravLeftHip, calGravLeftKnee, calGravRightHip, calGravRightKnee;
 }Foshan4DOFExoskeletonTMotorHandle;
 
 void Foshan4DOFExoskeletonTMotor_Init(float controlLoopPeriod);
 
 void Foshan4DOFExoskeletonTMotor_CenterControl(void);
 
-
+void Foshan4DOFExoskeletonTMotor_CalculateGravityCompensation(Foshan4DOFExoskeletonTMotorHandle* hexo);
 
 
 

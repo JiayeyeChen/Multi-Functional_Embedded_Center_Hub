@@ -94,6 +94,8 @@ LinearPotentialmeterHandle    hPotFoshanHipExoskeletonGraFactor, hPotFoshanHipEx
 /*Foshan 4dof exoskeleton*/
 PageHandle                    UIPage_Foshan4DOFExoskeletonSelection, UIPage_Foshan4DOFExoskeletonTMotor, UIPage_Foshan4DOFExoskeletonLKMotor;
 ButtonHandle                  hButtonPageFoshan4DOFExoskeletonSelection, hButtonFoshan4DOFExoskeletonTMotor, hButtonFoshan4DOFExoskeletonLKMotor;
+LinearPotentialmeterHandle		hPotFoshan4DOFExoLeftHipGravCoe, hPotFoshan4DOFExoLeftKneeGravCoe, \
+															hPotFoshan4DOFExoRightHipGravCoe, hPotFoshan4DOFExoRightKneeGravCoe;
 ///////////////////////////
 
 ButtonHandle Button_Create(uint16_t x, uint16_t y, uint16_t xLen, uint16_t yLen, char label[],\
@@ -1834,6 +1836,12 @@ void UI_Page_Foshan4DOFExoskeletonTMotor(void)
 	ButtonUpdate(&hButtonMotorEnable);
   ButtonUpdate(&hButtonMotorDisable);
   ButtonUpdate(&hButtonMotorZeroing);
+	ButtonUpdate(&hButtonStart);
+	PotentialmeterUpdate(&hPotFoshan4DOFExoLeftHipGravCoe);
+	PotentialmeterUpdate(&hPotFoshan4DOFExoLeftKneeGravCoe);
+	PotentialmeterUpdate(&hPotFoshan4DOFExoRightHipGravCoe);
+	PotentialmeterUpdate(&hPotFoshan4DOFExoRightKneeGravCoe);
+	
   
   
   LCD_SetLayer(1); 
@@ -1856,6 +1864,32 @@ void UI_Page_Foshan4DOFExoskeletonTMotor(void)
   else
     LCD_DisplayString(380, 25, "Offline");
 	
+	LCD_DisplayDecimals(80, 110, hExoskeletonFoshan4DOFTMotor.hMotorLeftHip.realPosition.f, 4,1);
+	LCD_DisplayDecimals(80, 145, hExoskeletonFoshan4DOFTMotor.hMotorLeftKnee.realPosition.f, 4,1);
+	LCD_DisplayDecimals(80, 180, hExoskeletonFoshan4DOFTMotor.hMotorLeftHip.realTorque.f, 4,1);
+	LCD_DisplayDecimals(80, 215, hExoskeletonFoshan4DOFTMotor.hMotorLeftKnee.realTorque.f, 4,1);
+	
+	LCD_DisplayDecimals(330, 110, hExoskeletonFoshan4DOFTMotor.hMotorRightHip.realPosition.f, 4,1);
+	LCD_DisplayDecimals(330, 145, hExoskeletonFoshan4DOFTMotor.hMotorRightKnee.realPosition.f, 4,1);
+	LCD_DisplayDecimals(330, 180, hExoskeletonFoshan4DOFTMotor.hMotorRightHip.realTorque.f, 4,1);
+	LCD_DisplayDecimals(330, 215, hExoskeletonFoshan4DOFTMotor.hMotorRightKnee.realTorque.f, 4,1);
+	
+	LCD_DisplayDecimals(50, 240, hExoskeletonFoshan4DOFTMotor.gravLeftCoef_1, 4,1);
+	LCD_DisplayDecimals(150, 240, hExoskeletonFoshan4DOFTMotor.gravLeftCoef_2, 4,1);
+	LCD_DisplayDecimals(250, 240, hExoskeletonFoshan4DOFTMotor.gravRightCoef_1, 4,1);
+	LCD_DisplayDecimals(350, 240, hExoskeletonFoshan4DOFTMotor.gravRightCoef_2, 4,1);
+	
+	
+	LCD_DisplayDecimals(50, 710, hExoskeletonFoshan4DOFTMotor.gravLeftCoef_1, 3, 1);
+	LCD_DisplayDecimals(150, 710, hExoskeletonFoshan4DOFTMotor.gravLeftCoef_2, 3, 1);
+	LCD_DisplayDecimals(250, 710, hExoskeletonFoshan4DOFTMotor.gravRightCoef_1, 3, 1);
+	LCD_DisplayDecimals(350, 710, hExoskeletonFoshan4DOFTMotor.gravRightCoef_2, 3, 1);
+	LCD_DisplayString(50, 680, "Lcoef-1");
+	LCD_DisplayString(150, 680, "Lcoef-2");
+	LCD_DisplayString(250, 680, "Rcoef-1");
+	LCD_DisplayString(350, 680, "Rcoef-2");
+
+	
   if (ifButtonPressed(&hButtonMotorEnable))
   {
     hExoskeletonFoshan4DOFTMotor.task = FOSHAN_4DOF_EXO_TASK_ENABLE_MOTORS;
@@ -1871,6 +1905,11 @@ void UI_Page_Foshan4DOFExoskeletonTMotor(void)
 		hExoskeletonFoshan4DOFTMotor.task = FOSHAN_4DOF_EXO_TASK_ZEROING;
     hExoskeletonFoshan4DOFTMotor.motorCmdSequence = FOSHAN_4DOF_EXO_TMOTOR_COMMAND_SEQUENCE_LEFT_HIP;
   }
+	if (ifButtonPressed(&hButtonStart))
+	{
+		hExoskeletonFoshan4DOFTMotor.task = FOSHAN_4DOF_EXO_TASK_GRAVITY_COMPENSATION;
+		hExoskeletonFoshan4DOFTMotor.motorCmdSequence = FOSHAN_4DOF_EXO_TMOTOR_COMMAND_SEQUENCE_LEFT_HIP;
+	}
   
   
 	if (ifButtonPressed(&hButtonGoBack))
@@ -1884,6 +1923,15 @@ void UI_Page_Foshan4DOFExoskeletonTMotor_Init(void)
   hButtonMotorEnable = Button_Create(0, 60, 100, 40, "Enable", LCD_WHITE, LCD_RED);
   hButtonMotorDisable = Button_Create(120, 60, 100, 40, "Disable", LCD_WHITE, LCD_RED);
   hButtonMotorZeroing = Button_Create(240, 60, 100, 40, "Zeroing", LCD_WHITE, LCD_RED);
+	hButtonStart = Button_Create(350, 60, 100, 40, "Assist", LCD_WHITE, LCD_RED);
+	
+	
+	
+	hPotFoshan4DOFExoLeftHipGravCoe = Potentialmeter_Create(50, 270, 30, 400, 100, 70, LCD_MAGENTA, LCD_RED, LIGHT_GREY, 0.0f, 30.0f, 0.0f, &hExoskeletonFoshan4DOFTMotor.gravLeftCoef_1);
+	hPotFoshan4DOFExoLeftKneeGravCoe = Potentialmeter_Create(150, 270, 30, 400, 100, 70, LCD_MAGENTA, LCD_RED, LIGHT_GREY, 0.0f, 10.0f, 0.0f, &hExoskeletonFoshan4DOFTMotor.gravLeftCoef_2);
+	hPotFoshan4DOFExoRightHipGravCoe = Potentialmeter_Create(250, 270, 30, 400, 100, 70, LCD_MAGENTA, LCD_RED, LIGHT_GREY, 0.0f, 30.0f, 0.0f, &hExoskeletonFoshan4DOFTMotor.gravRightCoef_1);
+	hPotFoshan4DOFExoRightKneeGravCoe = Potentialmeter_Create(350, 270, 30, 400, 100, 70, LCD_MAGENTA, LCD_RED, LIGHT_GREY, 0.0f, 10.0f, 0.0f, &hExoskeletonFoshan4DOFTMotor.gravRightCoef_2);
+	
   
   LCD_SetLayer(1); 
   LCD_SetColor(LCD_BLACK);
@@ -1891,6 +1939,21 @@ void UI_Page_Foshan4DOFExoskeletonTMotor_Init(void)
   LCD_DisplayString(300, 0, "LftKe:");
   LCD_DisplayString(100, 25, "RhtHp:");
   LCD_DisplayString(300, 25, "RhtKe:");
+	
+	LCD_DisplayString(0, 110, "LHpPos:");
+	LCD_DisplayString(0, 145, "LKePos:");
+	LCD_DisplayString(0, 180, "LHpTq:");
+	LCD_DisplayString(0, 215, "LKeTq:");
+	
+	LCD_DisplayString(250, 110, "RHpPos:");
+	LCD_DisplayString(250, 145, "RKePos:");
+	LCD_DisplayString(250, 180, "RHpTq:");
+	LCD_DisplayString(250, 215, "RKeTq:");
+	
+	LCD_DisplayString(50, 680, "Lcoef-1");
+	LCD_DisplayString(150, 680, "Lcoef-2");
+	LCD_DisplayString(250, 680, "Rcoef-1");
+	LCD_DisplayString(350, 680, "Rcoef-2");
 }
 
 void UI_Page_Foshan4DOFExoskeletonLKMotor(void)
