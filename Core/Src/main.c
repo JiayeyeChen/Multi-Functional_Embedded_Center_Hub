@@ -48,7 +48,7 @@ int main(void)
 	Foshan4DOFExoskeletonTMotor_Init(0.001f);
 
   AD7606_Init(AD7606_RANG_10V, AD7606_OS_RATIO_4);
-  FOSHANHIPEXOSKELETON_Init(0.01f);
+//  FOSHANHIPEXOSKELETON_Init(0.01f);
 ////  EXOSKELETON_Init();
   CAN_ConfigureFilters();
   osKernelInitialize();
@@ -157,14 +157,15 @@ void Main_Task(void *argument)
   datalogTimeStamp = HAL_GetTick();
   for(;;)
   {
-    if (hUI.curPage == &UIPage_FoshanHipExoskeleton)
-      FOSHANHIPEXOSKELETON_CentreControl();
-    
-		if (hUI.curPage == &UIPage_Foshan4DOFExoskeletonTMotor)
-			Foshan4DOFExoskeletonTMotor_CenterControl();
-		else if (hUI.curPage == &UIPage_Foshan4DOFExoskeletonLKMotor)
-		{
-		}
+    Foshan4DOFExoskeletonTMotor_CenterControl();
+////////////////    if (hUI.curPage == &UIPage_FoshanHipExoskeleton)
+////////////////      FOSHANHIPEXOSKELETON_CentreControl();
+////////////////    
+////////////////		if (hUI.curPage == &UIPage_Foshan4DOFExoskeletonTMotor)
+////////////////			Foshan4DOFExoskeletonTMotor_CenterControl();
+////////////////		else if (hUI.curPage == &UIPage_Foshan4DOFExoskeletonLKMotor)
+////////////////		{
+////////////////		}
 
 ////////////    /* Proprioception lower limb exoskeleton control */
 ////////////    if (hUI.task == UI_MAIN_TASK_LOWER_LIMB_EXOSKELETON)
@@ -240,7 +241,7 @@ void Main_Task(void *argument)
 ////////////    AK10_9_CubeMarsFW_MotorStatusMonitor(&hAKMotorRightKnee, 100);
 ////////////    AK10_9_CubeMarsFW_MotorStatusMonitor(&hAKMotorRightHip, 100);
     
-    osDelay(1);
+    osDelay(10);
   }
 }
 
@@ -251,12 +252,12 @@ void MotorTesting_Task(void *argument)
 		/* Lin Kong Ke Ji MG */
     if (hUI.curPage == &UIPage_LinKongKeJi_Testing)
     {
-      if (hLKTechTestingMotorPtr->task == LETECH_MG_CAN_BUS_TASK_SPEED_CONTROL)
-        LETECH_MG_SpeedControl(hLKTechTestingMotorPtr, hLKTechTestingMotorPtr->velocityControlSet.f);
-      else if (hLKTechTestingMotorPtr->task == LETECH_MG_CAN_BUS_TASK_CURRENT_CONTROL)
-        LETECH_MG_CurrentControl(hLKTechTestingMotorPtr, hLKTechTestingMotorPtr->currentControlSet.f);
-      else if (hLKTechTestingMotorPtr->task == LETECH_MG_CAN_BUS_TASK_POSITION_CONTROL_6_INCREMENT)
-        LETECH_MG_PositionControl6Increment(hLKTechTestingMotorPtr, hLKTechTestingMotorPtr->positionControlIncrementSet.f, 600.0f);
+//////      if (hLKTechTestingMotorPtr->task == LETECH_MG_CAN_BUS_TASK_SPEED_CONTROL)
+//////        LETECH_MG_SpeedControl(hLKTechTestingMotorPtr, hLKTechTestingMotorPtr->velocityControlSet.f);
+//////      else if (hLKTechTestingMotorPtr->task == LETECH_MG_CAN_BUS_TASK_CURRENT_CONTROL)
+//////        LETECH_MG_CurrentControl(hLKTechTestingMotorPtr, hLKTechTestingMotorPtr->currentControlSet.f);
+//////      else if (hLKTechTestingMotorPtr->task == LETECH_MG_CAN_BUS_TASK_POSITION_CONTROL_6_INCREMENT)
+//////        LETECH_MG_PositionControl6Increment(hLKTechTestingMotorPtr, hLKTechTestingMotorPtr->positionControlIncrementSet.f, 600.0f);
       
 //      dataSlots_LKTECH_MG_MotorTest[0].f = hLKTechTestingMotorPtr->angle.f;
 //      dataSlots_LKTECH_MG_MotorTest[1].f = hLKTechTestingMotorPtr->speedDeg.f;
