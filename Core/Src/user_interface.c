@@ -1880,10 +1880,10 @@ void UI_Page_Foshan4DOFExoskeletonTMotor(void)
 	LCD_DisplayDecimals(350, 240, hExoskeletonFoshan4DOFTMotor.gravRightCoef_2, 4,1);
 	
 	
-	LCD_DisplayDecimals(50, 710, hExoskeletonFoshan4DOFTMotor.gravLeftCoef_1, 3, 1);
-	LCD_DisplayDecimals(150, 710, hExoskeletonFoshan4DOFTMotor.gravLeftCoef_2, 3, 1);
-	LCD_DisplayDecimals(250, 710, hExoskeletonFoshan4DOFTMotor.gravRightCoef_1, 3, 1);
-	LCD_DisplayDecimals(350, 710, hExoskeletonFoshan4DOFTMotor.gravRightCoef_2, 3, 1);
+	LCD_DisplayDecimals(50, 710, hExoskeletonFoshan4DOFTMotor.calGravLeftHip, 3, 1);
+	LCD_DisplayDecimals(150, 710, hExoskeletonFoshan4DOFTMotor.calGravLeftKnee, 3, 1);
+	LCD_DisplayDecimals(250, 710, hExoskeletonFoshan4DOFTMotor.calGravRightHip, 3, 1);
+	LCD_DisplayDecimals(350, 710, hExoskeletonFoshan4DOFTMotor.calGravRightKnee, 3, 1);
 	LCD_DisplayString(50, 680, "Lcoef-1");
 	LCD_DisplayString(150, 680, "Lcoef-2");
 	LCD_DisplayString(250, 680, "Rcoef-1");

@@ -45,7 +45,7 @@ int main(void)
   UI_Init();
   
 ////  EXOSKELETON_MotorInit();
-	Foshan4DOFExoskeletonTMotor_Init(0.001f);
+	Foshan4DOFExoskeletonTMotor_Init(0.01f);
 
   AD7606_Init(AD7606_RANG_10V, AD7606_OS_RATIO_4);
 //  FOSHANHIPEXOSKELETON_Init(0.01f);
