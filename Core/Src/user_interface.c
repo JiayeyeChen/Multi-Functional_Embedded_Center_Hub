@@ -1863,9 +1863,13 @@ void UI_Page_Foshan4DOFExoskeletonTMotor(void)
   }
   if (ifButtonPressed(&hButtonMotorDisable))
   {
+		hExoskeletonFoshan4DOFTMotor.task = FOSHAN_4DOF_EXO_TASK_DISABLE_MOTORS;
+    hExoskeletonFoshan4DOFTMotor.motorCmdSequence = FOSHAN_4DOF_EXO_TMOTOR_COMMAND_SEQUENCE_LEFT_HIP;
   }
   if (ifButtonPressed(&hButtonMotorZeroing))
   {
+		hExoskeletonFoshan4DOFTMotor.task = FOSHAN_4DOF_EXO_TASK_ZEROING;
+    hExoskeletonFoshan4DOFTMotor.motorCmdSequence = FOSHAN_4DOF_EXO_TMOTOR_COMMAND_SEQUENCE_LEFT_HIP;
   }
   
   

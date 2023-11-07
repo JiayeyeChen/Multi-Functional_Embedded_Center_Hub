@@ -17,6 +17,7 @@ void Foshan4DOFExoskeletonTMotor_Init(float controlLoopPeriod)
 	
   
   hExoskeletonFoshan4DOFTMotor.motorCmdSequence = FOSHAN_4DOF_EXO_TMOTOR_COMMAND_SEQUENCE_FINISHED;
+	hExoskeletonFoshan4DOFTMotor.task = FOSHAN_4DOF_EXO_TASK_IDLE;
 }
 
 void Foshan4DOFExoskeletonTMotor_CenterControl(void)
@@ -39,16 +40,38 @@ void Foshan4DOFExoskeletonTMotor_CenterControl(void)
     {
       if (hExoskeletonFoshan4DOFTMotor.motorCmdSequence == FOSHAN_4DOF_EXO_TMOTOR_COMMAND_SEQUENCE_LEFT_HIP)
         AK10_9_MITMode_EnableMotor(&hExoskeletonFoshan4DOFTMotor.hMotorLeftHip);
+			else if (hExoskeletonFoshan4DOFTMotor.motorCmdSequence == FOSHAN_4DOF_EXO_TMOTOR_COMMAND_SEQUENCE_LEFT_KNEE)
+				AK10_9_MITMode_EnableMotor(&hExoskeletonFoshan4DOFTMotor.hMotorLeftKnee);
+			else if (hExoskeletonFoshan4DOFTMotor.motorCmdSequence == FOSHAN_4DOF_EXO_TMOTOR_COMMAND_SEQUENCE_RIGHT_HIP)
+        AK10_9_MITMode_EnableMotor(&hExoskeletonFoshan4DOFTMotor.hMotorRightHip);
+			else if (hExoskeletonFoshan4DOFTMotor.motorCmdSequence == FOSHAN_4DOF_EXO_TMOTOR_COMMAND_SEQUENCE_RIGHT_KNEE)
+				AK10_9_MITMode_EnableMotor(&hExoskeletonFoshan4DOFTMotor.hMotorRightKnee);
       hExoskeletonFoshan4DOFTMotor.motorCmdSequence += 1;
   		break;
     }
     case FOSHAN_4DOF_EXO_TASK_DISABLE_MOTORS:
     {
+			if (hExoskeletonFoshan4DOFTMotor.motorCmdSequence == FOSHAN_4DOF_EXO_TMOTOR_COMMAND_SEQUENCE_LEFT_HIP)
+        AK10_9_MITMode_DisableMotor(&hExoskeletonFoshan4DOFTMotor.hMotorLeftHip);
+			else if (hExoskeletonFoshan4DOFTMotor.motorCmdSequence == FOSHAN_4DOF_EXO_TMOTOR_COMMAND_SEQUENCE_LEFT_KNEE)
+				AK10_9_MITMode_DisableMotor(&hExoskeletonFoshan4DOFTMotor.hMotorLeftKnee);
+			else if (hExoskeletonFoshan4DOFTMotor.motorCmdSequence == FOSHAN_4DOF_EXO_TMOTOR_COMMAND_SEQUENCE_RIGHT_HIP)
+        AK10_9_MITMode_DisableMotor(&hExoskeletonFoshan4DOFTMotor.hMotorRightHip);
+			else if (hExoskeletonFoshan4DOFTMotor.motorCmdSequence == FOSHAN_4DOF_EXO_TMOTOR_COMMAND_SEQUENCE_RIGHT_KNEE)
+				AK10_9_MITMode_DisableMotor(&hExoskeletonFoshan4DOFTMotor.hMotorRightKnee);
+      hExoskeletonFoshan4DOFTMotor.motorCmdSequence += 1;
   		break;
     }
   	default:
   		break;
   }
+	
+	
+	
+	
+	
+	if (hExoskeletonFoshan4DOFTMotor.motorCmdSequence == FOSHAN_4DOF_EXO_TMOTOR_COMMAND_SEQUENCE_RIGHT_KNEE)
+		hExoskeletonFoshan4DOFTMotor.motorCmdSequence = FOSHAN_4DOF_EXO_TMOTOR_COMMAND_SEQUENCE_FINISHED;
 	
 	AK10_9_MotorStatusMonitor(&hExoskeletonFoshan4DOFTMotor.hMotorLeftHip, 300);
 	AK10_9_MotorStatusMonitor(&hExoskeletonFoshan4DOFTMotor.hMotorLeftKnee, 300);
