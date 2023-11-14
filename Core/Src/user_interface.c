@@ -63,11 +63,13 @@ ButtonHandle hButtonPageCustomizedIMUMonitor, hButtonSelectHipIMU, hButtonSelect
 /* Lin Kong Ke Ji Testing */
 PageHandle                    UIPage_LinKongKeJi_Testing;
 ButtonHandle                  hButtonPageLinKongKeJiTesting, hButtonReadAngle;
+ButtonHandle                  hButtonEnableVelocityDampingCompensation, hButtonDisableVelocityDampingCompensation;
 JoystickHandle 								hJoyLKTECHTesting;
 float                         LKTECHJoyStickValue, LKTECHBlank;
 uint8_t												ifKeepReadingAngle = 0;
 uint8_t                       LKTECHifMotorProfiling = 0;
 LKTECH_MG_Handle*             hLKTechTestingMotorPtr;
+LinearPotentialmeterHandle    hPotVelComFactor;
 ////////////////////////////
 
 /* Torque Constant Calibration */
@@ -1460,7 +1462,11 @@ void UI_Page_LinKongKeJiTesting(void)
   ButtonUpdate(&hButtonDataLogEnd);
   ButtonUpdate(&hButtonMotorProfilingStart);
   ButtonUpdate(&hButtonMotorProfilingEnd);
+  ButtonUpdate(&hButtonEnableVelocityDampingCompensation);
+  ButtonUpdate(&hButtonDisableVelocityDampingCompensation);
+  PotentialmeterUpdate(&hPotVelComFactor);
 	JoystickUpdate(&hJoyLKTECHTesting);
+  
   
   if (ifButtonPressed(&hButtonMotorEnable))
 	{
@@ -1513,6 +1519,10 @@ void UI_Page_LinKongKeJiTesting(void)
 		hLKTechTestingMotorPtr->task = LKTECH_MG_CAN_BUS_TASK_NONE;
     hLKTechTestingMotorPtr->currentControlSet.f = 0.0f;
   }
+  if (ifButtonPressed(&hButtonEnableVelocityDampingCompensation))
+    ifVelDampingCompensation = 1;
+  if (ifButtonPressed(&hButtonDisableVelocityDampingCompensation))
+    ifVelDampingCompensation = 0;
 	
 	if (hLKTechTestingMotorPtr->task == LETECH_MG_CAN_BUS_TASK_SPEED_CONTROL)
 		hLKTechTestingMotorPtr->velocityControlSet.f = LKTECHJoyStickValue * 360.0f;
@@ -1529,6 +1539,7 @@ void UI_Page_LinKongKeJiTesting(void)
 	LCD_DisplayDecimals(200, 230, hLKTechTestingMotorPtr->speedDeg.f, 4, 1);
 	LCD_DisplayDecimals(200, 260, hLKTechTestingMotorPtr->torque.f, 6, 4);
   LCD_DisplayDecimals(200, 290, hLKTechTestingMotorPtr->temperature.f, 4, 1);
+  LCD_DisplayDecimals(50, 480, velComFactor, 4,1);
   
   if (ifButtonPressed(&hButtonGoBack))
     UI_Page_Change_To(&UIPage_Home1);
@@ -1549,7 +1560,13 @@ void UI_Page_LinKongKeJiTesting_Init(void)
   hButtonDataLogEnd = Button_Create(330, 250, 100, 40, "DataLogE", LCD_GREEN, LCD_RED);
   hButtonMotorProfilingStart = Button_Create(280, 300, 100, 40, "ProfSt", LCD_GREEN, LCD_RED);
   hButtonMotorProfilingEnd = Button_Create(280, 350, 100, 40, "ProfEd", LCD_GREEN, LCD_RED);
-	hJoyLKTECHTesting = Joystick_Create(220, 580, 160, LCD_WHITE, LCD_BLACK, 50, 180, &LKTECHJoyStickValue, &LKTECHBlank, 0.0f, 1.0f, 1.0f, -1.0f);
+  hButtonEnableVelocityDampingCompensation = Button_Create(5, 400, 130, 40, "VelComEna", LCD_GREEN, LCD_RED);
+  hButtonDisableVelocityDampingCompensation = Button_Create(150, 400, 130, 40, "VelComDisa", LCD_GREEN, LCD_RED);
+	hJoyLKTECHTesting = Joystick_Create(310, 630, 130, LCD_WHITE, LCD_BLACK, 50, 180, &LKTECHJoyStickValue, &LKTECHBlank, 0.0f, 1.0f, 1.0f, -1.0f);
+  
+  hPotVelComFactor = Potentialmeter_Create(50, 480, 40, 300, 100, 80, \
+                                    LCD_MAGENTA, LCD_RED, LIGHT_GREY, 0.0f, 5.0f, 0.0f, &velComFactor);
+  
   
   USB_SetNewDataSlotLen(sizeof(dataSlots_LKTECH_MG_MotorTest)/4);
 	
@@ -1560,7 +1577,7 @@ void UI_Page_LinKongKeJiTesting_Init(void)
 	LCD_DisplayString(120, 260, "Toq:");
   LCD_DisplayString(120, 290, "Tem:");
   
-//  hLKTechTestingMotorPtr = &hFoshanHipExoskeleton.hMotorLeft;
+  hLKTechTestingMotorPtr = &hLKTECH;
 }
 
 

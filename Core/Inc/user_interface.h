@@ -13,6 +13,7 @@
 #include "foshan_hip_exoskeleton.h"
 #include "lktech_mg_motor.h"
 #include "foshan_4dof_exoskeleton_tmotor.h"
+#include "bldc_actuators_testing.h"
 
 typedef struct
 {

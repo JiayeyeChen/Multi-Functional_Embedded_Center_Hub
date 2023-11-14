@@ -1,6 +1,8 @@
 #include "bldc_actuators_testing.h"
 
 LKTECH_MG_Handle     hLKTECH;
+uint8_t              ifVelDampingCompensation = 0;
+float                velComFactor = 0.0f;
 
 
 void LKTECH_Testing_DataSlotUpdate(void)
