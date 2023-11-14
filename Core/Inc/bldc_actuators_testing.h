@@ -7,5 +7,5 @@
 void LKTECH_Testing_DataSlotUpdate(void);
 void LKTECH_MotorTest_Set_Datalog_Label(void);
 
-LKTECH_MG_Handle     hLKTECH;
+extern LKTECH_MG_Handle     hLKTECH;
 #endif

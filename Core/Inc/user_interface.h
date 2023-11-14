@@ -13,6 +13,7 @@
 #include "foshan_hip_exoskeleton.h"
 #include "lktech_mg_motor.h"
 #include "foshan_4dof_exoskeleton_tmotor.h"
+#include "bldc_actuators_testing.h"
 
 typedef struct
 {
@@ -169,6 +170,7 @@ void         UI_Page_Foshan4DOFExoskeletonLKMotor_Init(void);
 extern uint8_t ifKeepReadingAngle;
 extern PageHandle UIPage_LinKongKeJi_Testing;
 extern LKTECH_MG_Handle* hLKTechTestingMotorPtr;
+extern float velComFactor;
 ////////////////////////////
 
 /* Exoskeleton motor test */
