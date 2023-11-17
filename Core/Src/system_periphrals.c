@@ -662,13 +662,13 @@ void HAL_CAN_MspInit(CAN_HandleTypeDef* hcan)
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
     /* CAN2 interrupt Init */
-    HAL_NVIC_SetPriority(CAN2_TX_IRQn, 5, 0);
+    HAL_NVIC_SetPriority(CAN2_TX_IRQn, 1, 0);
     HAL_NVIC_EnableIRQ(CAN2_TX_IRQn);
-    HAL_NVIC_SetPriority(CAN2_RX0_IRQn, 5, 0);
+    HAL_NVIC_SetPriority(CAN2_RX0_IRQn, 1, 0);
     HAL_NVIC_EnableIRQ(CAN2_RX0_IRQn);
-    HAL_NVIC_SetPriority(CAN2_RX1_IRQn, 5, 0);
+    HAL_NVIC_SetPriority(CAN2_RX1_IRQn, 1, 0);
     HAL_NVIC_EnableIRQ(CAN2_RX1_IRQn);
-    HAL_NVIC_SetPriority(CAN2_SCE_IRQn, 5, 0);
+    HAL_NVIC_SetPriority(CAN2_SCE_IRQn, 1, 0);
     HAL_NVIC_EnableIRQ(CAN2_SCE_IRQn);
   }
 
@@ -1532,7 +1532,7 @@ void SystemPeriphral_Init(void)
   HAL_TIM_Base_Start(&htim8);
   TIM13_Init();
   TIM14_Init();
-//  CAN1_Init();
+  CAN1_Init();
   CAN2_Init();
   SPI1_Init();
   USB_DEVICE_Init();

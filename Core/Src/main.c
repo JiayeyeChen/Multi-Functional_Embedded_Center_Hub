@@ -22,6 +22,7 @@
 #include "xiaomi_cybergear.h"
 #include "foshan_4dof_exoskeleton_tmotor.h"
 #include "bldc_actuators_testing.h"
+#include "hwt605-can-inclinometer.h"
 
 void SystemClock_Config(void);
 
@@ -47,11 +48,13 @@ int main(void)
   
 ////  EXOSKELETON_MotorInit();
 //	Foshan4DOFExoskeletonTMotor_Init(0.01f);
-  LKTECH_MG_Init(&hLKTECH, &hcan2, 1, 36.0f, 1.0f);
+//  LKTECH_MG_Init(&hLKTECH, &hcan2, 1, 36.0f, 1.0f);
+  himu = HWT605_Create(&hcan2, 50);
   AD7606_Init(AD7606_RANG_10V, AD7606_OS_RATIO_4);
 //  FOSHANHIPEXOSKELETON_Init(0.01f);
 ////  EXOSKELETON_Init();
   CAN_ConfigureFilters();
+  HAL_Delay(50);
   osKernelInitialize();
   OSThreads_Init();
   
@@ -156,8 +159,16 @@ void SystemClock_Config(void)
 void Main_Task(void *argument)
 {
   datalogTimeStamp = HAL_GetTick();
+  uint32_t              pTxMailbox;
+  CAN_TxHeaderTypeDef   txHeader;
+  uint8_t txdata = 0x55;
   for(;;)
   {
+////    txHeader.DLC = 1;
+////    txHeader.IDE = CAN_ID_STD;
+////    txHeader.RTR = 0;
+////    txHeader.StdId = 0x02;
+////    HAL_CAN_AddTxMessage(&hcan2, &txHeader, &txdata, &pTxMailbox);
 //    Foshan4DOFExoskeletonTMotor_CenterControl();
 ////////////////    if (hUI.curPage == &UIPage_FoshanHipExoskeleton)
 ////////////////      FOSHANHIPEXOSKELETON_CentreControl();
@@ -242,7 +253,7 @@ void Main_Task(void *argument)
 ////////////    AK10_9_CubeMarsFW_MotorStatusMonitor(&hAKMotorRightKnee, 100);
 ////////////    AK10_9_CubeMarsFW_MotorStatusMonitor(&hAKMotorRightHip, 100);
     
-    osDelay(10);
+    osDelay(1000);
   }
 }
 
@@ -251,24 +262,24 @@ void MotorTesting_Task(void *argument)
 	for(;;)
   {
 		/* Lin Kong Ke Ji MG */
-    if (hUI.curPage == &UIPage_LinKongKeJi_Testing)
-    {
-      if (hLKTechTestingMotorPtr->task == LETECH_MG_CAN_BUS_TASK_SPEED_CONTROL)
-        LETECH_MG_SpeedControl(hLKTechTestingMotorPtr, hLKTechTestingMotorPtr->velocityControlSet.f);
-      else if (hLKTechTestingMotorPtr->task == LETECH_MG_CAN_BUS_TASK_CURRENT_CONTROL)
-      {
-        LETECH_MG_CurrentControl(hLKTechTestingMotorPtr, hLKTechTestingMotorPtr->currentControlSet.f + velComFactor * hLKTechTestingMotorPtr->speedDeg.f);
-      }
-      else if (hLKTechTestingMotorPtr->task == LETECH_MG_CAN_BUS_TASK_POSITION_CONTROL_6_INCREMENT)
-        LETECH_MG_PositionControl6Increment(hLKTechTestingMotorPtr, hLKTechTestingMotorPtr->positionControlIncrementSet.f, 600.0f);
-      
-//      dataSlots_LKTECH_MG_MotorTest[0].f = hLKTechTestingMotorPtr->angle.f;
-//      dataSlots_LKTECH_MG_MotorTest[1].f = hLKTechTestingMotorPtr->speedDeg.f;
-//      dataSlots_LKTECH_MG_MotorTest[2].f = hLKTechTestingMotorPtr->torque.f;
-//      dataSlots_LKTECH_MG_MotorTest[3].f = hLKTechTestingMotorPtr->temperature.f;
-//      hUSB.ifNewDataLogPiece2Send = 1;
-//      USB_DataLogManager(LKTECH_MotorTest_Set_Datalog_Label, dataSlots_LKTECH_MG_MotorTest);
-    }
+//    if (hUI.curPage == &UIPage_LinKongKeJi_Testing)
+//    {
+//      if (hLKTechTestingMotorPtr->task == LETECH_MG_CAN_BUS_TASK_SPEED_CONTROL)
+//        LETECH_MG_SpeedControl(hLKTechTestingMotorPtr, hLKTechTestingMotorPtr->velocityControlSet.f);
+//      else if (hLKTechTestingMotorPtr->task == LETECH_MG_CAN_BUS_TASK_CURRENT_CONTROL)
+//      {
+//        LETECH_MG_CurrentControl(hLKTechTestingMotorPtr, hLKTechTestingMotorPtr->currentControlSet.f + velComFactor * hLKTechTestingMotorPtr->speedDeg.f);
+//      }
+//      else if (hLKTechTestingMotorPtr->task == LETECH_MG_CAN_BUS_TASK_POSITION_CONTROL_6_INCREMENT)
+//        LETECH_MG_PositionControl6Increment(hLKTechTestingMotorPtr, hLKTechTestingMotorPtr->positionControlIncrementSet.f, 600.0f);
+//      
+////      dataSlots_LKTECH_MG_MotorTest[0].f = hLKTechTestingMotorPtr->angle.f;
+////      dataSlots_LKTECH_MG_MotorTest[1].f = hLKTechTestingMotorPtr->speedDeg.f;
+////      dataSlots_LKTECH_MG_MotorTest[2].f = hLKTechTestingMotorPtr->torque.f;
+////      dataSlots_LKTECH_MG_MotorTest[3].f = hLKTechTestingMotorPtr->temperature.f;
+////      hUSB.ifNewDataLogPiece2Send = 1;
+////      USB_DataLogManager(LKTECH_MotorTest_Set_Datalog_Label, dataSlots_LKTECH_MG_MotorTest);
+//    }
     osDelay(10);
   }
 }

@@ -5,6 +5,7 @@
 #include "foshan_hip_exoskeleton.h"
 #include "foshan_4dof_exoskeleton_tmotor.h"
 #include "bldc_actuators_testing.h"
+#include "hwt605-can-inclinometer.h"
 
 //for testing//
 uint32_t rxfifo0detected = 0;
@@ -74,26 +75,32 @@ void CAN_ConfigureFilters(void)
 
   /*Filter bank 0 & 1*/
   /*******************/
+//	tempFilter.FilterMode = CAN_FILTERMODE_IDLIST;;
+//	tempFilter.FilterScale = CAN_FILTERSCALE_16BIT;
+//	tempFilter.FilterFIFOAssignment = CAN_FILTER_FIFO0;
+//	tempFilter.FilterBank = 1;
+//	tempFilter.FilterIdHigh = CAN_ID_TMOTOR_RX << 5;
+//	tempFilter.FilterActivation = ENABLE;
+//	HAL_CAN_ConfigFilter(&hcan2, &tempFilter);
+  /*Filter bank 2*/
 	tempFilter.FilterMode = CAN_FILTERMODE_IDLIST;;
 	tempFilter.FilterScale = CAN_FILTERSCALE_16BIT;
 	tempFilter.FilterFIFOAssignment = CAN_FILTER_FIFO0;
-	tempFilter.FilterBank = 0;
-	tempFilter.FilterIdHigh = CAN_ID_TMOTOR_RX << 5;
+	tempFilter.FilterBank = 15;
+	tempFilter.FilterIdHigh = 0 << 5;
 	tempFilter.FilterActivation = ENABLE;
-	HAL_CAN_ConfigFilter(&hcan2, &tempFilter);
-  /*Filter bank 2*/
-
+	HAL_CAN_ConfigFilter(hLKTECH.hcan, &tempFilter);
   /***************/
 
   /*Filter bank 3*/
 	
-	tempFilter.FilterMode = CAN_FILTERMODE_IDLIST;;
-	tempFilter.FilterScale = CAN_FILTERSCALE_32BIT;
-	tempFilter.FilterFIFOAssignment = CAN_FILTER_FIFO0;
-	tempFilter.FilterBank = 3;
-	tempFilter.FilterIdHigh = hLKTECH.canID << 5;
-	tempFilter.FilterActivation = ENABLE;
-	HAL_CAN_ConfigFilter(hLKTECH.hcan, &tempFilter);
+//	tempFilter.FilterMode = CAN_FILTERMODE_IDLIST;;
+//	tempFilter.FilterScale = CAN_FILTERSCALE_32BIT;
+//	tempFilter.FilterFIFOAssignment = CAN_FILTER_FIFO0;
+//	tempFilter.FilterBank = 3;
+//	tempFilter.FilterIdHigh = hLKTECH.canID << 5;
+//	tempFilter.FilterActivation = ENABLE;
+//	HAL_CAN_ConfigFilter(hLKTECH.hcan, &tempFilter);
   /***************/
   
   /*Filter bank 4*/
