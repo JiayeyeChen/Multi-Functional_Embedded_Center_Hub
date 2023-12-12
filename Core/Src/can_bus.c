@@ -71,7 +71,7 @@ void ConfigCANFilter_STD_ID_32Bit2IDListMode(CAN_HandleTypeDef* hcan,  uint32_t 
 
 void CAN_ConfigureFilters(void)
 {
-  CAN_FilterTypeDef tempFilter;
+  static CAN_FilterTypeDef tempFilter;
 
   /*Filter bank 0 & 1*/
   /*******************/
@@ -83,13 +83,14 @@ void CAN_ConfigureFilters(void)
 //	tempFilter.FilterActivation = ENABLE;
 //	HAL_CAN_ConfigFilter(&hcan2, &tempFilter);
   /*Filter bank 2*/
-	tempFilter.FilterMode = CAN_FILTERMODE_IDLIST;;
-	tempFilter.FilterScale = CAN_FILTERSCALE_16BIT;
-	tempFilter.FilterFIFOAssignment = CAN_FILTER_FIFO0;
-	tempFilter.FilterBank = 15;
-	tempFilter.FilterIdHigh = 0 << 5;
-	tempFilter.FilterActivation = ENABLE;
-	HAL_CAN_ConfigFilter(hLKTECH.hcan, &tempFilter);
+//	tempFilter.FilterMode = CAN_FILTERMODE_IDLIST;;
+//	tempFilter.FilterScale = CAN_FILTERSCALE_16BIT;
+//	tempFilter.FilterFIFOAssignment = CAN_FILTER_FIFO0;
+//	tempFilter.FilterBank = 14;
+//	tempFilter.FilterIdHigh = 0 << 5;
+//	tempFilter.FilterActivation = ENABLE;
+//	HAL_CAN_ConfigFilter(hLKTECH.hcan, &tempFilter);
+	
   /***************/
 
   /*Filter bank 3*/
@@ -104,6 +105,13 @@ void CAN_ConfigureFilters(void)
   /***************/
   
   /*Filter bank 4*/
+	himu.canFilter.FilterMode = CAN_FILTERMODE_IDLIST;;
+	himu.canFilter.FilterScale = CAN_FILTERSCALE_16BIT;
+	himu.canFilter.FilterFIFOAssignment = CAN_FILTER_FIFO0;
+	himu.canFilter.FilterBank = 14;
+	himu.canFilter.FilterIdHigh = himu.canID << 5;
+	himu.canFilter.FilterActivation = ENABLE;
+	HAL_CAN_ConfigFilter(himu.hcan, &himu.canFilter);
   /***************/
 
   /*Filter bank 5*/
@@ -192,6 +200,9 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
   
   if (temRxHeader.StdId == hLKTECH.canID)
     LKTECH_MG_GetFeedback(&hLKTECH, &temRxHeader, temRxData);
+	
+	if (temRxHeader.StdId == himu.canID)
+		HWT605_GetFeedback(&himu, &temRxHeader, temRxData);
   
   //End
   rxfifo0detected++;

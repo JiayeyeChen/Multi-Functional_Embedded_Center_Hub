@@ -23,13 +23,24 @@
 #include "foshan_4dof_exoskeleton_tmotor.h"
 #include "bldc_actuators_testing.h"
 #include "hwt605-can-inclinometer.h"
+#include "serial_protocol.h"
+#include "embedded_multimeter.h"
 
-void SystemClock_Config(void);
 
 
 /* For exoskeleton motor test */
 uint32_t datalogTimeStamp;
 ////////////////////////////////
+
+SerialProtocolHandle hSerial;
+union FloatUInt8 dataSlots_HWT605[3];
+
+EmbeddedMultimeterHandle hMeter;
+
+void SendDatalogLabels_HWT605(void)
+{
+	SERIALPROTOCOL_SendDataSlotLabel(&hSerial, "3", "AccX", "AccY", "AccZ");
+}
 
 int main(void)
 {
@@ -46,14 +57,22 @@ int main(void)
 	MX_FMC_Init();
   UI_Init();
   
-////  EXOSKELETON_MotorInit();
-//	Foshan4DOFExoskeletonTMotor_Init(0.01f);
-//  LKTECH_MG_Init(&hLKTECH, &hcan2, 1, 36.0f, 1.0f);
-  himu = HWT605_Create(&hcan2, 50);
-  AD7606_Init(AD7606_RANG_10V, AD7606_OS_RATIO_4);
-//  FOSHANHIPEXOSKELETON_Init(0.01f);
-////  EXOSKELETON_Init();
+  himu = HWT605_Create(&hcan2, 0x50, 0.9821f, 0.027f, -0.0064f, -0.0166f, 1.0097f, -0.0058f, \
+	-0.0062f, 0.0025f, 1.0063f, 0.0598f, 0.0614f, 0.0654f);
+	hMeter = EMBEDDEDMULTIMETER_Create(&huart3, 0x01);
+	
+	
+	hSerial = SERIALPROTOCOL_Create(&huart6);
+	SERIALPROTOCOL_EnableCommunication(&hSerial);
+	
+	SERIALPROTOCOL_SetNewDatalogSlotLength(&hSerial, sizeof(dataSlots_HWT605)/4);
+	SERIALPROTOCOL_SetNewDatalogSlot(&hSerial, dataSlots_HWT605);
+	SERIALPROTOCOL_SetNewDatalogSendLabelFunction(&hSerial, SendDatalogLabels_HWT605);
+	
+	
+	
   CAN_ConfigureFilters();
+	
   HAL_Delay(50);
   osKernelInitialize();
   OSThreads_Init();
@@ -62,113 +81,36 @@ int main(void)
   while (1){}
 }
 
-void SystemClock_Config(void)
+
+
+void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 {
-  RCC_OscInitTypeDef RCC_OscInitStruct = {0};
-  RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
-
-	uint16_t LCD_PLLSAIN = 0;		//	用于倍频的PLLSAIN参数，可取范围为50~432
-	uint8_t  LCD_PLLSAIR = 3;		//	用于分频的PLLSAIR参数，可取范围为2~7
-	uint8_t  LCD_CLKDIV	= 2;		//	LCD时钟分频参数，默认设置为2分频
-  RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
-  /** Configure the main internal regulator output voltage
-  */
-  __HAL_RCC_PWR_CLK_ENABLE();
-  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE3);
-  /** Initializes the RCC Oscillators according to the specified parameters
-  * in the RCC_OscInitTypeDef structure.
-  */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
-  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
-  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-  RCC_OscInitStruct.PLL.PLLM = 15;
-  RCC_OscInitStruct.PLL.PLLN = 144;
-  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
-  RCC_OscInitStruct.PLL.PLLQ = 5;
-  HAL_RCC_OscConfig(&RCC_OscInitStruct);
-  /** Initializes the CPU, AHB and APB buses clocks
-  */
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
-                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
-  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
-  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
-
-  HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_3);
-  
-  
-  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_LTDC;
-	// LCD_CLK = LCD_PLLSAIN / LCD_PLLSAIR / RCC_PLLSAIDIVR_2
-	LCD_PLLSAIN = LCD_CLK * LCD_PLLSAIR * LCD_CLKDIV;	//	根据需要使用的LCD时钟计算PLLSAIN参数，可取范围为50~432
-	PeriphClkInitStruct.PLLSAI.PLLSAIN 	= LCD_PLLSAIN;			// 设置 PLLSAIN
-	PeriphClkInitStruct.PLLSAI.PLLSAIR 	= LCD_PLLSAIR;			// 设置 PLLSAIR，这里取值为3
-	PeriphClkInitStruct.PLLSAIDivR 		= RCC_PLLSAIDIVR_4;	// 为了方便计算，这里使用2分频，所以 LCD_CLKDIV 定义为2
-	HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct);
-
-/////////////////////////////////////////////////////////////////////////////
-
-//	uint16_t LCD_PLLSAIN = 0;		//	用于倍频的PLLSAIN参数，可取范围为50~432
-//	uint8_t  LCD_PLLSAIR = 3;		//	用于分频的PLLSAIR参数，可取范围为2~7
-//	uint8_t  LCD_CLKDIV	= 2;		//	LCD时钟分频参数，默认设置为2分频
-
-//	RCC_OscInitTypeDef RCC_OscInitStruct = {0};
-//	RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
-//	RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
-
-//	/** Configure the main internal regulator output voltage 
-//	*/
-//	__HAL_RCC_PWR_CLK_ENABLE();
-//	__HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
-//	/** Initializes the CPU, AHB and APB busses clocks 
-//	*/
-//	RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
-//	RCC_OscInitStruct.HSEState = RCC_HSE_ON;
-//	RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-//	RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-//	RCC_OscInitStruct.PLL.PLLM = 25;
-//	RCC_OscInitStruct.PLL.PLLN = 360;
-//	RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
-//	RCC_OscInitStruct.PLL.PLLQ = 4;
-//	HAL_RCC_OscConfig(&RCC_OscInitStruct);
-//	/** Activate the Over-Drive mode 
-//	*/
-//	HAL_PWREx_EnableOverDrive();
-//	/** Initializes the CPU, AHB and APB busses clocks 
-//	*/
-//	RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
-//										|RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
-//	RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
-//	RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-//	RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
-//	RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
-
-//	HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5);
-//	PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_LTDC;
-//	
-//	// LCD_CLK = LCD_PLLSAIN / LCD_PLLSAIR / RCC_PLLSAIDIVR_2
-//	LCD_PLLSAIN = LCD_CLK * LCD_PLLSAIR * LCD_CLKDIV;	//	根据需要使用的LCD时钟计算PLLSAIN参数，可取范围为50~432
-//	
-//	PeriphClkInitStruct.PLLSAI.PLLSAIN 	= LCD_PLLSAIN;			// 设置 PLLSAIN
-//	PeriphClkInitStruct.PLLSAI.PLLSAIR 	= LCD_PLLSAIR;			// 设置 PLLSAIR，这里取值为3
-//	PeriphClkInitStruct.PLLSAIDivR 		= RCC_PLLSAIDIVR_2;	// 为了方便计算，这里使用2分频，所以 LCD_CLKDIV 定义为2
-//	HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct);
+	if (huart == hSerial.huart)
+		SERIALPROTOCOL_ReceiveCargoUARTIdleITCallback(&hSerial);
+	else if (huart == hMeter.huart)
+		EMBEDDEDMULTIMETER_GetData(&hMeter);
 }
+
 
 void Main_Task(void *argument)
 {
   datalogTimeStamp = HAL_GetTick();
-  uint32_t              pTxMailbox;
-  CAN_TxHeaderTypeDef   txHeader;
-  uint8_t txdata = 0x55;
+	
+	
+  SERIALPROTOCOL_DatalogInitiateStart(&hSerial);
   for(;;)
   {
-////    txHeader.DLC = 1;
-////    txHeader.IDE = CAN_ID_STD;
-////    txHeader.RTR = 0;
-////    txHeader.StdId = 0x02;
-////    HAL_CAN_AddTxMessage(&hcan2, &txHeader, &txdata, &pTxMailbox);
+		
+		EMBEDDEDMULTIMETER_ReadAllRequest(&hMeter);
+		
+		dataSlots_HWT605[0].f = himu.AccX.f;
+		dataSlots_HWT605[1].f = himu.AccY.f;
+		dataSlots_HWT605[2].f = himu.AccZ.f;
+		hSerial.ifNewDatalogPiece2Send = 1;
+		SERIALPROTOCOL_DatalogManager(&hSerial);
+		
+		if (HAL_GetTick() > 15000)
+			SERIALPROTOCOL_DatalogInitiateEnd(&hSerial);
 //    Foshan4DOFExoskeletonTMotor_CenterControl();
 ////////////////    if (hUI.curPage == &UIPage_FoshanHipExoskeleton)
 ////////////////      FOSHANHIPEXOSKELETON_CentreControl();

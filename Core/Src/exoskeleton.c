@@ -267,7 +267,7 @@ void EXOSKELETON_SystemIDManager(void)
       }
   		break;
     case EXOSKELETON_SYSTEMID_TASK_KNEE_JOINT_MOVEMENT_WAIT_FOR_START:
-      if (hUSB.datalogTask == DATALOG_TASK_START)
+      if (hUSB.USBDataLogTask == USB_DATALOG_TASK_START)
         USB_DataLogStart();
       break;
     case EXOSKELETON_SYSTEMID_TASK_KNEE_JOINT_MOVEMENT_POSITIONING:
@@ -320,9 +320,9 @@ void EXOSKELETON_SystemIDManager(void)
       }
       break;
     case EXOSKELETON_SYSTEMID_TASK_HIP_JOINT_MOVEMENT_WAIT_FOR_START:
-      if (hUSB.datalogTask == DATALOG_TASK_END)
+      if (hUSB.USBDataLogTask == USB_DATALOG_TASK_END)
         USB_DataLogEnd();
-      if (hUSB.datalogTask == DATALOG_TASK_FREE || hUSB.datalogTask == DATALOG_TASK_START)
+      if (hUSB.USBDataLogTask == USB_DATALOG_TASK_FREE || hUSB.USBDataLogTask == USB_DATALOG_TASK_START)
         USB_DataLogStart();
       break;
     case EXOSKELETON_SYSTEMID_TASK_HIP_JOINT_MOVEMENT_POSITIONING:
@@ -384,9 +384,9 @@ void EXOSKELETON_SystemIDManager(void)
         }
         else
         {
-          if (hUSB.datalogTask == DATALOG_TASK_DATALOG || hUSB.datalogTask == DATALOG_TASK_END)
+          if (hUSB.USBDataLogTask == USB_DATALOG_TASK_DATALOG || hUSB.USBDataLogTask == USB_DATALOG_TASK_END)
             USB_DataLogEnd();
-          else if (hUSB.datalogTask == DATALOG_TASK_FREE)
+          else if (hUSB.USBDataLogTask == USB_DATALOG_TASK_FREE)
             hSystemID.curTask = EXOSKELETON_SYSTEMID_TASK_RELEASING_JOINTS;
         }
       }

@@ -608,7 +608,7 @@ void UI_Page_LowerLimb_Exoskeleton_SystemID(void)
   LCD_DisplayString(350, 250, "A_H:");
   LCD_DisplayDecimals(350, 275, hSystemID.hipProfilingAmp, 2, 1);
   
-  if (hUSB.datalogTask == DATALOG_TASK_DATALOG)
+  if (hUSB.USBDataLogTask == USB_DATALOG_TASK_DATALOG)
     LCD_DisplayString(200, 0, "Datalog   ready");
   else
     LCD_DisplayString(200, 0, "Datalog unready");
@@ -621,7 +621,7 @@ void UI_Page_LowerLimb_Exoskeleton_SystemID(void)
   }
   if (ifButtonPressed(&hButtonSystemIDJointMovementStart))
   {
-    if (hUSB.datalogTask == DATALOG_TASK_DATALOG)
+    if (hUSB.USBDataLogTask == USB_DATALOG_TASK_DATALOG)
     {
       if (hSystemID.curTask == EXOSKELETON_SYSTEMID_TASK_KNEE_JOINT_MOVEMENT_WAIT_FOR_START)
         hSystemID.curTask = EXOSKELETON_SYSTEMID_TASK_KNEE_JOINT_MOVEMENT_POSITIONING;
@@ -635,7 +635,7 @@ void UI_Page_LowerLimb_Exoskeleton_SystemID(void)
     AK10_9_MITMode_DisableMotor(&hAKMotorRightKnee);
     AK10_9_MITMode_DisableMotor(&hAKMotorRightHip);
     hSystemID.curTask = EXOSKELETON_SYSTEMID_TASK_FREE;
-    hUSB.datalogTask = DATALOG_TASK_FREE;
+    hUSB.USBDataLogTask = USB_DATALOG_TASK_FREE;
   }
   if (ifButtonPressed(&hButtonProfilingTimeIncrease))
   {

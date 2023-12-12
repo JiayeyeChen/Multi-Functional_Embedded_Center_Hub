@@ -5,16 +5,10 @@ extern PCD_HandleTypeDef hpcd_USB_OTG_HS;
 extern CAN_HandleTypeDef hcan1;
 extern CAN_HandleTypeDef hcan2;
 extern DAC_HandleTypeDef hdac;
-extern DMA_HandleTypeDef hdma_i2c1_rx;
-extern DMA_HandleTypeDef hdma_i2c1_tx;
 extern I2C_HandleTypeDef hi2c1;
 extern DMA_HandleTypeDef hdma_sdio_rx;
 extern DMA_HandleTypeDef hdma_sdio_tx;
 extern SD_HandleTypeDef hsd;
-extern DMA_HandleTypeDef hdma_spi4_rx;
-extern DMA_HandleTypeDef hdma_spi4_tx;
-extern DMA_HandleTypeDef hdma_spi5_rx;
-extern DMA_HandleTypeDef hdma_spi5_tx;
 extern SPI_HandleTypeDef hspi1;
 extern SPI_HandleTypeDef hspi4;
 extern SPI_HandleTypeDef hspi6;
@@ -23,20 +17,17 @@ extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim5;
 extern TIM_HandleTypeDef htim13;
 extern TIM_HandleTypeDef htim14;
-extern DMA_HandleTypeDef hdma_uart4_rx;
-extern DMA_HandleTypeDef hdma_uart4_tx;
-extern DMA_HandleTypeDef hdma_usart2_rx;
-extern DMA_HandleTypeDef hdma_usart2_tx;
-extern DMA_HandleTypeDef hdma_usart3_rx;
-extern DMA_HandleTypeDef hdma_usart3_tx;
 extern UART_HandleTypeDef huart4;
 extern UART_HandleTypeDef huart2;
 extern UART_HandleTypeDef huart3;
 extern UART_HandleTypeDef huart6;
+extern DMA_HandleTypeDef hdma_usart6_rx;
+extern DMA_HandleTypeDef hdma_usart6_tx;
+extern DMA_HandleTypeDef hdma_usart3_rx;
+extern DMA_HandleTypeDef hdma_usart3_tx;
 extern TIM_HandleTypeDef htim1;
 
 //for testing//
-
 ///////////////
 void NMI_Handler(void)
 {
@@ -94,37 +85,37 @@ void EXTI4_IRQHandler(void)
 
 void DMA1_Stream0_IRQHandler(void)
 {
-  HAL_DMA_IRQHandler(&hdma_i2c1_rx);
+
 }
 
 void DMA1_Stream1_IRQHandler(void)
 {
-  HAL_DMA_IRQHandler(&hdma_usart3_rx);
+	HAL_DMA_IRQHandler(&hdma_usart3_rx);
 }
 
 void DMA1_Stream2_IRQHandler(void)
 {
-  HAL_DMA_IRQHandler(&hdma_uart4_rx);
+
 }
 
 void DMA1_Stream3_IRQHandler(void)
 {
-  HAL_DMA_IRQHandler(&hdma_usart3_tx);
+	HAL_DMA_IRQHandler(&hdma_usart3_tx);
 }
 
 void DMA1_Stream4_IRQHandler(void)
 {
-  HAL_DMA_IRQHandler(&hdma_uart4_tx);
+
 }
 
 void DMA1_Stream5_IRQHandler(void)
 {
-  HAL_DMA_IRQHandler(&hdma_usart2_rx);
+
 }
 
 void DMA1_Stream6_IRQHandler(void)
 {
-  HAL_DMA_IRQHandler(&hdma_usart2_tx);
+
 }
 
 void CAN1_TX_IRQHandler(void)
@@ -204,7 +195,16 @@ void TIM8_TRG_COM_TIM14_IRQHandler(void)
 
 void DMA1_Stream7_IRQHandler(void)
 {
-  HAL_DMA_IRQHandler(&hdma_i2c1_tx);
+}
+
+void DMA2_Stream7_IRQHandler(void)
+{
+  HAL_DMA_IRQHandler(&hdma_usart6_tx);
+}
+
+void DMA2_Stream1_IRQHandler(void)
+{
+  HAL_DMA_IRQHandler(&hdma_usart6_rx);
 }
 
 void SDIO_IRQHandler(void)
@@ -229,17 +229,10 @@ void TIM6_DAC_IRQHandler(void)
 
 void DMA2_Stream0_IRQHandler(void)
 {
-  HAL_DMA_IRQHandler(&hdma_spi4_rx);
-}
-
-void DMA2_Stream1_IRQHandler(void)
-{
-  HAL_DMA_IRQHandler(&hdma_spi4_tx);
 }
 
 void DMA2_Stream2_IRQHandler(void)
 {
-  
 }
 
 void DMA2_Stream3_IRQHandler(void)
@@ -249,7 +242,7 @@ void DMA2_Stream3_IRQHandler(void)
 
 void DMA2_Stream4_IRQHandler(void)
 {
-  HAL_DMA_IRQHandler(&hdma_spi5_tx);
+
 }
 
 void CAN2_TX_IRQHandler(void)
@@ -274,17 +267,12 @@ void CAN2_SCE_IRQHandler(void)
 
 void DMA2_Stream5_IRQHandler(void)
 {
-  HAL_DMA_IRQHandler(&hdma_spi5_rx);
+
 }
 
 void DMA2_Stream6_IRQHandler(void)
 {
   HAL_DMA_IRQHandler(&hdma_sdio_tx);
-}
-
-void DMA2_Stream7_IRQHandler(void)
-{
-  
 }
 
 void USART6_IRQHandler(void)

@@ -16,14 +16,14 @@ enum DatalogType
   DATALOG_TYPE_TIMESEGMENT
 };
 
-enum DataLogTask
+enum USBDataLogTask
 {
-  DATALOG_TASK_FREE,
-  DATALOG_TASK_START,
-  DATALOG_TASK_SEND_DATA_SLOT_LEN,
-  DATALOG_TASK_SEND_DATA_SLOT_MSG,
-  DATALOG_TASK_DATALOG,
-  DATALOG_TASK_END
+  USB_DATALOG_TASK_FREE,
+  USB_DATALOG_TASK_START,
+  USB_DATALOG_TASK_SEND_DATA_SLOT_LEN,
+  USB_DATALOG_TASK_SEND_DATA_SLOT_MSG,
+  USB_DATALOG_TASK_DATALOG,
+  USB_DATALOG_TASK_END
 };
 
 typedef struct
@@ -48,7 +48,7 @@ typedef struct
   uint8_t               dataSlotLen;
   uint32_t              datalogStartTimestamp;
   uint32_t              timeSegmentDuration;
-  enum DataLogTask      datalogTask;
+  enum USBDataLogTask      USBDataLogTask;
 }USBHandle;
 
 void USB_Init(uint8_t data_slot_len);

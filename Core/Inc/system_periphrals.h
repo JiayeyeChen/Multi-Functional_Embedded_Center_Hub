@@ -9,6 +9,7 @@
 #include "gpio_digital_filtered_input.h"
 #include "led_control.h"
 #include "can_bus.h"
+#include "lcd_rgb.h"
 
 #define SPI_SCK_Pin GPIO_PIN_2
 #define SPI_SCK_GPIO_Port GPIOE
@@ -28,18 +29,20 @@
 #define DAC1_OUTPUT_GPIO_Port GPIOA
 #define DAC2_OUTPUT_Pin GPIO_PIN_5
 #define DAC2_OUTPUT_GPIO_Port GPIOA
-#define RS485_TX_Pin GPIO_PIN_8
-#define RS485_TX_GPIO_Port GPIOD
-#define RS485_RX_Pin GPIO_PIN_9
-#define RS485_RX_GPIO_Port GPIOD
+#define RS485_TX_Pin GPIO_PIN_10
+#define RS485_TX_GPIO_Port GPIOB
+#define RS485_RX_Pin GPIO_PIN_11
+#define RS485_RX_GPIO_Port GPIOB
 #define ONBOARD_LED_BLUE_Pin GPIO_PIN_12
 #define ONBOARD_LED_BLUE_GPIO_Port GPIOD
 #define SPI_FLASH_CS_Pin GPIO_PIN_3
 #define SPI_FLASH_CS_GPIO_Port GPIOG
 #define ONBOARD_LED_YELLOWGREEN_Pin GPIO_PIN_7
 #define ONBOARD_LED_YELLOWGREEN_GPIO_Port GPIOG
-#define UART_RX_Pin GPIO_PIN_7
-#define UART_RX_GPIO_Port GPIOC
+#define UART_RX_Pin GPIO_PIN_9
+#define UART_RX_GPIO_Port GPIOG
+#define UART_TX_Pin GPIO_PIN_14
+#define UART_TX_GPIO_Port GPIOG
 #define ONBOARD_UART_TX_Pin GPIO_PIN_9
 #define ONBOARD_UART_TX_GPIO_Port GPIOA
 #define ONBOARD_UART_RX_Pin GPIO_PIN_10
@@ -48,8 +51,6 @@
 #define RS232_TX_GPIO_Port GPIOD
 #define RS232_RX_Pin GPIO_PIN_6
 #define RS232_RX_GPIO_Port GPIOD
-#define UART_TX_Pin GPIO_PIN_14
-#define UART_TX_GPIO_Port GPIOG
 #define SPI_FLASH_SCK_Pin GPIO_PIN_3
 #define SPI_FLASH_SCK_GPIO_Port GPIOB
 #define SPI_FLASH_MISO_Pin GPIO_PIN_4
@@ -61,6 +62,7 @@
 #define I2C_SDA_Pin GPIO_PIN_7
 #define I2C_SDA_GPIO_Port GPIOB
 
+void SystemClock_Config(void);
 void SystemPeriphral_Init(void);
 void MX_USB_DEVICE_Init(void);
 void Button_Init(void);

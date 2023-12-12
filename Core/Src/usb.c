@@ -15,7 +15,7 @@ void USB_Init(uint8_t data_slot_len)
   hUSB.ifNewCargo = 0;
   hUSB.ifNewDataLogPiece2Send = 0;
   hUSB.index.b32 = 0;
-  hUSB.datalogTask = DATALOG_TASK_FREE;
+  hUSB.USBDataLogTask = USB_DATALOG_TASK_FREE;
   hUSB.dataSlotLen = data_slot_len;
 }
 
@@ -116,55 +116,55 @@ void USB_DatalogCargoReceiveManager(void (*LabelSetFunc)(void))
   {
     char msg[hUSB.rxMessageLen];
     memcpy(msg, hUSB.rxMessageCfrm, hUSB.rxMessageLen);
-    if (hUSB.datalogTask == DATALOG_TASK_FREE)
+    if (hUSB.USBDataLogTask == USB_DATALOG_TASK_FREE)
     {
       if (!strcmp(msg, "Datalog start"))
       {
-        hUSB.datalogTask = DATALOG_TASK_SEND_DATA_SLOT_LEN;
+        hUSB.USBDataLogTask = USB_DATALOG_TASK_SEND_DATA_SLOT_LEN;
         USB_SendDataSlotLen();
         hUSB.ifNewCargo = 0;
       }
     }
-    else if (hUSB.datalogTask == DATALOG_TASK_START)
+    else if (hUSB.USBDataLogTask == USB_DATALOG_TASK_START)
     {
       if (!strcmp(msg, "Roger that"))
       {
-        hUSB.datalogTask = DATALOG_TASK_SEND_DATA_SLOT_LEN;
+        hUSB.USBDataLogTask = USB_DATALOG_TASK_SEND_DATA_SLOT_LEN;
         USB_SendDataSlotLen();
         hUSB.ifNewCargo = 0;
       }
     }
-    else if (hUSB.datalogTask == DATALOG_TASK_SEND_DATA_SLOT_LEN)
+    else if (hUSB.USBDataLogTask == USB_DATALOG_TASK_SEND_DATA_SLOT_LEN)
     {
       if (!strcmp(msg, "Roger that"))
       {
-        hUSB.datalogTask = DATALOG_TASK_SEND_DATA_SLOT_MSG;
+        hUSB.USBDataLogTask = USB_DATALOG_TASK_SEND_DATA_SLOT_MSG;
         (*LabelSetFunc)();
         hUSB.ifNewCargo = 0;
       }
     }
-    else if (hUSB.datalogTask == DATALOG_TASK_SEND_DATA_SLOT_MSG)
+    else if (hUSB.USBDataLogTask == USB_DATALOG_TASK_SEND_DATA_SLOT_MSG)
     {
       if (!strcmp(msg, "Roger that"))
       {
-        hUSB.datalogTask = DATALOG_TASK_DATALOG;
+        hUSB.USBDataLogTask = USB_DATALOG_TASK_DATALOG;
         hUSB.ifNewCargo = 0;
       }
     }
-    else if (hUSB.datalogTask == DATALOG_TASK_DATALOG)
+    else if (hUSB.USBDataLogTask == USB_DATALOG_TASK_DATALOG)
     {
       if (!strcmp(msg, "Datalog end"))
       {
-        hUSB.datalogTask = DATALOG_TASK_FREE;
+        hUSB.USBDataLogTask = USB_DATALOG_TASK_FREE;
         USB_SendText("Roger that");
         hUSB.ifNewCargo = 0;
       }
     }
-    else if (hUSB.datalogTask == DATALOG_TASK_END)
+    else if (hUSB.USBDataLogTask == USB_DATALOG_TASK_END)
     {
       if (!strcmp(msg, "Roger that"))
       {
-        hUSB.datalogTask = DATALOG_TASK_FREE;
+        hUSB.USBDataLogTask = USB_DATALOG_TASK_FREE;
         hUSB.ifNewCargo = 0;
       }
     }
@@ -175,7 +175,7 @@ void USB_DatalogCargoReceiveManager(void (*LabelSetFunc)(void))
 void USB_DataLogManager(void (*LabelSetFunc)(void), union FloatUInt8 dala_slots[])
 {
   USB_DatalogCargoReceiveManager(LabelSetFunc);
-  if (hUSB.datalogTask == DATALOG_TASK_DATALOG)
+  if (hUSB.USBDataLogTask == USB_DATALOG_TASK_DATALOG)
   {
     if (hUSB.ifNewDataLogPiece2Send)
     {
@@ -222,12 +222,12 @@ void USB_DataLogInitialization(void)
 void USB_DataLogStart(void)
 {
   USB_DataLogInitialization();
-  hUSB.datalogTask = DATALOG_TASK_START;
+  hUSB.USBDataLogTask = USB_DATALOG_TASK_START;
   USB_SendText("Datalog start");
 }
 void USB_DataLogEnd(void)
 {
-  hUSB.datalogTask = DATALOG_TASK_END;
+  hUSB.USBDataLogTask = USB_DATALOG_TASK_END;
   USB_SendText("Datalog end");
 }
 
