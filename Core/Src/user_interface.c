@@ -102,6 +102,12 @@ LinearPotentialmeterHandle		hPotFoshan4DOFExoLeftHipGravCoe, hPotFoshan4DOFExoLe
 															hPotFoshan4DOFExoRightHipGravCoe, hPotFoshan4DOFExoRightKneeGravCoe;
 ///////////////////////////
 
+/*IMU to test hip angle*/
+PageHandle                    UIPage_IMUHipAngleTesting;
+ButtonHandle                  hButtonPageIMUHipAngleTesting, hButtonRecordCurrentVal;
+extern float standstillAccX, standstillAccY, standstillAccZ, hipAngle;
+extern SerialProtocolHandle hSerial;
+
 ButtonHandle Button_Create(uint16_t x, uint16_t y, uint16_t xLen, uint16_t yLen, char label[],\
                            uint32_t colorUnpressed, uint32_t colorPressed)
 {
@@ -345,6 +351,10 @@ void UI_Init(void)
 	UIPage_Foshan4DOFExoskeletonLKMotor.ifPageInitialized = 0;
   UIPage_Foshan4DOFExoskeletonLKMotor.Page = UI_Page_Foshan4DOFExoskeletonLKMotor;
   UIPage_Foshan4DOFExoskeletonLKMotor.PageInit = UI_Page_Foshan4DOFExoskeletonLKMotor_Init;
+	
+	UIPage_IMUHipAngleTesting.ifPageInitialized = 0;
+  UIPage_IMUHipAngleTesting.Page = UI_Page_IMUHipAngleTesting;
+  UIPage_IMUHipAngleTesting.PageInit = UI_Page_IMUHipAngleTesting_Init;
 }
 
 JoystickHandle Joystick_Create(uint16_t x, uint16_t y, uint16_t r, uint32_t background_color, \
@@ -873,6 +883,7 @@ void UI_Page_Home1(void)
   ButtonUpdate(&hButtonPageExoskeletonMotorDurabilityTest);
   ButtonUpdate(&hButtonPageFoshanHipExoskeleton);
 	ButtonUpdate(&hButtonPageFoshan4DOFExoskeletonSelection);
+	ButtonUpdate(&hButtonPageIMUHipAngleTesting);
   
   
   if (ifButtonPressed(&hButtonPageExoskeletonInterface))
@@ -897,6 +908,8 @@ void UI_Page_Home1(void)
     UI_Page_Change_To(&UIPage_FoshanHipExoskeleton);
 	if (ifButtonPressed(&hButtonPageFoshan4DOFExoskeletonSelection))
     UI_Page_Change_To(&UIPage_Foshan4DOFExoskeletonSelection);
+	if (ifButtonPressed(&hButtonPageIMUHipAngleTesting))
+    UI_Page_Change_To(&UIPage_IMUHipAngleTesting);
 }
 void UI_Page_Home1_Init(void)
 {
@@ -912,7 +925,7 @@ void UI_Page_Home1_Init(void)
 	hButtonPageFoshan4DOFExoskeletonSelection = Button_Create(100, 500, 300, 40, "Foshan 4DOF Exoskeleton", LIGHT_MAGENTA, LCD_RED);
   hButtonPageTorqueConstantCalibration = Button_Create(100, 550, 300, 40, "Kt Calibration", LIGHT_MAGENTA, LCD_RED);
   hButtonPageExoskeletonMotorDurabilityTest = Button_Create(40, 600, 400, 40, "Exoskeleton Motor Test", LIGHT_MAGENTA, LCD_RED);
-	
+	hButtonPageIMUHipAngleTesting = Button_Create(100, 650, 300, 40, "IMU Hip Angle Testing", LIGHT_MAGENTA, LCD_RED);
 }
 
 void UI_Page_AK10_9_ManualControlCubeMarsFWServoMode(void)
@@ -1983,4 +1996,48 @@ void UI_Page_Foshan4DOFExoskeletonLKMotor(void)
 void UI_Page_Foshan4DOFExoskeletonLKMotor_Init(void)
 {
 	hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
+}
+
+void UI_Page_IMUHipAngleTesting(void)
+{
+	ButtonUpdate(&hButtonGoBack);
+	ButtonUpdate(&hButtonDataLogStart);
+	ButtonUpdate(&hButtonDataLogEnd);
+	ButtonUpdate(&hButtonRecordCurrentVal);
+	
+	
+	
+	LCD_SetLayer(1); 
+  LCD_SetColor(LCD_BLACK);
+	LCD_DisplayDecimals(100, 300, himu.AccX.f, 3, 2);
+	LCD_DisplayDecimals(100, 325, himu.AccY.f, 3, 2);
+	LCD_DisplayDecimals(100, 350, himu.AccZ.f, 3, 2);
+	LCD_SetColor(LCD_RED);
+	LCD_DisplayDecimals(100, 400, hipAngle, 4, 1);
+	
+	
+	
+	
+	
+	if (ifButtonPressed(&hButtonDataLogStart))
+		SERIALPROTOCOL_DatalogInitiateStart(&hSerial);
+	if (ifButtonPressed(&hButtonDataLogEnd))
+		SERIALPROTOCOL_DatalogInitiateEnd(&hSerial);
+	if (ifButtonPressed(&hButtonRecordCurrentVal))
+	{
+		standstillAccX = himu.AccX.f;
+		standstillAccY = himu.AccY.f;
+		standstillAccZ = himu.AccZ.f;
+	}
+	
+	
+	if (ifButtonPressed(&hButtonGoBack))
+    UI_Page_Change_To(&UIPage_Home1);
+}
+void UI_Page_IMUHipAngleTesting_Init(void)
+{
+	hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
+	hButtonDataLogStart = Button_Create(100, 100, 300, 40, "Datalog Start", LCD_WHITE, LCD_RED);
+	hButtonDataLogEnd = Button_Create(100, 200, 300, 40, "Datalog End", LCD_WHITE, LCD_RED);
+	hButtonRecordCurrentVal = Button_Create(250, 300, 100, 40, "Calib", LCD_WHITE, LCD_RED);
 }

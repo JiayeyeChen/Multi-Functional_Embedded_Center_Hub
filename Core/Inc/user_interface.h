@@ -14,6 +14,8 @@
 #include "lktech_mg_motor.h"
 #include "foshan_4dof_exoskeleton_tmotor.h"
 #include "bldc_actuators_testing.h"
+#include "serial_protocol.h"
+#include "hwt605-can-inclinometer.h"
 
 typedef struct
 {
@@ -165,6 +167,8 @@ void         UI_Page_Foshan4DOFExoskeletonTMotor(void);
 void         UI_Page_Foshan4DOFExoskeletonTMotor_Init(void);
 void         UI_Page_Foshan4DOFExoskeletonLKMotor(void);
 void         UI_Page_Foshan4DOFExoskeletonLKMotor_Init(void);
+void         UI_Page_IMUHipAngleTesting(void);
+void         UI_Page_IMUHipAngleTesting_Init(void);
 
 /* Lin Kong Ke Ji Testing */
 extern uint8_t ifKeepReadingAngle;

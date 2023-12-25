@@ -146,7 +146,7 @@ static void CAN1_Init(void)
 static void CAN2_Init(void)
 {
   hcan2.Instance = CAN2;
-  hcan2.Init.Prescaler = 3;
+  hcan2.Init.Prescaler = 3;//3 for 1MHz
   hcan2.Init.Mode = CAN_MODE_NORMAL;
   hcan2.Init.SyncJumpWidth = CAN_SJW_1TQ;
   hcan2.Init.TimeSeg1 = CAN_BS1_13TQ;
@@ -1475,7 +1475,7 @@ void SystemPeriphral_Init(void)
   HAL_TIM_Base_Start(&htim8);
   TIM13_Init();
   TIM14_Init();
-  CAN1_Init();
+//  CAN1_Init();
   CAN2_Init();
   SPI1_Init();
   USB_DEVICE_Init();

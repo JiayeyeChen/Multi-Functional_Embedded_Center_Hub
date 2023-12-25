@@ -33,13 +33,14 @@ uint32_t datalogTimeStamp;
 ////////////////////////////////
 
 SerialProtocolHandle hSerial;
-union FloatUInt8 dataSlots_HWT605[3];
+union FloatUInt8 dataSlots_HWT605[7];
+float standstillAccX, standstillAccY, standstillAccZ, hipAngle;
 
 EmbeddedMultimeterHandle hMeter;
 
 void SendDatalogLabels_HWT605(void)
 {
-	SERIALPROTOCOL_SendDataSlotLabel(&hSerial, "3", "AccX", "AccY", "AccZ");
+	SERIALPROTOCOL_SendDataSlotLabel(&hSerial, "7", "AccX", "AccY", "AccZ", "AccXOffset", "AccYOffset", "AccZOffset", "Hip Angle");
 }
 
 int main(void)
@@ -59,7 +60,7 @@ int main(void)
   
   himu = HWT605_Create(&hcan2, 0x50, 0.9821f, 0.027f, -0.0064f, -0.0166f, 1.0097f, -0.0058f, \
 	-0.0062f, 0.0025f, 1.0063f, 0.0598f, 0.0614f, 0.0654f);
-	hMeter = EMBEDDEDMULTIMETER_Create(&huart3, 0x01);
+//	hMeter = EMBEDDEDMULTIMETER_Create(&huart3, 0x01);
 	
 	
 	hSerial = SERIALPROTOCOL_Create(&huart6);
@@ -95,22 +96,26 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 void Main_Task(void *argument)
 {
   datalogTimeStamp = HAL_GetTick();
-	
-	
-  SERIALPROTOCOL_DatalogInitiateStart(&hSerial);
+  
   for(;;)
   {
 		
-		EMBEDDEDMULTIMETER_ReadAllRequest(&hMeter);
+//		EMBEDDEDMULTIMETER_ReadAllRequest(&hMeter);
+		
 		
 		dataSlots_HWT605[0].f = himu.AccX.f;
 		dataSlots_HWT605[1].f = himu.AccY.f;
 		dataSlots_HWT605[2].f = himu.AccZ.f;
+		dataSlots_HWT605[3].f = standstillAccX;
+		dataSlots_HWT605[4].f = standstillAccY;
+		dataSlots_HWT605[5].f = standstillAccZ;
+		hipAngle = acosf((himu.AccX.f * standstillAccX + himu.AccY.f * standstillAccY + himu.AccZ.f * standstillAccZ) / \
+								(sqrtf(himu.AccX.f*himu.AccX.f + himu.AccY.f*himu.AccY.f + himu.AccZ.f*himu.AccZ.f) * \
+								sqrtf(standstillAccX*standstillAccX + standstillAccY*standstillAccY + standstillAccZ*standstillAccZ))) * rad2deg;
+		dataSlots_HWT605[6].f = hipAngle;
 		hSerial.ifNewDatalogPiece2Send = 1;
 		SERIALPROTOCOL_DatalogManager(&hSerial);
 		
-		if (HAL_GetTick() > 15000)
-			SERIALPROTOCOL_DatalogInitiateEnd(&hSerial);
 //    Foshan4DOFExoskeletonTMotor_CenterControl();
 ////////////////    if (hUI.curPage == &UIPage_FoshanHipExoskeleton)
 ////////////////      FOSHANHIPEXOSKELETON_CentreControl();
@@ -195,7 +200,7 @@ void Main_Task(void *argument)
 ////////////    AK10_9_CubeMarsFW_MotorStatusMonitor(&hAKMotorRightKnee, 100);
 ////////////    AK10_9_CubeMarsFW_MotorStatusMonitor(&hAKMotorRightHip, 100);
     
-    osDelay(1000);
+    osDelay(5);
   }
 }
 
