@@ -11,8 +11,6 @@ extern I2C_HandleTypeDef hi2c1;
 extern DMA_HandleTypeDef hdma_sdio_rx;
 extern DMA_HandleTypeDef hdma_sdio_tx;
 extern SD_HandleTypeDef hsd;
-extern DMA_HandleTypeDef hdma_spi4_rx;
-extern DMA_HandleTypeDef hdma_spi4_tx;
 extern DMA_HandleTypeDef hdma_spi5_rx;
 extern DMA_HandleTypeDef hdma_spi5_tx;
 extern SPI_HandleTypeDef hspi1;
@@ -29,6 +27,8 @@ extern DMA_HandleTypeDef hdma_usart2_rx;
 extern DMA_HandleTypeDef hdma_usart2_tx;
 extern DMA_HandleTypeDef hdma_usart3_rx;
 extern DMA_HandleTypeDef hdma_usart3_tx;
+extern DMA_HandleTypeDef hdma_usart6_rx;
+extern DMA_HandleTypeDef hdma_usart6_tx;
 extern UART_HandleTypeDef huart4;
 extern UART_HandleTypeDef huart2;
 extern UART_HandleTypeDef huart3;
@@ -229,12 +229,12 @@ void TIM6_DAC_IRQHandler(void)
 
 void DMA2_Stream0_IRQHandler(void)
 {
-  HAL_DMA_IRQHandler(&hdma_spi4_rx);
+
 }
 
 void DMA2_Stream1_IRQHandler(void)
 {
-  HAL_DMA_IRQHandler(&hdma_spi4_tx);
+	HAL_DMA_IRQHandler(&hdma_usart6_rx);
 }
 
 void DMA2_Stream2_IRQHandler(void)
@@ -284,7 +284,7 @@ void DMA2_Stream6_IRQHandler(void)
 
 void DMA2_Stream7_IRQHandler(void)
 {
-  
+  HAL_DMA_IRQHandler(&hdma_usart6_tx);
 }
 
 void USART6_IRQHandler(void)

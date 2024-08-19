@@ -2,8 +2,6 @@
 #include "ak10-9_v2_testing.h"
 #include "usb.h"
 #include "exoskeleton.h"
-#include "foshan_hip_exoskeleton.h"
-#include "foshan_4dof_exoskeleton_tmotor.h"
 #include "bldc_actuators_testing.h"
 
 //for testing//
@@ -184,14 +182,6 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
   
 	if (temRxHeader.StdId == CAN_ID_TMOTOR_RX)
 	{
-		if (temRxData[0] == CAN_ID_TMOTOR_EXOSKELETON_RIGHT_HIP_MOTOR)
-			AK10_9_MITMode_GetFeedbackMsg(&temRxHeader, &hExoskeletonFoshan4DOFTMotor.hMotorRightHip, temRxData);
-		else if (temRxData[0] == CAN_ID_TMOTOR_EXOSKELETON_RIGHT_KNEE_MOTOR)
-			AK10_9_MITMode_GetFeedbackMsg(&temRxHeader, &hExoskeletonFoshan4DOFTMotor.hMotorRightKnee, temRxData);
-		if (temRxData[0] == CAN_ID_TMOTOR_EXOSKELETON_LEFT_HIP_MOTOR)
-			AK10_9_MITMode_GetFeedbackMsg(&temRxHeader, &hExoskeletonFoshan4DOFTMotor.hMotorLeftHip, temRxData);
-		else if (temRxData[0] == CAN_ID_TMOTOR_EXOSKELETON_LEFT_KNEE_MOTOR)
-			AK10_9_MITMode_GetFeedbackMsg(&temRxHeader, &hExoskeletonFoshan4DOFTMotor.hMotorLeftKnee, temRxData);
 	}
   
   //End

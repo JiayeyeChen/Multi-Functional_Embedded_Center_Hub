@@ -18,10 +18,11 @@
 #include "adc.h"
 #include "exoskeleton.h"
 #include "lktech_mg_motor.h"
-#include "foshan_hip_exoskeleton.h"
 #include "xiaomi_cybergear.h"
-#include "foshan_4dof_exoskeleton_tmotor.h"
 #include "bldc_actuators_testing.h"
+#include "cui_amt222b_encoder.h"
+#include "serial_protocol.h"
+#include "opticalencoder_acceleration_test.h"
 
 void SystemClock_Config(void);
 
@@ -29,6 +30,7 @@ void SystemClock_Config(void);
 /* For exoskeleton motor test */
 uint32_t datalogTimeStamp;
 ////////////////////////////////
+
 
 int main(void)
 {
@@ -45,17 +47,30 @@ int main(void)
 	MX_FMC_Init();
   UI_Init();
   
+//	DWT_Delay_Init();
+	hSerial = SERIALPROTOCOL_Create(&huart6);
+	SERIALPROTOCOL_SetNewDatalogSlotLength(&hSerial, 3);
+	SERIALPROTOCOL_SetNewDatalogSlot(&hSerial, datalog_slot_cui);
+	SERIALPROTOCOL_SetNewDatalogSendLabelFunction(&hSerial, OPTICALENCODERTEST_SetDatalogLabel);
+	SERIALPROTOCOL_EnableCommunication(&hSerial);
+	hCUIEncoder = CUI_AMT222b_Create(&hspi4, SPI_CS_GPIO_Port, SPI_CS_Pin, 0.0f);
+	LowPassFilter_Init(&hFilterSpeed, 10, 0.001f);
+	LowPassFilter_Init(&hFilterAcc, 10, 0.001f);
+	pre_speed = 0.0f;
+	cur_speed = 0.0f;
+	pre_acc = 0.0f;
+	cur_acc = 0.0f;
+	pre_angle = 0.0f;
+	cur_angle = 0.0f;
 ////  EXOSKELETON_MotorInit();
-//	Foshan4DOFExoskeletonTMotor_Init(0.01f);
-  LKTECH_MG_Init(&hLKTECH, &hcan2, 1, 36.0, 1.0f);
+//  LKTECH_MG_Init(&hLKTECH, &hcan2, 1, 36.0, 1.0f);
   
   AD7606_Init(AD7606_RANG_10V, AD7606_OS_RATIO_4);
-//  FOSHANHIPEXOSKELETON_Init(0.01f);
+	
 ////  EXOSKELETON_Init();
   CAN_ConfigureFilters();
   osKernelInitialize();
   OSThreads_Init();
-  
   osKernelStart();
   while (1){}
 }
@@ -279,10 +294,26 @@ void Main_Task(void *argument)
 
 void MotorTesting_Task(void *argument)
 {
+	SERIALPROTOCOL_EnableCommunication(&hSerial);
+//	SERIALPROTOCOL_DatalogInitiateStart(&hSerial);
 	for(;;)
   {
+//		CUI_AMT222b_Get_Angle(&hCUIEncoder);
+		pre_angle = cur_angle;
+		cur_angle = hCUIEncoder.angleDeg;
 		
-    osDelay(50);
+		pre_speed = hFilterSpeed.output.f;
+		LowPassFilter_Update(&hFilterSpeed, (cur_angle - pre_angle) / 0.001f);
+		cur_speed = hFilterSpeed.output.f;
+		
+		LowPassFilter_Update(&hFilterAcc, (cur_speed - pre_speed) / 0.001f);
+		
+		datalog_slot_cui[0].f = hCUIEncoder.angleDeg;
+		datalog_slot_cui[1].f = cur_speed;
+		datalog_slot_cui[2].f = hFilterAcc.output.f;
+		
+		hSerial.ifNewDatalogPiece2Send = 1;
+    osDelay(1);
   }
 }
 
@@ -291,6 +322,7 @@ void UI_Task(void *argument)
   
   for(;;)
   {
+		
     Touch_Scan();
     UI();
     LED_Blink(&hLEDBlue, 2);
@@ -303,7 +335,8 @@ void ADC_Task(void *argument)
   for(;;)
   {
 //    ADC_DataRequest();
-    osDelay(1000);
+		SERIALPROTOCOL_DatalogManager(&hSerial);
+    osDelay(10);
   }
 }
 
@@ -326,4 +359,9 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
   default:
     break;
   }
+}
+
+void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
+{
+	SERIALPROTOCOL_ReceiveCargoUARTIdleITCallback(&hSerial);
 }

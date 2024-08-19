@@ -10,9 +10,7 @@
 #include "ak10-9_v2_testing.h"
 #include "exoskeleton.h"
 #include "adc.h"
-#include "foshan_hip_exoskeleton.h"
 #include "lktech_mg_motor.h"
-#include "foshan_4dof_exoskeleton_tmotor.h"
 #include "bldc_actuators_testing.h"
 
 typedef struct
@@ -147,8 +145,8 @@ void         UI_Page_AK10_9_ManualControlCubeMarsFWMITMode(void);
 void         UI_Page_AK10_9_ManualControlCubeMarsFWMITMode_Init(void);
 void         UI_Page_BNO055_Monitor(void);
 void         UI_Page_BNO055_Monitor_Init(void);
-void         UI_Page_TMotor_Acceleration_Observer_Project(void);
-void         UI_Page_TMotor_Acceleration_Observer_Project_Init(void);
+void         UI_Page_Acceleration_Observer_Project(void);
+void         UI_Page_Acceleration_Observer_Project_Init(void);
 void         UI_Page_ADC_Monitor_Init(void);
 void         UI_Page_ADC_Monitor(void);
 void         UI_Page_CustomizedIMU(void);
@@ -157,14 +155,6 @@ void 				 UI_Page_LinKongKeJiTesting(void);
 void 				 UI_Page_LinKongKeJiTesting_Init(void);
 void         UI_Page_TkCalibration(void);
 void         UI_Page_TkCalibration_Init(void);
-void         UI_Page_ExoskeletonMotorDurabilityTest(void);
-void         UI_Page_ExoskeletonMotorDurabilityTest_Init(void);
-void				 UI_Page_Foshan4DOFExoskeletonSelection(void);
-void				 UI_Page_Foshan4DOFExoskeletonSelection_Init(void);
-void         UI_Page_Foshan4DOFExoskeletonTMotor(void);
-void         UI_Page_Foshan4DOFExoskeletonTMotor_Init(void);
-void         UI_Page_Foshan4DOFExoskeletonLKMotor(void);
-void         UI_Page_Foshan4DOFExoskeletonLKMotor_Init(void);
 
 /* Lin Kong Ke Ji Testing */
 extern uint8_t ifKeepReadingAngle;
@@ -181,6 +171,4 @@ extern float exoskeletonMotorTestHipGaitAngleDeg;
 extern UIHandle hUI;
 extern PageHandle UIPage_AK10_9_ManualControlCubeMarsFWServoMode, UIPage_AK10_9_ManualControlCubeMarsFWMITMode;
 extern PageHandle UIPage_LowerLimb_Exoskeleton;
-extern PageHandle UIPage_FoshanHipExoskeleton;
-extern PageHandle UIPage_Foshan4DOFExoskeletonTMotor, UIPage_Foshan4DOFExoskeletonLKMotor;
 #endif

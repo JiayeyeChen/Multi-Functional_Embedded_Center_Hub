@@ -45,9 +45,8 @@ ButtonHandle hButtonPageBNO055_Monitor, hButtonIMUSetModeNDOF, \
              hButtonIMUSetModeACCONLY, hButtonIMUSetModeGYROONLY;
 ////////////////////
 /* Acceleration Observer Development*/
-PageHandle UIPage_TMotor_Acceleration_Observer_Project;
-ButtonHandle hButtonPageTMotorAccelerationObserverProject;
-LinearPotentialmeterHandle  hPotTMotorProfilingFrequency;
+PageHandle UIPage_Acceleration_Observer_Project;
+ButtonHandle hButtonPageAccelerationObserverProject;
 //////////////////////////////////////
 
 /* AD7606 Monitor */
@@ -79,26 +78,6 @@ float                         torqueConstantCalibrationMotorKp, torqueConstantCa
 AveragerHandle                hAverageTorqueConstantCalibration;
 uint8_t                       torqueConstantCalibrationIfMotorStarted;
 /////////////////////////////////
-/* Exoskeleton Motor Durability test */
-PageHandle                    UIPage_ExoskeletonMotorDurabilityTest;
-ButtonHandle                  hButtonPageExoskeletonMotorDurabilityTest;
-uint8_t                       ifMotorProfilingStartedExoskeletonMotorTest;
-uint32_t                      exoskeletonMotorTestTimeDifference;
-float                         exoskeletonMotorTestHipGaitAngleDeg;
-///////////////////////////////////////
-/* Foshan hip exoskeleton*/
-PageHandle                    UIPage_FoshanHipExoskeleton;
-ButtonHandle                  hButtonPageFoshanHipExoskeleton, hButtonFoshanHipExoskeletonAssistControl, \
-                              hButtonFoshanHipExoskeletonResistControl;
-LinearPotentialmeterHandle    hPotFoshanHipExoskeletonGraFactor, hPotFoshanHipExoskeletonInnerFactor, \
-                              hPotFoshanHipExoskeletonSpringFactor;
-///////////////////////////
-/*Foshan 4dof exoskeleton*/
-PageHandle                    UIPage_Foshan4DOFExoskeletonSelection, UIPage_Foshan4DOFExoskeletonTMotor, UIPage_Foshan4DOFExoskeletonLKMotor;
-ButtonHandle                  hButtonPageFoshan4DOFExoskeletonSelection, hButtonFoshan4DOFExoskeletonTMotor, hButtonFoshan4DOFExoskeletonLKMotor;
-LinearPotentialmeterHandle		hPotFoshan4DOFExoLeftHipGravCoe, hPotFoshan4DOFExoLeftKneeGravCoe, \
-															hPotFoshan4DOFExoRightHipGravCoe, hPotFoshan4DOFExoRightKneeGravCoe;
-///////////////////////////
 
 ButtonHandle Button_Create(uint16_t x, uint16_t y, uint16_t xLen, uint16_t yLen, char label[],\
                            uint32_t colorUnpressed, uint32_t colorPressed)
@@ -304,9 +283,9 @@ void UI_Init(void)
   UIPage_BNO055_Monitor.Page = UI_Page_BNO055_Monitor;
   UIPage_BNO055_Monitor.PageInit = UI_Page_BNO055_Monitor_Init;
   
-  UIPage_TMotor_Acceleration_Observer_Project.ifPageInitialized = 0;
-  UIPage_TMotor_Acceleration_Observer_Project.Page = UI_Page_TMotor_Acceleration_Observer_Project;
-  UIPage_TMotor_Acceleration_Observer_Project.PageInit = UI_Page_TMotor_Acceleration_Observer_Project_Init;
+  UIPage_Acceleration_Observer_Project.ifPageInitialized = 0;
+  UIPage_Acceleration_Observer_Project.Page = UI_Page_Acceleration_Observer_Project;
+  UIPage_Acceleration_Observer_Project.PageInit = UI_Page_Acceleration_Observer_Project_Init;
   
   UIPage_ADC_Monitor.ifPageInitialized = 0;
   UIPage_ADC_Monitor.Page = UI_Page_ADC_Monitor;
@@ -323,26 +302,7 @@ void UI_Init(void)
   UIPage_TorqueConstantCalibration.ifPageInitialized = 0;
 	UIPage_TorqueConstantCalibration.Page = UI_Page_TkCalibration;
   UIPage_TorqueConstantCalibration.PageInit = UI_Page_TkCalibration_Init;
-  
-  UIPage_ExoskeletonMotorDurabilityTest.ifPageInitialized = 0;
-	UIPage_ExoskeletonMotorDurabilityTest.Page = UI_Page_ExoskeletonMotorDurabilityTest;
-  UIPage_ExoskeletonMotorDurabilityTest.PageInit = UI_Page_ExoskeletonMotorDurabilityTest_Init;
-  
-  UIPage_FoshanHipExoskeleton.ifPageInitialized = 0;
-  UIPage_FoshanHipExoskeleton.Page = UI_Page_FoshanHipExoskeleton;
-  UIPage_FoshanHipExoskeleton.PageInit = UI_Page_FoshanHipExoskeleton_Init;
-	
-	UIPage_Foshan4DOFExoskeletonSelection.ifPageInitialized = 0;
-  UIPage_Foshan4DOFExoskeletonSelection.Page = UI_Page_Foshan4DOFExoskeletonSelection;
-  UIPage_Foshan4DOFExoskeletonSelection.PageInit = UI_Page_Foshan4DOFExoskeletonSelection_Init;
-	
-	UIPage_Foshan4DOFExoskeletonTMotor.ifPageInitialized = 0;
-  UIPage_Foshan4DOFExoskeletonTMotor.Page = UI_Page_Foshan4DOFExoskeletonTMotor;
-  UIPage_Foshan4DOFExoskeletonTMotor.PageInit = UI_Page_Foshan4DOFExoskeletonTMotor_Init;
-	
-	UIPage_Foshan4DOFExoskeletonLKMotor.ifPageInitialized = 0;
-  UIPage_Foshan4DOFExoskeletonLKMotor.Page = UI_Page_Foshan4DOFExoskeletonLKMotor;
-  UIPage_Foshan4DOFExoskeletonLKMotor.PageInit = UI_Page_Foshan4DOFExoskeletonLKMotor_Init;
+
 }
 
 JoystickHandle Joystick_Create(uint16_t x, uint16_t y, uint16_t r, uint32_t background_color, \
@@ -863,14 +823,11 @@ void UI_Page_Home1(void)
   ButtonUpdate(&hButtonPageExoskeletonInterface);
   ButtonUpdate(&hButtonPageAK10_9ManualControl);
   ButtonUpdate(&hButtonPageBNO055_Monitor);
-  ButtonUpdate(&hButtonPageTMotorAccelerationObserverProject);
+  ButtonUpdate(&hButtonPageAccelerationObserverProject);
   ButtonUpdate(&hButtonPageADCMonitor);
   ButtonUpdate(&hButtonPageCustomizedIMUMonitor);
   ButtonUpdate(&hButtonPageLinKongKeJiTesting);
   ButtonUpdate(&hButtonPageTorqueConstantCalibration);
-  ButtonUpdate(&hButtonPageExoskeletonMotorDurabilityTest);
-  ButtonUpdate(&hButtonPageFoshanHipExoskeleton);
-	ButtonUpdate(&hButtonPageFoshan4DOFExoskeletonSelection);
   
   
   if (ifButtonPressed(&hButtonPageExoskeletonInterface))
@@ -879,8 +836,8 @@ void UI_Page_Home1(void)
     UI_Page_Change_To(&UIPage_AK10_9_ManualControlCubeMarsFWMITMode);
   if (ifButtonPressed(&hButtonPageBNO055_Monitor))
     UI_Page_Change_To(&UIPage_BNO055_Monitor);
-  if (ifButtonPressed(&hButtonPageTMotorAccelerationObserverProject))
-    UI_Page_Change_To(&UIPage_TMotor_Acceleration_Observer_Project);
+  if (ifButtonPressed(&hButtonPageAccelerationObserverProject))
+    UI_Page_Change_To(&UIPage_Acceleration_Observer_Project);
   if (ifButtonPressed(&hButtonPageADCMonitor))
     UI_Page_Change_To(&UIPage_ADC_Monitor);
   if (ifButtonPressed(&hButtonPageCustomizedIMUMonitor))
@@ -889,12 +846,6 @@ void UI_Page_Home1(void)
     UI_Page_Change_To(&UIPage_LinKongKeJi_Testing);
   if (ifButtonPressed(&hButtonPageTorqueConstantCalibration))
     UI_Page_Change_To(&UIPage_TorqueConstantCalibration);
-  if (ifButtonPressed(&hButtonPageExoskeletonMotorDurabilityTest))
-    UI_Page_Change_To(&UIPage_ExoskeletonMotorDurabilityTest);
-  if (ifButtonPressed(&hButtonPageFoshanHipExoskeleton))
-    UI_Page_Change_To(&UIPage_FoshanHipExoskeleton);
-	if (ifButtonPressed(&hButtonPageFoshan4DOFExoskeletonSelection))
-    UI_Page_Change_To(&UIPage_Foshan4DOFExoskeletonSelection);
 }
 void UI_Page_Home1_Init(void)
 {
@@ -902,15 +853,12 @@ void UI_Page_Home1_Init(void)
   hButtonPageExoskeletonInterface = Button_Create(100, 100, 300, 40, "Lower Limb Exoskeleton", LIGHT_MAGENTA, LCD_RED);
   hButtonPageAK10_9ManualControl = Button_Create(80, 150, 360, 40, "AK10-9 V2.0 Manual Control", LIGHT_MAGENTA, LCD_RED);
   hButtonPageBNO055_Monitor = Button_Create(150, 250, 200, 40, "BNO055 Monitor", LIGHT_MAGENTA, LCD_RED);
-  hButtonPageTMotorAccelerationObserverProject = Button_Create(10, 300, 450, 40, "TMotor Acceleration Observer Project", LIGHT_MAGENTA, LCD_RED);
+  hButtonPageAccelerationObserverProject = Button_Create(10, 300, 450, 40, "Acceleration Observer Project", LIGHT_MAGENTA, LCD_RED);
   hButtonPageADCMonitor = Button_Create(150, 350, 200, 40, "ADC Monitor", LIGHT_MAGENTA, LCD_RED);
-  hButtonPageFoshanHipExoskeleton = Button_Create(150, 400, 200, 40, "Hip Exoskeleton", LIGHT_MAGENTA, LCD_RED);
   hButtonPageCustomizedIMUMonitor = Button_Create(80, 200, 360, 40, "Customized IMU Monitor", LIGHT_MAGENTA, LCD_RED);
   hButtonPageLinKongKeJiTesting = Button_Create(100, 450, 300, 40, "LinKongKeJi MG Motor", LIGHT_MAGENTA, LCD_RED);
-	hButtonPageFoshan4DOFExoskeletonSelection = Button_Create(100, 500, 300, 40, "Foshan 4DOF Exoskeleton", LIGHT_MAGENTA, LCD_RED);
   hButtonPageTorqueConstantCalibration = Button_Create(100, 550, 300, 40, "Kt Calibration", LIGHT_MAGENTA, LCD_RED);
-  hButtonPageExoskeletonMotorDurabilityTest = Button_Create(40, 600, 400, 40, "Exoskeleton Motor Test", LIGHT_MAGENTA, LCD_RED);
-	
+
 }
 
 void UI_Page_AK10_9_ManualControlCubeMarsFWServoMode(void)
@@ -1237,7 +1185,7 @@ void UI_Page_Change_To(PageHandle* hpage)
   LCD_Clear();
 }
 
-void UI_Page_TMotor_Acceleration_Observer_Project(void)
+void UI_Page_Acceleration_Observer_Project(void)
 {
   ButtonUpdate(&hButtonGoBack);
   ButtonUpdate(&hButtonDataLogStart);
@@ -1245,7 +1193,6 @@ void UI_Page_TMotor_Acceleration_Observer_Project(void)
   ButtonUpdate(&hButtonMotorProfilingStart);
   ButtonUpdate(&hButtonMotorProfilingEnd);
   ButtonUpdate(&hButtonMotorZeroing);
-  PotentialmeterUpdate(&hPotTMotorProfilingFrequency);
   
   if (ifButtonPressed(&hButtonDataLogStart))
     USB_DataLogStart();
@@ -1296,7 +1243,7 @@ void UI_Page_TMotor_Acceleration_Observer_Project(void)
     ifIMUFeedbackStarted = 0;
   }
 }
-void UI_Page_TMotor_Acceleration_Observer_Project_Init(void)
+void UI_Page_Acceleration_Observer_Project_Init(void)
 {
   hUI.task = UI_MAIN_TASK_TMOTOR_ACCELERATION_OBSERVER;
   hButtonDataLogStart = Button_Create(10, 100, 200, 40, "Data Log Start", LIGHT_MAGENTA, LCD_RED);
@@ -1305,8 +1252,7 @@ void UI_Page_TMotor_Acceleration_Observer_Project_Init(void)
   hButtonMotorProfilingEnd = Button_Create(10, 250, 300, 40, "Motor profiling Stop", LCD_YELLOW, LCD_RED);
   hButtonMotorZeroing = Button_Create(10, 330, 200, 40, "Motor Set Zero", LCD_BLUE, LCD_RED);
   hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
-  hPotTMotorProfilingFrequency = Potentialmeter_Create(420, 80, 30, 550, 130, 70, LCD_MAGENTA, LCD_RED, LIGHT_GREY, 0.0f, 1.0f, 0.0f, &tmotorProfilingSinWaveFrequency);
-  
+ 
   LCD_SetLayer(0); 
   LCD_SetColor(LCD_BLACK);
   LCD_DisplayString(10, 720, "Position mes: ");
@@ -1663,328 +1609,4 @@ void UI_Page_TkCalibration_Init(void)
   Averager_Init(&hAverageTorqueConstantCalibration);
   hMotorPtrManualControl = &hAKMotorRightKnee;
   torqueConstantCalibrationIfMotorStarted = 0;
-}
-
-void UI_Page_ExoskeletonMotorDurabilityTest(void)
-{
-  ButtonUpdate(&hButtonGoBack);
-  ButtonUpdate(&hButtonDataLogStart);
-  ButtonUpdate(&hButtonDataLogEnd);
-  ButtonUpdate(&hButtonMotorProfilingStart);
-  ButtonUpdate(&hButtonMotorProfilingEnd);
-  ButtonUpdate(&hButtonMotorZeroing);
-  ButtonUpdate(&hButtonMotorStart);
-  ButtonUpdate(&hButtonMotorStop);
-  
-  if (ifButtonPressed(&hButtonDataLogStart))
-    USB_DataLogStart();
-  if (ifButtonPressed(&hButtonDataLogEnd))
-    USB_DataLogEnd();
-  if(ifButtonPressed(&hButtonMotorProfilingStart))
-  {
-    ifMotorProfilingStartedExoskeletonMotorTest = 1;
-    exoskeletonMotorTestTimeDifference = HAL_GetTick();
-  }
-  if(ifButtonPressed(&hButtonMotorProfilingEnd))
-  {
-    ifMotorProfilingStartedExoskeletonMotorTest = 0;
-    exoskeletonMotorTestTimeDifference = 0;
-  }
-  if(ifButtonPressed(&hButtonMotorZeroing))
-    AK10_9_MITMode_Zeroing(&hAKMotorRightHip);
-  if(ifButtonPressed(&hButtonMotorStart))
-    AK10_9_MITMode_EnableMotor(&hAKMotorRightHip);
-  if(ifButtonPressed(&hButtonMotorStop))
-    AK10_9_MITMode_DisableMotor(&hAKMotorRightHip);
-  
-  
-  LCD_SetLayer(1); 
-  LCD_SetColor(LCD_BLACK);
-  if (hAKMotorRightHip.status == AK10_9_Online)
-    LCD_DisplayString(200, 0, "Motor  Online");
-  else
-    LCD_DisplayString(200, 0, "Motor Offline");
-  LCD_DisplayDecimals(90, 560, hAKMotorRightHip.realPositionOffseted.f, 7,1);
-  LCD_DisplayDecimals(90, 585, hAKMotorRightHip.realVelocityPresent.f, 7,1);
-  LCD_DisplayDecimals(90, 610, hAKMotorRightHip.realCurrent.f, 7,4);
-  LCD_DisplayDecimals(90, 635, (float)hAKMotorRightHip.temperature, 7,1);
-  
-  if (ifButtonPressed(&hButtonGoBack))
-    UI_Page_Change_To(&UIPage_Home1);
-}
-
-void UI_Page_ExoskeletonMotorDurabilityTest_Init(void)
-{
-  hUI.task = UI_MAIN_TASK_EXOSKELETON_MOTOR_TEST;
-  USB_SetNewDataSlotLen(sizeof(dataSlots_Exoskeleton_Motor_Durability_Test)/4);
-  ifMotorProfilingStartedExoskeletonMotorTest = 0;
-  exoskeletonMotorTestTimeDifference = 0;
-  
-  hButtonDataLogStart = Button_Create(10, 100, 200, 40, "Data Log Start", LIGHT_MAGENTA, LCD_RED);
-  hButtonDataLogEnd = Button_Create(10, 150, 200, 40, "Data Log End", LCD_GREEN, LCD_RED);
-  hButtonMotorProfilingStart = Button_Create(10, 200, 300, 40, "Motor profiling Start", LIGHT_GREY, LCD_RED);
-  hButtonMotorProfilingEnd = Button_Create(10, 250, 300, 40, "Motor profiling Stop", LCD_YELLOW, LCD_RED);
-  hButtonMotorZeroing = Button_Create(10, 330, 200, 40, "Motor Set Zero", LCD_BLUE, LCD_RED);
-  hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
-  hButtonMotorStart = Button_Create(10, 400, 300, 50, "Motor Start", LCD_YELLOW, LCD_RED);
-  hButtonMotorStop = Button_Create(10, 460, 300, 80, "Motor Stop", LCD_YELLOW, LCD_RED);
-  
-  LCD_SetLayer(1); 
-  LCD_SetColor(LCD_BLACK);
-  LCD_DisplayString(10, 560, "Pos:");
-  LCD_DisplayString(10, 585, "Vel:");
-  LCD_DisplayString(10, 610, "Cur:");
-  LCD_DisplayString(10, 635, "Tem:");
-}
-
-void UI_Page_FoshanHipExoskeleton_Init(void)
-{
-  hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
-  hButtonFoshanHipExoskeletonAssistControl = Button_Create(20, 120, 130, 70, "Assist", LCD_YELLOW, LCD_RED);
-  hButtonFoshanHipExoskeletonResistControl = Button_Create(180, 120, 130, 70, "Resist", LCD_YELLOW, LCD_RED);
-  hButtonStop = Button_Create(340, 120, 130, 70, "STOP", LCD_YELLOW, LCD_RED);
-  hButtonMotorZeroing = Button_Create(5, 60, 70, 50, "Zero", LCD_YELLOW, LCD_RED);
-  
-  hPotFoshanHipExoskeletonGraFactor = Potentialmeter_Create(70, 300, 30, 400, 100, 70, LCD_MAGENTA, LCD_RED, LIGHT_GREY, 0.0f, 50.0f, 0.0f, &hFoshanHipExoskeleton.gravityFactor);
-  hPotFoshanHipExoskeletonInnerFactor = Potentialmeter_Create(230, 300, 30, 400, 100, 70, LCD_MAGENTA, LCD_RED, LIGHT_GREY, 0.0f, 2.0f, 0.0f, &hFoshanHipExoskeleton.innertiaFactor);
-  hPotFoshanHipExoskeletonSpringFactor = Potentialmeter_Create(380, 300, 30, 400, 100, 70, LCD_MAGENTA, LCD_RED, LIGHT_GREY, -1.0f, 1.0f, 0.0f, &hFoshanHipExoskeleton.springFactor);
-  
-  LCD_SetLayer(1); 
-  LCD_SetColor(LCD_BLACK);
-  LCD_DisplayString(100, 0, "LPos:");
-  LCD_DisplayString(100, 30, "LTq:");
-	LCD_DisplayString(100, 60, "LTem:");
-
-  LCD_DisplayString(250, 0, "RPos:");
-  LCD_DisplayString(250, 30, "RTq:");
-	LCD_DisplayString(250, 60, "RTem:");
-	
-  LCD_DisplayString(70, 210, "Gra:");
-  LCD_DisplayString(230, 210, "Ine:");
-  LCD_DisplayString(380, 210, "Spr:");
-}
-
-void UI_Page_FoshanHipExoskeleton(void)
-{
-  ButtonUpdate(&hButtonGoBack);
-  ButtonUpdate(&hButtonFoshanHipExoskeletonAssistControl);
-  ButtonUpdate(&hButtonFoshanHipExoskeletonResistControl);
-  ButtonUpdate(&hButtonStop);
-  ButtonUpdate(&hButtonMotorZeroing);
-  PotentialmeterUpdate(&hPotFoshanHipExoskeletonGraFactor);
-  PotentialmeterUpdate(&hPotFoshanHipExoskeletonInnerFactor);
-  PotentialmeterUpdate(&hPotFoshanHipExoskeletonSpringFactor);
-  
-  if (ifButtonPressed(&hButtonFoshanHipExoskeletonAssistControl))
-  {
-		hFoshanHipExoskeleton.task = FOSHAN_HIP_EXOSKELETON_TASK_ASSIST;
-		CYBERGEAR_Enable(&hFoshanHipExoskeleton.hMotorLeft);
-		CYBERGEAR_Enable(&hFoshanHipExoskeleton.hMotorRight);
-		hFoshanHipExoskeleton.hMotorLeft.task = CYBERGEAR_TASK_CURRENT_CONTROL;
-		hFoshanHipExoskeleton.hMotorRight.task = CYBERGEAR_TASK_CURRENT_CONTROL;
-  }
-  if (ifButtonPressed(&hButtonFoshanHipExoskeletonResistControl))
-  {
-  }
-  if (ifButtonPressed(&hButtonStop))
-  {
-		hFoshanHipExoskeleton.task = FOSHAN_HIP_EXOSKELETON_TASK_NONE;
-		CYBERGEAR_Disable(&hFoshanHipExoskeleton.hMotorLeft);
-		hFoshanHipExoskeleton.hMotorLeft.task = CYBERGEAR_TASK_SHUTDOWN;
-		CYBERGEAR_Disable(&hFoshanHipExoskeleton.hMotorRight);
-		hFoshanHipExoskeleton.hMotorRight.task = CYBERGEAR_TASK_SHUTDOWN;
-  }
-  if (ifButtonPressed(&hButtonMotorZeroing))
-	{
-		CYBERGEAR_Zeroing(&hFoshanHipExoskeleton.hMotorLeft);
-		CYBERGEAR_Zeroing(&hFoshanHipExoskeleton.hMotorRight);
-	}
-  
-//	
-//////////	if (hFoshanHipExoskeleton.hMotorLeft.task == CYBERGEAR_TASK_SHUTDOWN)
-//////////		
-//////////	
-//////////	if (hFoshanHipExoskeleton.hMotorRight.task == CYBERGEAR_TASK_SHUTDOWN)
-//////////		
-	
-  LCD_SetLayer(1); 
-  LCD_SetColor(LCD_BLACK);
-  LCD_DisplayDecimals(170, 0, hFoshanHipExoskeleton.hMotorLeft.realPosDeg.f, 4, 1);
-  LCD_DisplayDecimals(170, 30, hFoshanHipExoskeleton.hMotorLeft.realTorque.f, 4, 1);
-	LCD_DisplayDecimals(170, 60, hFoshanHipExoskeleton.hMotorLeft.temperature.f, 4, 1);
-	LCD_DisplayDecimals(320, 0, hFoshanHipExoskeleton.hMotorRight.realPosDeg.f, 4, 1);
-  LCD_DisplayDecimals(320, 30, hFoshanHipExoskeleton.hMotorRight.realTorque.f, 4, 1);
-	LCD_DisplayDecimals(320, 60, hFoshanHipExoskeleton.hMotorRight.temperature.f, 4, 1);
-
-  LCD_DisplayDecimals(70, 240, hFoshanHipExoskeleton.gravityFactor, 3, 1);
-  LCD_DisplayDecimals(230, 240, hFoshanHipExoskeleton.innertiaFactor, 3, 1);
-  LCD_DisplayDecimals(380, 240, hFoshanHipExoskeleton.springFactor, 3, 1);
-  if (ifButtonPressed(&hButtonGoBack))
-    UI_Page_Change_To(&UIPage_Home1);
-}
-
-void UI_Page_Foshan4DOFExoskeletonSelection(void)
-{
-	ButtonUpdate(&hButtonGoBack);
-	ButtonUpdate(&hButtonFoshan4DOFExoskeletonTMotor);
-	ButtonUpdate(&hButtonFoshan4DOFExoskeletonLKMotor);
-	
-	if (ifButtonPressed(&hButtonFoshan4DOFExoskeletonTMotor))
-    UI_Page_Change_To(&UIPage_Foshan4DOFExoskeletonTMotor);
-	if (ifButtonPressed(&hButtonFoshan4DOFExoskeletonLKMotor))
-    UI_Page_Change_To(&UIPage_Foshan4DOFExoskeletonLKMotor);
-	
-	
-	
-	if (ifButtonPressed(&hButtonGoBack))
-    UI_Page_Change_To(&UIPage_Home1);
-}
-
-void UI_Page_Foshan4DOFExoskeletonSelection_Init(void)
-{
-	hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
-	hButtonFoshan4DOFExoskeletonTMotor = Button_Create(100, 300, 300, 100, "TMotor", LCD_WHITE, LCD_RED);
-	hButtonFoshan4DOFExoskeletonLKMotor = Button_Create(100, 500, 300, 100, "LKMotor", LCD_WHITE, LCD_RED);
-}
-
-void UI_Page_Foshan4DOFExoskeletonTMotor(void)
-{
-	ButtonUpdate(&hButtonGoBack);
-	ButtonUpdate(&hButtonMotorEnable);
-  ButtonUpdate(&hButtonMotorDisable);
-  ButtonUpdate(&hButtonMotorZeroing);
-	ButtonUpdate(&hButtonStart);
-	PotentialmeterUpdate(&hPotFoshan4DOFExoLeftHipGravCoe);
-	PotentialmeterUpdate(&hPotFoshan4DOFExoLeftKneeGravCoe);
-	PotentialmeterUpdate(&hPotFoshan4DOFExoRightHipGravCoe);
-	PotentialmeterUpdate(&hPotFoshan4DOFExoRightKneeGravCoe);
-	
-  
-  
-  LCD_SetLayer(1); 
-  LCD_SetColor(LCD_RED);
-  if (hExoskeletonFoshan4DOFTMotor.hMotorLeftHip.status == AK10_9_Online)
-    LCD_DisplayString(200, 0, "Online ");
-  else
-    LCD_DisplayString(200, 0, "Offline");
-  if (hExoskeletonFoshan4DOFTMotor.hMotorLeftKnee.status == AK10_9_Online)
-    LCD_DisplayString(380, 0, "Online ");
-  else
-    LCD_DisplayString(380, 0, "Offline");
-  /////
-  if (hExoskeletonFoshan4DOFTMotor.hMotorRightHip.status == AK10_9_Online)
-    LCD_DisplayString(200, 25, "Online ");
-  else
-    LCD_DisplayString(200, 25, "Offline");
-  if (hExoskeletonFoshan4DOFTMotor.hMotorRightKnee.status == AK10_9_Online)
-    LCD_DisplayString(380, 25, "Online ");
-  else
-    LCD_DisplayString(380, 25, "Offline");
-	
-	LCD_DisplayDecimals(80, 110, hExoskeletonFoshan4DOFTMotor.hMotorLeftHip.realPosition.f, 4,1);
-	LCD_DisplayDecimals(80, 145, hExoskeletonFoshan4DOFTMotor.hMotorLeftKnee.realPosition.f, 4,1);
-	LCD_DisplayDecimals(80, 180, hExoskeletonFoshan4DOFTMotor.hMotorLeftHip.realTorque.f, 4,1);
-	LCD_DisplayDecimals(80, 215, hExoskeletonFoshan4DOFTMotor.hMotorLeftKnee.realTorque.f, 4,1);
-	
-	LCD_DisplayDecimals(330, 110, hExoskeletonFoshan4DOFTMotor.hMotorRightHip.realPosition.f, 4,1);
-	LCD_DisplayDecimals(330, 145, hExoskeletonFoshan4DOFTMotor.hMotorRightKnee.realPosition.f, 4,1);
-	LCD_DisplayDecimals(330, 180, hExoskeletonFoshan4DOFTMotor.hMotorRightHip.realTorque.f, 4,1);
-	LCD_DisplayDecimals(330, 215, hExoskeletonFoshan4DOFTMotor.hMotorRightKnee.realTorque.f, 4,1);
-	
-	LCD_DisplayDecimals(50, 240, hExoskeletonFoshan4DOFTMotor.gravLeftCoef_1, 4,1);
-	LCD_DisplayDecimals(150, 240, hExoskeletonFoshan4DOFTMotor.gravLeftCoef_2, 4,1);
-	LCD_DisplayDecimals(250, 240, hExoskeletonFoshan4DOFTMotor.gravRightCoef_1, 4,1);
-	LCD_DisplayDecimals(350, 240, hExoskeletonFoshan4DOFTMotor.gravRightCoef_2, 4,1);
-	
-	
-	LCD_DisplayDecimals(50, 710, hExoskeletonFoshan4DOFTMotor.calGravLeftHip, 3, 1);
-	LCD_DisplayDecimals(150, 710, hExoskeletonFoshan4DOFTMotor.calGravLeftKnee, 3, 1);
-	LCD_DisplayDecimals(250, 710, hExoskeletonFoshan4DOFTMotor.calGravRightHip, 3, 1);
-	LCD_DisplayDecimals(350, 710, hExoskeletonFoshan4DOFTMotor.calGravRightKnee, 3, 1);
-	LCD_DisplayString(50, 680, "Lcoef-1");
-	LCD_DisplayString(150, 680, "Lcoef-2");
-	LCD_DisplayString(250, 680, "Rcoef-1");
-	LCD_DisplayString(350, 680, "Rcoef-2");
-
-	
-  if (ifButtonPressed(&hButtonMotorEnable))
-  {
-    hExoskeletonFoshan4DOFTMotor.task = FOSHAN_4DOF_EXO_TASK_ENABLE_MOTORS;
-    hExoskeletonFoshan4DOFTMotor.motorCmdSequence = FOSHAN_4DOF_EXO_TMOTOR_COMMAND_SEQUENCE_LEFT_HIP;
-  }
-  if (ifButtonPressed(&hButtonMotorDisable))
-  {
-		hExoskeletonFoshan4DOFTMotor.task = FOSHAN_4DOF_EXO_TASK_DISABLE_MOTORS;
-    hExoskeletonFoshan4DOFTMotor.motorCmdSequence = FOSHAN_4DOF_EXO_TMOTOR_COMMAND_SEQUENCE_LEFT_HIP;
-  }
-  if (ifButtonPressed(&hButtonMotorZeroing))
-  {
-		hExoskeletonFoshan4DOFTMotor.task = FOSHAN_4DOF_EXO_TASK_ZEROING;
-    hExoskeletonFoshan4DOFTMotor.motorCmdSequence = FOSHAN_4DOF_EXO_TMOTOR_COMMAND_SEQUENCE_LEFT_HIP;
-  }
-	if (ifButtonPressed(&hButtonStart))
-	{
-		hExoskeletonFoshan4DOFTMotor.task = FOSHAN_4DOF_EXO_TASK_GRAVITY_COMPENSATION;
-		hExoskeletonFoshan4DOFTMotor.motorCmdSequence = FOSHAN_4DOF_EXO_TMOTOR_COMMAND_SEQUENCE_LEFT_HIP;
-	}
-  
-  
-	if (ifButtonPressed(&hButtonGoBack))
-    UI_Page_Change_To(&UIPage_Foshan4DOFExoskeletonSelection);
-}
-
-void UI_Page_Foshan4DOFExoskeletonTMotor_Init(void)
-{
-	hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
-  
-  hButtonMotorEnable = Button_Create(0, 60, 100, 40, "Enable", LCD_WHITE, LCD_RED);
-  hButtonMotorDisable = Button_Create(120, 60, 100, 40, "Disable", LCD_WHITE, LCD_RED);
-  hButtonMotorZeroing = Button_Create(240, 60, 100, 40, "Zeroing", LCD_WHITE, LCD_RED);
-	hButtonStart = Button_Create(350, 60, 100, 40, "Assist", LCD_WHITE, LCD_RED);
-	
-	
-	
-	hPotFoshan4DOFExoLeftHipGravCoe = Potentialmeter_Create(50, 270, 30, 400, 100, 70, LCD_MAGENTA, LCD_RED, LIGHT_GREY, 0.0f, 30.0f, 0.0f, &hExoskeletonFoshan4DOFTMotor.gravLeftCoef_1);
-	hPotFoshan4DOFExoLeftKneeGravCoe = Potentialmeter_Create(150, 270, 30, 400, 100, 70, LCD_MAGENTA, LCD_RED, LIGHT_GREY, 0.0f, 10.0f, 0.0f, &hExoskeletonFoshan4DOFTMotor.gravLeftCoef_2);
-	hPotFoshan4DOFExoRightHipGravCoe = Potentialmeter_Create(250, 270, 30, 400, 100, 70, LCD_MAGENTA, LCD_RED, LIGHT_GREY, 0.0f, 30.0f, 0.0f, &hExoskeletonFoshan4DOFTMotor.gravRightCoef_1);
-	hPotFoshan4DOFExoRightKneeGravCoe = Potentialmeter_Create(350, 270, 30, 400, 100, 70, LCD_MAGENTA, LCD_RED, LIGHT_GREY, 0.0f, 10.0f, 0.0f, &hExoskeletonFoshan4DOFTMotor.gravRightCoef_2);
-	
-  
-  LCD_SetLayer(1); 
-  LCD_SetColor(LCD_BLACK);
-  LCD_DisplayString(100, 0, "LftHp:");
-  LCD_DisplayString(300, 0, "LftKe:");
-  LCD_DisplayString(100, 25, "RhtHp:");
-  LCD_DisplayString(300, 25, "RhtKe:");
-	
-	LCD_DisplayString(0, 110, "LHpPos:");
-	LCD_DisplayString(0, 145, "LKePos:");
-	LCD_DisplayString(0, 180, "LHpTq:");
-	LCD_DisplayString(0, 215, "LKeTq:");
-	
-	LCD_DisplayString(250, 110, "RHpPos:");
-	LCD_DisplayString(250, 145, "RKePos:");
-	LCD_DisplayString(250, 180, "RHpTq:");
-	LCD_DisplayString(250, 215, "RKeTq:");
-	
-	LCD_DisplayString(50, 680, "Lcoef-1");
-	LCD_DisplayString(150, 680, "Lcoef-2");
-	LCD_DisplayString(250, 680, "Rcoef-1");
-	LCD_DisplayString(350, 680, "Rcoef-2");
-}
-
-void UI_Page_Foshan4DOFExoskeletonLKMotor(void)
-{
-	ButtonUpdate(&hButtonGoBack);
-	
-	
-	
-	
-	if (ifButtonPressed(&hButtonGoBack))
-    UI_Page_Change_To(&UIPage_Foshan4DOFExoskeletonSelection);
-}
-
-void UI_Page_Foshan4DOFExoskeletonLKMotor_Init(void)
-{
-	hButtonGoBack = Button_Create(0, 0, 60, 40, "Back", LCD_WHITE, LCD_RED);
 }

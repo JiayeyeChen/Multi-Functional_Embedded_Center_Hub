@@ -7,8 +7,6 @@ DMA_HandleTypeDef hdma_sdio_tx;
 SPI_HandleTypeDef hspi1;
 SPI_HandleTypeDef hspi4;
 SPI_HandleTypeDef hspi6;
-DMA_HandleTypeDef hdma_spi4_rx;
-DMA_HandleTypeDef hdma_spi4_tx;
 DMA_HandleTypeDef hdma_spi5_rx;
 DMA_HandleTypeDef hdma_spi5_tx;
 
@@ -29,6 +27,8 @@ DMA_HandleTypeDef hdma_usart2_rx;
 DMA_HandleTypeDef hdma_usart2_tx;
 DMA_HandleTypeDef hdma_usart3_rx;
 DMA_HandleTypeDef hdma_usart3_tx;
+DMA_HandleTypeDef hdma_usart6_rx;
+DMA_HandleTypeDef hdma_usart6_tx;
 
 CAN_HandleTypeDef hcan1;
 CAN_HandleTypeDef hcan2;
@@ -175,6 +175,10 @@ static void SPI1_Init(void)
   HAL_SPI_Init(&hspi1);
 }
 
+
+
+
+
 static void SPI4_Init(void)
 {
   hspi4.Instance = SPI4;
@@ -184,11 +188,12 @@ static void SPI4_Init(void)
   hspi4.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi4.Init.CLKPhase = SPI_PHASE_1EDGE;
   hspi4.Init.NSS = SPI_NSS_SOFT;
-  hspi4.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
+  hspi4.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_64;
   hspi4.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi4.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi4.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
   hspi4.Init.CRCPolynomial = 10;
+	hspi4.Instance->CR1 &= 0xFFFE;//Switch to SPI mode 0
   HAL_SPI_Init(&hspi4);
 }
 
@@ -404,7 +409,10 @@ static void USART6_UART_Init(void)
   huart6.Init.HwFlowCtl = UART_HWCONTROL_NONE;
   huart6.Init.OverSampling = UART_OVERSAMPLING_16;
   HAL_UART_Init(&huart6);
-
+	
+	/* USART6 interrupt Init */
+	HAL_NVIC_SetPriority(USART6_IRQn, 3, 0);
+	HAL_NVIC_EnableIRQ(USART6_IRQn);
 }
 
 static void DMA_Init(void)
@@ -491,9 +499,10 @@ static void GPIO_Init(void)
   /*Configure GPIO pin : SPI_CS_Pin */
   GPIO_InitStruct.Pin = SPI_CS_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
   HAL_GPIO_Init(SPI_CS_GPIO_Port, &GPIO_InitStruct);
+	HAL_GPIO_WritePin(SPI_CS_GPIO_Port, SPI_CS_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin : ONBOARD_BUTTON_KEY_Pin */
   GPIO_InitStruct.Pin = ONBOARD_BUTTON_KEY_Pin;
@@ -1012,40 +1021,6 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef* hspi)
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
     GPIO_InitStruct.Alternate = GPIO_AF5_SPI4;
     HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
-
-    /* SPI4 DMA Init */
-    /* SPI4_RX Init */
-    hdma_spi4_rx.Instance = DMA2_Stream0;
-    hdma_spi4_rx.Init.Channel = DMA_CHANNEL_4;
-    hdma_spi4_rx.Init.Direction = DMA_PERIPH_TO_MEMORY;
-    hdma_spi4_rx.Init.PeriphInc = DMA_PINC_DISABLE;
-    hdma_spi4_rx.Init.MemInc = DMA_MINC_ENABLE;
-    hdma_spi4_rx.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
-    hdma_spi4_rx.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
-    hdma_spi4_rx.Init.Mode = DMA_NORMAL;
-    hdma_spi4_rx.Init.Priority = DMA_PRIORITY_LOW;
-    hdma_spi4_rx.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
-    HAL_DMA_Init(&hdma_spi4_rx);
-
-    __HAL_LINKDMA(hspi,hdmarx,hdma_spi4_rx);
-
-    /* SPI4_TX Init */
-    hdma_spi4_tx.Instance = DMA2_Stream1;
-    hdma_spi4_tx.Init.Channel = DMA_CHANNEL_4;
-    hdma_spi4_tx.Init.Direction = DMA_MEMORY_TO_PERIPH;
-    hdma_spi4_tx.Init.PeriphInc = DMA_PINC_DISABLE;
-    hdma_spi4_tx.Init.MemInc = DMA_MINC_ENABLE;
-    hdma_spi4_tx.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
-    hdma_spi4_tx.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
-    hdma_spi4_tx.Init.Mode = DMA_NORMAL;
-    hdma_spi4_tx.Init.Priority = DMA_PRIORITY_LOW;
-    hdma_spi4_tx.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
-    HAL_DMA_Init(&hdma_spi4_tx);
-
-    __HAL_LINKDMA(hspi,hdmatx,hdma_spi4_tx);
-
-    HAL_NVIC_SetPriority(SPI4_IRQn, 5, 0);
-    HAL_NVIC_EnableIRQ(SPI4_IRQn);
   }
   else if(hspi->Instance==SPI5)
   {
@@ -1414,27 +1389,48 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
   else if(huart->Instance==USART6)
   {
     __HAL_RCC_USART6_CLK_ENABLE();
-
-    __HAL_RCC_GPIOC_CLK_ENABLE();
     __HAL_RCC_GPIOG_CLK_ENABLE();
     /**USART6 GPIO Configuration
-    PC7     ------> USART6_RX
-    PG14     ------> USART6_TX
+    PG9     ------> USART6_RX
+    PG14    ------> USART6_TX
     */
-    GPIO_InitStruct.Pin = UART_RX_Pin;
-    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-    GPIO_InitStruct.Alternate = GPIO_AF8_USART6;
-    HAL_GPIO_Init(UART_RX_GPIO_Port, &GPIO_InitStruct);
-
-    GPIO_InitStruct.Pin = UART_TX_Pin;
+    GPIO_InitStruct.Pin = UART_TX_Pin|UART_RX_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
     GPIO_InitStruct.Alternate = GPIO_AF8_USART6;
     HAL_GPIO_Init(UART_TX_GPIO_Port, &GPIO_InitStruct);
-
+		
+		
+			/* USART6 DMA Init */
+		/* USART6_RX Init */
+		hdma_usart6_rx.Instance = DMA2_Stream1;
+		hdma_usart6_rx.Init.Channel = DMA_CHANNEL_5;
+		hdma_usart6_rx.Init.Direction = DMA_PERIPH_TO_MEMORY;
+		hdma_usart6_rx.Init.PeriphInc = DMA_PINC_DISABLE;
+		hdma_usart6_rx.Init.MemInc = DMA_MINC_ENABLE;
+		hdma_usart6_rx.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
+		hdma_usart6_rx.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
+		hdma_usart6_rx.Init.Mode = DMA_NORMAL;
+		hdma_usart6_rx.Init.Priority = DMA_PRIORITY_LOW;
+		hdma_usart6_rx.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
+		HAL_DMA_Init(&hdma_usart6_rx);
+		__HAL_LINKDMA(&huart6,hdmarx,hdma_usart6_rx);
+		/* USART6_TX Init */
+		hdma_usart6_tx.Instance = DMA2_Stream7;
+		hdma_usart6_tx.Init.Channel = DMA_CHANNEL_5;
+		hdma_usart6_tx.Init.Direction = DMA_MEMORY_TO_PERIPH;
+		hdma_usart6_tx.Init.PeriphInc = DMA_PINC_DISABLE;
+		hdma_usart6_tx.Init.MemInc = DMA_MINC_ENABLE;
+		hdma_usart6_tx.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
+		hdma_usart6_tx.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
+		hdma_usart6_tx.Init.Mode = DMA_NORMAL;
+		hdma_usart6_tx.Init.Priority = DMA_PRIORITY_LOW;
+		hdma_usart6_tx.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
+		HAL_DMA_Init(&hdma_usart6_tx);
+		__HAL_LINKDMA(&huart6,hdmatx,hdma_usart6_tx);
+		
+		
     /* USART6 interrupt Init */
     HAL_NVIC_SetPriority(USART6_IRQn, 5, 0);
     HAL_NVIC_EnableIRQ(USART6_IRQn);
